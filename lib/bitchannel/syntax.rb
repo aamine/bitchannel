@@ -436,7 +436,7 @@ module BitChannel
       @internal_links.push name
       if @repository.exist?(name)
       then %Q[<a href="#{view_url(name)}">#{escape_html(name)}</a>]
-      else %Q[<a href="#{view_url(name)}">?</a>#{escape_html(name)}]
+      else %Q[<a href="#{view_url(name)}" class="dangling">?</a>#{escape_html(name)}]
       end
     end
 

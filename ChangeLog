@@ -1,3 +1,9 @@
+Thu Sep  2 00:58:33 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* theme/default/default.css: add rules for printing. (contributed by zunda)
+
+	* lib/bitchannel/syntax.rb: classify internal dangling link.
+
 Thu Sep  2 00:23:55 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/repository.rb: gracefully ignore rev 1.1.1.1.

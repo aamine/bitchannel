@@ -228,3 +228,25 @@ span.previewmark {
     font-size: 200%;
     font-weight: bold;
 }
+
+/*
+    For Printing
+*/
+@media print {
+    div.menu {
+        display: none;
+    }
+    h1 {
+        color: #33a;
+        background-color: white;
+        border-bottom: 10px solid #33a;
+        padding-bottom: 0em;
+    }
+    a, a:link, a:visited {
+        color: #33a;
+        font-weight: normal;
+    }
+    a.dangling {
+        display: none;
+    }
+}
