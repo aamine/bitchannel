@@ -690,10 +690,8 @@ module BitChannel
       @diff.rev2
     end
 
-    def content_cdata
-      '<pre>' +
-      @config.locale.to_utf8(escape_cdata(@diff.diff)) +
-      '</pre>'
+    def diff
+      @config.locale.to_utf8(@diff.diff)
     end
   end
 
