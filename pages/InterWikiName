@@ -1,0 +1,8 @@
+InterWiki の定義リストです。
+箇条書きを使い、InterWikiName:URL の形式で書いてください。
+
+* ruby-list:http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-list/%s
+* ruby-dev:http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-dev/%s
+* ruby-ext:http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-ext/%s
+* ruby-talk:http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-talk/%s
+* ruby-math:http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-math/%s
