@@ -19,15 +19,12 @@ module BitChannel
 
   class FarmCGI < WEBrick::CGI
 
-    def FarmCGI.main(farm)
-      super({}, farm)
-    end
-
-    def init_application(farm)
-      @farm = farm
+    def FarmCGI.main(farm, webrickconf = {})
+      super(webrickconf, farm)
     end
 
     def do_GET(req, res)
+      @farm, = *@options
       handle(req).update_for res
     end
 
@@ -43,7 +40,9 @@ module BitChannel
         webrickreq.query['cmd'] ||= 'view'
         webrickreq.query['name'] ||= req.page_name
         wiki = @farm[req.node_id]
-        Handler.new(wiki).handle(Request.new(webrickreq, wiki.locale, false))
+        wiki.session(nil) {
+          Handler.new(wiki).handle(Request.new(webrickreq, wiki.locale, false))
+        }
       when req.new_node?
         return prop_missing('id') unless req.id
         return prop_missing('name') unless req.name
@@ -218,6 +217,8 @@ module BitChannel
 
   class FarmConfig
 
+    include FilenameEncoding
+
     def initialize(hash)
       UserConfig.parse(hash, 'farmconf') {|conf|
         @farm_url      = conf.get_required(:farm_url)
@@ -262,7 +263,7 @@ module BitChannel
         @repository  = conf.get_required(:repository)
         @skeleton    = conf.get_required(:skeleton)
         @notifier    = conf.get_optional(:notifier, nil)
-        @logfile     = conf.get_optional(:logfile, nil)
+        @logger      = conf.get_optional(:logger, NullLogger.new)
       }
       @nodes = {}
     end
@@ -277,7 +278,7 @@ module BitChannel
       tmpprefix = "#{@datadir}/.#{id}"
       begin
         Dir.mkdir tmpprefix
-      rescue Errno::EEXIST
+      rescue Errno::EEXIST, Errno::EISDIR
         raise NodeExist, "node `#{id}' already exists"
       end
       if File.directory?(prefix(id))
@@ -285,24 +286,32 @@ module BitChannel
         raise NodeExist, "node `#{id}' already exists"
       end
       Dir.mkdir "#{tmpprefix}/cache"
-      repo = Repository.new({
-        :cmd_path     => @cmd_path,
-        :wc_read      => "#{tmpprefix}/wc.read",
-        :wc_write     => "#{tmpprefix}/wc.write",
-        :cachedir     => "#{tmpprefix}/cache",
-        :notifier     => @notifier,
-        :logfile      => @logfile
-      }, id)
-      repo.setup_working_copy @repository
-      Dir.glob("#{@skeleton}/*").select {|n| File.file?(n) }.each do |path|
-        repo.checkin decode_filename(File.basename(path)), nil, File.read(path)
-      end
+      initialize_working_copy tmpprefix, id
       repo.properties = prop
       File.rename tmpprefix, prefix(id)
     ensure
       unless File.directory?(prefix(id))
         FileUtils.rm_rf tmpprefix
       end
+    end
+
+    def initialize_working_copy(tmpprefix, id)
+      wc = CVSWorkingCopy.new(id, "#{tmpprefix}/tmp", @logger)
+      Dir.mkdir wc.dir
+      wc.chdir {
+        log = 'BitChannelFarm auto import'
+        wc.cvs '-d',@repository, 'import', '-m',log, id, 'bcfarm', 'start'
+        Dir.glob("#{@skeleton}/*").select {|n| File.file?(n) }.each do |path|
+          name = decode_filename(File.basename(path))
+          wc.write name, File.read(path)
+          wc.cvs_add name
+          wc.cvs_checkin name, 'checkin from skeleton'
+        end
+      }
+      Dir.chdir(tmpprefix) {
+        wc.cvs '-d',@repository, 'co', '-d','wc.read', id
+        wc.cvs '-d',@repository, 'co', '-d','wc.write', id
+      }
     end
 
     def last_modified
@@ -332,7 +341,7 @@ module BitChannel
         :wc_write     => "#{prefix(id)}/wc.write",
         :cachedir     => "#{prefix(id)}/cache",
         :notifier     => @notifier,
-        :logfile      => @logfile
+        :logger       => @logger
       }, id)
       conf = Config.new({
         :templatedir   => @config.templatedir,
@@ -363,19 +372,6 @@ module BitChannel
 
 
   class Repository   # redefine
-
-    def setup_working_copy(repopath)
-      Dir.mkdir File.dirname(@wc_read) + '/tmp'
-      Dir.chdir(File.dirname(@wc_read) + '/tmp') {
-        log = 'BitChannelFarm auto import'
-        cvs '-d', repopath, 'import', '-m',log, @module_id, 'bcfarm', 'start'
-      }
-      Dir.rmdir File.dirname(@wc_read) + '/tmp'
-      Dir.chdir(File.dirname(@wc_read)) {
-        cvs '-d', repopath, 'co', '-d', File.basename(@wc_read), @module_id
-        cvs '-d', repopath, 'co', '-d', File.basename(@wc_write), @module_id
-      }
-    end
 
     def name
       getprop(:name)
@@ -436,6 +432,6 @@ module BitChannel
       File.dirname(@wc_read)
     end
 
-  end
+  end   # class Repository
 
 end

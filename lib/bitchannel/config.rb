@@ -64,7 +64,8 @@ module BitChannel
                   end
         @site_name     = conf.get_optional(:site_name, nil)
         @logo_url      = conf.get_optional(:logo_url, nil)
-        @cgi_url       = conf.get_optional(:cgi_url, nil)
+        @user_cgi_url  = conf.get_optional(:cgi_url, nil)
+        @guess_cgi_url = nil
       }
       if @theme and @css_url
         raise ConfigError, "both of theme and css_url given"
@@ -76,6 +77,7 @@ module BitChannel
 
     attr_reader :locale
     attr_reader :templatedir
+    attr_reader :site_name
     attr_reader :logo_url
 
     def css_url
@@ -90,21 +92,12 @@ module BitChannel
       @suffix
     end
 
-    def suggest_cgi_url(url)
-      @cgi_url ||= url
-      @cgi_url
-    end
-
     def cgi_url
-      return @cgi_url if @cgi_url
-      return ENV['SCRIPT_NAME'] if ENV['SCRIPT_NAME']
-      return File.basename(::Apache.request.filename) if defined?(::Apache)
-      return File.basename($0) if $0
-      raise "cannot get cgi url; given up"
+      @user_cgi_url || @guess_cgi_url
     end
 
-    def site_name
-      @site_name || FRONT_PAGE_NAME
+    def cgi_url=(u)
+      @guess_cgi_url = u
     end
   end
 

@@ -49,8 +49,19 @@ module BitChannel
       '#<dummy config object>'
     end
 
-    def ToHTML.extract_links(str, repo)
-      new(DUMMY_CONFIG, repo).extract_links(str)
+    DUMMY_REPOSITORY = Object.new
+    def DUMMY_REPOSITORY.[](name)
+      ''
+    end
+    def DUMMY_REPOSITORY.invalid?(name)
+      false
+    end
+    def DUMMY_REPOSITORY.exist?(name)
+      true
+    end
+
+    def ToHTML.extract_links(str)
+      new(DUMMY_CONFIG, DUMMY_REPOSITORY).extract_links(str)
     end
 
     def extract_links(str)
@@ -480,9 +491,9 @@ module BitChannel
     end
 
     def read_interwikiname_table(page_name)
-      text = @repository[page_name] or return {}
+      page = @repository[page_name] or return {}
       table = {}
-      text.each do |line|
+      page.source.each do |line|
         if /\A\s*\*\s*(\S+?):/ =~ line
           interwikiname = $1
           url = $'.strip

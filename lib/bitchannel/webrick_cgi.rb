@@ -13,9 +13,7 @@ require 'webrick/cgi'
 module WEBrick
   class CGI
     def CGI.main(conf, *context)
-      app = new(conf)
-      app.init_application(*context)
-      app.run
+      new(conf, *context).run
     end
 
     def CGI.each_request(&block)

@@ -1,3 +1,39 @@
+Thu Jun 24 00:28:15 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb: new class PageEntity and CVSWorkingCopy.
+
+	* lib/bitchannel/page.rb: ditto.
+
+	* lib/bitchannel/farm.rb: ditto.
+
+	* lib/bitchannel/wikispace.rb: ditto.
+
+	* misc/refresh-linkcache.rb: ditto.
+
+	* misc/tohtml.rb: ditto.
+
+	* template/recent.rhtml: ditto.
+
+	* template/revlinks.rhtml: ditto.
+
+	* template/search_result.rhtml: ditto.
+
+	* lib/bitchannel/wikispace.rb: new method WikiSpace#session.
+
+	* lib/bitchannel/cgi.rb: ditto.
+
+	* lib/bitchannel/config.rb: ditto.
+
+	* lib/bitchannel/webrickservlet.rb: ditto.
+
+	* lib/bitchannel/farm.rb: support Logger object.
+
+	* lib/bitchannel/repository.rb: new method Time.rcsdate.
+
+	* lib/bitchannel/tohtml.rb (extract_links): does not need Repository.
+
+	* lib/bitchannel/webrick_cgi.rb (main): abandon #init_application idea.
+
 Fri Jun 11 19:39:38 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/mail.rb: new file.

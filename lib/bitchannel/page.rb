@@ -102,17 +102,9 @@ module BitChannel
 
 
   class NamedPage < WikiPage
-    def initialize(config, repo, page_name)
+    def initialize(config, page)
       super config
-      @repository = repo
-      @page_name = page_name
-
-      # cache
-      @size = nil
-      @mtime = nil
-      @links = nil
-      @revlinks = nil
-      @nlinks = {}
+      @page = page
     end
 
     private
@@ -123,64 +115,58 @@ module BitChannel
     def menuitem_annotate_enabled?() true end
 
     def compile_page(content)
-      ToHTML.new(@config, @repository).compile(content, @page_name)
+      ToHTML.new(@config, @page.repository).compile(content, @page.name)
     end
 
     def page_name
-      escape_html(@page_name)
+      escape_html(@page.name)
     end
 
     def page_url
-      escape_url(@page_name)
+      escape_url(@page.name)
     end
 
     def page_view_url
-      view_url(@page_name)
+      view_url(@page.name)
     end
 
     def front_page?
-      @page_name == FRONT_PAGE_NAME
+      @page.name == FRONT_PAGE_NAME
     end
 
     def site_name
-      escape_html(@config.site_name)
+      escape_html(@config.site_name || FRONT_PAGE_NAME)
     end
 
     def size
-      @size ||= @repository.size(@page_name)
+      @page.size
     end
 
     def mtime
-      @mtime ||= @repository.mtime(@page_name)
+      @page.mtime
     end
 
     def links
-      @links ||= @repository.links(@page_name)
+      @page.links
     end
 
     def revlinks
-      @revlinks ||= (@repository.revlinks(@page_name) - [@page_name])
+      @page.revlinks - [@page.name]
     end
 
     def ordered_revlinks
-      leaves, nodes = revlinks().select {|page| @repository.exist?(page) }\
-                          .partition {|page| num_links(page) < 2 }
-      nodes.sort_by {|page| @repository.size(page) / num_links(page) } +
-          leaves.sort_by {|page| -@repository.size(page) }
-    end
-
-    def num_links(page)
-      @nlinks[page] ||= @repository.links(page).size
-    end
-
-    def num_revlinks
-      revlinks().size
+      leaves, nodes = *revlinks()\
+          .select {|name| @page.repository.exist?(name) }\
+          .map {|name| @page.repository[name] }\
+          .partition {|page| page.links.size < 2 }
+      nodes.sort_by {|page| page.size / page.links.size } +
+          leaves.sort_by {|page| -page.size }
     end
   end
 
 
   class ViewPage < NamedPage
-    def initialize(config, repo, page_name)
+    def initialize(config, page)
       super
       @revision = nil
     end
@@ -196,11 +182,11 @@ module BitChannel
     end
 
     def menuitem_top_enabled?()
-      page_name() != FRONT_PAGE_NAME
+      @page.name != FRONT_PAGE_NAME
     end
 
     def menuitem_help_enabled?()
-      page_name() != HELP_PAGE_NAME
+      @page.name != HELP_PAGE_NAME
     end
 
     def diff_base_revision
@@ -208,23 +194,23 @@ module BitChannel
     end
 
     def revision
-      @revision ||= @repository.revision(@page_name)
+      @revision ||= @page.revision
     end
 
     def body
-      compile_page(@repository[@page_name])
+      compile_page(@page.source)
     end
   end
 
 
   class ViewRevPage < NamedPage
-    def initialize(config, repo, page_name, rev)
-      super config, repo, page_name
+    def initialize(config, page, rev)
+      super config, page
       @revision = rev
     end
 
     def last_modified
-      mtime()
+      @page.mtime(@revision)
     end
 
     private
@@ -242,14 +228,14 @@ module BitChannel
     end
 
     def body
-      compile_page(@repository[@page_name, @revision])
+      compile_page(@page.source(@revision))
     end
   end
 
 
   class DiffPage < NamedPage
-    def initialize(config, repo, page_name, rev1, rev2)
-      super config, repo, page_name
+    def initialize(config, page, rev1, rev2)
+      super config, page
       @rev1 = rev1
       @rev2 = rev2
     end
@@ -273,7 +259,7 @@ module BitChannel
     end
 
     def diff
-      @repository.diff(@page_name, @rev1, @rev2)
+      @page.diff(@rev1, @rev2)
     end
   end
 
@@ -307,8 +293,8 @@ module BitChannel
 
 
   class AnnotatePage < NamedPage
-    def initialize(config, repo, page_name, rev)
-      super config, repo, page_name
+    def initialize(config, page, rev)
+      super config, page
       @revision = rev
     end
 
@@ -323,7 +309,7 @@ module BitChannel
     end
 
     def diff_base_revision
-      @revision || @repository.revision(@page_name)
+      @revision || @page.revision
     end
 
     def revision
@@ -331,12 +317,12 @@ module BitChannel
     end
 
     def annotate_revision
-      @revision || @repository.revision(@page_name)
+      @revision || @page.revision
     end
 
     def annotate
       latest = annotate_revision()
-      @repository.annotate(@page_name, @revision).map {|line|
+      @page.annotate(@revision).map {|line|
         rev = line.slice(/\d+/).to_i
         sprintf(%Q[<a href="%s?cmd=view;rev=%d;name=%s">%4d</a>: <span class="new%d">%s</span>\n],
                 @config.cgi_url, rev, page_url(), rev,
@@ -348,7 +334,7 @@ module BitChannel
 
 
   class HistoryPage < NamedPage
-    def initialize(config, repo, page_name)
+    def initialize(config, page)
       super
       @revision = nil
     end
@@ -368,18 +354,18 @@ module BitChannel
     end
 
     def revision
-      @revision ||= @repository.revision(@page_name)
+      @revision ||= @page.revision
     end
 
     def logs
-      @repository.logs(@page_name)
+      @page.logs
     end
   end
 
 
   class EditPage < NamedPage
-    def initialize(config, repo, page_name, text, origrev, reason = nil)
-      super config, repo, page_name
+    def initialize(config, page, text, origrev, reason = nil)
+      super config, page
       @text = text
       @original_revision = origrev
       @invalid_edit_reason = reason
@@ -396,7 +382,7 @@ module BitChannel
     end
 
     def diff_base_revision
-      @original_revision || @repository.revision(@page_name)
+      @original_revision || @page.revision
     rescue Errno::ENOENT
       return 0
     end
@@ -417,8 +403,8 @@ module BitChannel
 
 
   class PreviewPage < NamedPage
-    def initialize(config, repo, page_name, text, origrev)
-      super config, repo, page_name
+    def initialize(config, page, text, origrev)
+      super config, page
       @text = text
       @original_revision = origrev
     end
@@ -430,7 +416,7 @@ module BitChannel
     end
 
     def diff_base_revision
-      @original_revision || @repository.revision(@page_name)
+      @original_revision || @page.revision
     rescue Errno::ENOENT
       return 0
     end
@@ -492,7 +478,7 @@ module BitChannel
     end
 
     def orphan_page?(name)
-      @repository.orphan?(name)
+      @repository[name].orphan?
     end
   end
 
@@ -518,9 +504,7 @@ module BitChannel
     end
 
     def page_list
-      @repository.page_names\
-          .map {|name| [name, @repository.mtime(name)] }\
-          .sort_by {|name, mtime| -(mtime.to_i) }
+      @repository.pages.sort_by {|page| -page.mtime.to_i }
     end
   end
 
@@ -548,18 +532,13 @@ module BitChannel
     end
 
     def matched_pages(&block)
-      title_match, not_match = @repository.page_names.sort.partition {|name|
-        @patterns.all? {|re| re =~ name }
-      }
-      title_match.each do |name|
-        yield name, @repository[name]
-      end
-      not_match.sort_by {|name| -@repository.mtime(name).to_i }.each do |name|
-        content = @repository[name]
-        if @patterns.all? {|re| re =~ content }
-          yield name, content
-        end
-      end
+      title_match, not_match = *@repository.pages\
+          .partition {|page| @patterns.all? {|re| re =~ page.name } }
+      title_match\
+          .sort_by {|page| -page.mtime.to_i }.each(&block)
+      not_match\
+          .select {|page| @patterns.all? {|re| re =~ page.source } }\
+          .sort_by {|page| -page.mtime.to_i }.each(&block)
     end
 
     def shorten(str)

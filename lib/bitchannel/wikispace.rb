@@ -30,12 +30,16 @@ module BitChannel
       @repository
     end
 
-    def locale
-      @config.locale
+    def session(guess_cgi_url)
+      @config.cgi_url ||= guess_cgi_url
+      raise 'CGI url could not fixed; give up' unless @config.cgi_url
+      return yield
+    ensure
+      @repository.clear_per_request_cache
     end
 
-    def suggest_cgi_url(u)
-      @config.suggest_cgi_url u
+    def locale
+      @config.locale
     end
 
     def valid?(name)
@@ -43,49 +47,51 @@ module BitChannel
     end
 
     def exist?(name)
-      @repository.valid?(name) and @repository.exist?(name)
+      @repository.exist?(name)
     end
 
     def view(name)
-      ViewPage.new(@config, @repository, name)
+      ViewPage.new(@config, @repository[name])
     end
 
     def viewrev(name, rev)
-      ViewRevPage.new(@config, @repository, name, rev)
+      ViewRevPage.new(@config, @repository[name], rev)
     end
 
     def edit(name)
-      rev = @repository.revision(name)
-      EditPage.new(@config, @repository, name,
-                   @repository.fetch(name, rev) { '' }, rev)
+      unless @repository.exist?(name)
+        return edit_new(name)
+      end
+      page = @repository[name]
+      rev = page.revision  # fix revision
+      EditPage.new(@config, page, page.source(rev), rev)
     end
 
     def edit_revision(name, srcrev)
-      EditPage.new(@config, @repository, name,
-                   @repository.fetch(name, srcrev) { '' },
-                   @repository.revision(name))
+      page = @repository[name]
+      EditPage.new(@config, page, page.source(srcrev), page.revision)
     end
 
     def edit_new(name)
-      EditPage.new(@config, @repository, name, '', nil)
+      EditPage.new(@config, @repository.fetch(name), '', nil)
     end
 
     def edit_again(name, src, cirev, reason = :edit_conflicted)
-      EditPage.new(@config, @repository, name,
-                   src, cirev || @repository.revision(name), reason)
+      page = @repository[name]
+      EditPage.new(@config, page, src, (cirev || page.revision), reason)
     end
 
     def preview(name, orgrev, text)
-      PreviewPage.new(@config, @repository, name, text, orgrev)
+      PreviewPage.new(@config, @repository[name], text, orgrev)
     end
 
-    def save(name, orgrev, text)
-      @repository.checkin name, orgrev, text
+    def save(name, origrev, text)
+      @repository[name].checkin origrev, text
       ThanksPage.new(@config, name)
     end
 
     def comment(name, user, cmt)
-      @repository.edit(name) {|text|
+      @repository[name].edit {|text|
         insert_comment(text, user, cmt)
       }
       ThanksPage.new(@config, name)
@@ -102,15 +108,15 @@ module BitChannel
     private :insert_comment
 
     def diff(name, rev1, rev2)
-      DiffPage.new(@config, @repository, name, rev1, rev2)
+      DiffPage.new(@config, @repository[name], rev1, rev2)
     end
 
     def history(name)
-      HistoryPage.new(@config, @repository, name)
+      HistoryPage.new(@config, @repository[name])
     end
 
     def annotate(name, rev)
-      AnnotatePage.new(@config, @repository, name, rev)
+      AnnotatePage.new(@config, @repository[name], rev)
     end
 
     def list
@@ -134,18 +140,19 @@ module BitChannel
     end
 
     def src(name)
-      TextPage.new(@config.locale, @repository[name], @repository.mtime(name))
+      page = @repository[name]
+      TextPage.new(@config.locale, page.source, page.mtime)
     end
 
     def extent
       buf = ''
-      @repository.page_names.sort.each do |name|
-        buf << "= #{name}\r\n"
+      @repository.pages.sort_by {|page| -page.mtime.to_i }.each do |page|
+        buf << "= #{page.name}\r\n"
         buf << "\r\n"
-        buf << @repository[name]
+        buf << page.source
         buf << "\r\n"
       end
-      TextPage.new(@config.locale, buf, @repository.latest_mtime)
+      TextPage.new(@config.locale, buf, @repository.last_modified)
     end
 
   end

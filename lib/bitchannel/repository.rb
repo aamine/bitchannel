@@ -14,6 +14,11 @@ require 'bitchannel/exception'
 require 'time'
 require 'fileutils'
 
+def Time.rcsdate(t)
+  m = /\w{3} (\w{3})  ?(\d{1,2}) (\d{1,2}):(\d{1,2}):(\d{1,2}) (\d{4})/.match(t)
+  Time.utc(m[6], m[1], m[2], m[3], m[4], m[5])
+end
+
 module BitChannel
 
   module FilenameEncoding
@@ -35,7 +40,7 @@ module BitChannel
 
     # This method locks write access.
     # Read only access is always allowed.
-    def lock(path)
+    def lockpath(path)
       n_retry = 5
       lock = path + ',bitchannel,lock'
       begin
@@ -54,164 +59,363 @@ module BitChannel
         raise LockFailed, "cannot get lock for #{File.basename(path)}"
       end
     end
-
   end
 
 
   class Repository
+
     include FilenameEncoding
-    include LockUtils
-    include TextUtils
 
     def initialize(hash, id = nil)
+      @module_id = id
       UserConfig.parse(hash, 'repository') {|conf|
-        @cvs_cmd  = conf.get_required(:cmd_path)
-        @wc_read  = conf.get_required(:wc_read)
-        @wc_write = conf.get_required(:wc_write)
-        @logfile  = conf.get_required(:logfile)
+        logfile = conf.get_optional(:logfile, nil)
+        logger = conf.get_optional(:logger, nil)
+        raise ConfigError, "logger and logfile given" if logfile and logger
+        if logfile
+          logger = FileLogger.new(logfile)
+        elsif logger
+          ;
+        else
+          logger = NullLogger.new
+        end
+
+        cmd = conf.get_required(:cmd_path)
+        @wc_read  = CVSWorkingCopy.new(id, conf.get_required(:wc_read), cmd, logger)
+        @wc_write = CVSWorkingCopy.new(id, conf.get_required(:wc_write), cmd, logger)
         cachedir  = conf.get_required(:cachedir)
-        @link_cache = LinkCache.new("#{cachedir}/link", "#{cachedir}/revlink")
+        @link_cache = LinkCache.new("#{cachedir}/link")
+        @revlink_cache = LinkCache.new("#{cachedir}/revlink")
         @notifier = conf.get_optional(:notifier, nil)
       }
-      @module_id = id
       # per-request cache
-      @Entries = nil
+      @pages = {}
+    end
+
+    attr_reader :module_id
+
+    def clear_per_request_cache
+      @pages.clear
+      @wc_read.clear_cache
+      @wc_write.clear_cache
     end
 
     # internal use only
     attr_reader :link_cache
+    attr_reader :revlink_cache
 
     def page_names
-      cvs_Entries().keys.map {|name| decode_filename(name) }
+      @wc_read.cvs_Entries.keys.map {|name| decode_filename(name) }
     end
+
+    def pages
+      page_names().map {|name| new_page(name) }
+    end
+
+    def new_page(name)
+      @pages[name] ||= PageEntity.new(self, name, @wc_read, @wc_write)
+    end
+    private :new_page
 
     def orphan_pages
-      page_names().select {|name| orphan?(name) }
-    end
-
-    def orphan?(page_name)
-      revlinks(page_name).empty?
+      pages().select {|page| page.orphan? }
     end
 
     def exist?(page_name)
-      raise 'page_name == nil' unless page_name
-      raise 'page_name == ""' if page_name.empty?
-      File.file?("#{@wc_read}/#{encode_filename(page_name)}")
+      st = @wc_read.stat(page_name)
+      st.file? and st.readable? and st.writable?
+    rescue Errno::ENOENT
+      return false
     end
 
+    def page_must_exist(name)
+      raise WrongPageName, "page not exist: #{name}" unless exist?(name)
+    end
+    private :page_must_exist
+
     def invalid?(page_name)
-      st = File.stat("#{@wc_read}/#{encode_filename(page_name)}")
+      st = @wc_read.stat(page_name)
       not st.file? or not st.readable?
     rescue Errno::ENOENT
       return false
     end
 
-    def valid?(page_name)
-      not invalid?(page_name)
+    def valid?(name)
+      not invalid?(name)
     end
 
-    def size(page_name)
+    def page_must_valid(name)
+      raise WrongPageName, "wrong page name: #{name}" if invalid?(name)
+    end
+    private :page_must_valid
+
+    def last_modified
+      @wc_write.last_modified
+    end
+
+    def [](page_name)
+      page_must_exist page_name
+      new_page(page_name)
+    end
+
+    def fetch(page_name)
       page_must_valid page_name
-      File.size("#{@wc_read}/#{encode_filename(page_name)}")
+      new_page(page_name)
+    end
+
+    def updated(page_name, new_rev, new_text)
+      update_linkcache page_name, ToHTML.extract_links(new_text)
+      notify page_name, new_rev
+    end
+
+    private
+
+    def update_linkcache(page_name, new_links)
+      old_links = @link_cache[page_name]
+      @link_cache[page_name] = new_links
+      @revlink_cache.updating {|cache|
+        (new_links - old_links).each do |n|
+          cache.add_link n, page_name
+        end
+        (old_links - new_links).each do |n|
+          cache.del_link n, page_name
+        end
+      }
+    end
+
+    def notify(page_name, new_rev)
+      return unless @notifier
+      # fork twice not to make zombie
+      pid = fork {
+        fork {
+          sleep 2  # dirty hack: wait unlocking
+          @wc_read.chdir {|wc|
+            if new_rev == 1
+              diffs = wc.cvs_diff_all(new_rev, page_name)
+            else
+              diffs = wc.cvs_diff(new_rev-1, new_rev, page_name)
+            end
+            @notifier.notify diffs
+          }
+        }
+      }
+      Process.waitpid pid
+    end
+
+  end   # class Repository
+
+
+  class LinkCache
+
+    include FilenameEncoding
+    include LockUtils
+
+    def initialize(dir)
+      @dir = dir
+      Dir.mkdir(@dir) unless File.directory?(@dir)
+      @locking = false
+    end
+
+    def clear
+      FileUtils.rm_rf @dir
+    end
+
+    def entries
+      Dir.entries(@dir)\
+          .select {|ent| File.file?("#{@dir}/#{ent.untaint}") }\
+          .map {|ent| decode_filename(ent) }
+    end
+
+    def [](name)
+      read_cache(cache_path(name))
+    end
+
+    def []=(name, links)
+      lock {
+        write_cache cache_path(name), links
+      }
+    end
+
+    def add_link(name, lnk)
+      links = (read_cache(cache_path(name)) || [])
+      write_cache cache_path(name), (links + [lnk]).uniq.sort
+    end
+
+    def del_link(name, lnk)
+      links = (read_cache(cache_path(name)) || [])
+      write_cache cache_path(name), (links - [lnk]).uniq.sort
+    end
+
+    def updating
+      lock {
+        yield self
+      }
+    end
+
+    private
+
+    def lock
+      if @locking
+        yield
+      else
+        lockpath(@dir) {
+          begin
+            @locking = true
+            yield
+          ensure
+            @locking = false
+          end
+        }
+      end
+    end
+
+    def cache_path(name)
+      "#{@dir}/#{encode_filename(name)}"
+    end
+
+    def read_cache(path)
+      File.readlines(path).map {|line| line.strip.untaint }
+    rescue Errno::ENOENT
+      return nil
+    end
+
+    def write_cache(path, links)
+      tmp = "#{path},tmp"
+      File.open(tmp, 'w') {|f|
+        links.each do |lnk|
+          f.puts lnk
+        end
+      }
+      File.rename tmp, path
+    ensure
+      File.unlink tmp if File.exist?(tmp)
+    end
+
+  end   # class LinkCache
+
+
+  class FileLogger
+    include TextUtils
+
+    def initialize(path)
+      @path = path
+    end
+
+    def log(id, msg)
+      File.open(@path, 'a') {|f|
+        f.puts "#{format_time(Time.now)};#{$$}; #{module_id(id)}#{msg}"
+      }
+    end
+
+    private
+
+    def module_id(id)
+      id ? "[#{id}] " : ''
+    end
+  end
+
+
+  class NullLogger
+    def log(id, msg)
+    end
+  end
+
+
+  class CVSWorkingCopy
+
+    include FilenameEncoding
+    include LockUtils
+
+    def initialize(id, dir, cmd, logger)
+      @module_id = id
+      @dir = dir
+      @cvs_cmd = cmd
+      @logger = logger
+      @in_chdir = false
+      # per-process cache
+      @cvs_version = nil
+      # per-request cache
+      @cvs_Entries = nil
+    end
+
+    attr_reader :dir
+
+    def clear_cache
+      @cvs_Entries = nil
     end
 
     def last_modified
-      page_names().map {|name| mtime(name) }.sort.last
+      File.mtime(@dir)
     end
 
-    def mtime(page_name, rev = nil)
-      page_must_valid page_name
-      page_must_exist page_name
-      unless rev
-        rev, mtime = *cvs_Entries()[page_name]
-        mtime
-      else
-        Dir.chdir(@wc_read) {
-          out, err = cvs('log', "-r1.#{rev}", encode_filename(page_name))
-          dateline = out.detect {|line| /\Adate: / =~ line } or
-              raise UnknownRCSLogFormat, "unknown RCS log format; given up"
-          return Time.parse(line.slice(/\Adate: (.*?);/, 1))
-        }
-      end
+    def chdir
+      Dir.chdir(@dir) {
+        begin
+          @in_chdir = true
+          yield self
+        ensure
+          @in_chdir = false
+        end
+      }
     end
 
-    def revision(page_name)
-      page_must_valid page_name
-      page_must_exist page_name
-      rev, mtime = *cvs_Entries()[page_name]
+    def size(name)
+      File.size("#{@dir}/#{encode_filename(name)}")
+    end
+
+    def stat(name)
+      File.stat("#{@dir}/#{encode_filename(name)}")
+    end
+
+    def revision(name)
+      rev, mtime = *cvs_Entries()[name]
       rev
     end
 
-    def [](page_name, rev = nil)
-      page_must_valid page_name
-      unless rev
-        File.read("#{@wc_read}/#{encode_filename(page_name)}")
-      else
-        page_must_exist page_name
-        Dir.chdir(@wc_read) {
-          out, err = cvs('up', '-p', "-r1.#{rev}", encode_filename(page_name))
-          return out
-        }
-      end
+    def mtime(name)
+      rev, mtime = *cvs_Entries()[name]
+      mtime
     end
 
-    def fetch(page_name, rev = nil)
-      self[page_name, rev]
-    rescue Errno::ENOENT
-      return yield
+    def cvs_Entries
+      @cvs_Entries ||= read_Entries("#{@dir}/CVS/Entries")
     end
 
-    def logs(page_name)
-      page_must_valid page_name
-      page_must_exist page_name
-      Dir.chdir(@wc_read) {
-        out, err = cvs('log', encode_filename(page_name))
-        logs = out.split(/^----------------------------/)
-        logs.shift  # remove header
-        logs.last.slice!(/\A={8,}/)
-        return logs.map {|str| Log.parse(str.strip) }
+    def read(name)
+      File.open("#{@dir}/#{encode_filename(name)}", 'r') {|f|
+        return f.read
       }
     end
 
-    class Log
-      def Log.parse(str)
-        rline, dline, *msg = *str.to_a
-        new(rline.slice(/\Arevision 1\.(\d+)\s/, 1).to_i,
-            Time.parse(dline.slice(/date: (.*?);/, 1) + ' UTC').getlocal,
-            dline.slice(/lines: \+(\d+)/, 1).to_i,
-            dline.slice(/lines:(?: \+(?:\d+))? -(\d+)/, 1).to_i,
-            msg.join(''))
-      end
-
-      def initialize(rev, date, add, rem, msg)
-        @revision = rev
-        @date = date
-        @n_added = add
-        @n_removed = rem
-        @log = msg
-      end
-
-      attr_reader :revision
-      attr_reader :date
-      attr_reader :n_added
-      attr_reader :n_removed
-      attr_reader :log
-    end
-
-    def diff(page_name, rev1, rev2)
-      page_must_valid page_name
-      page_must_exist page_name
-      Dir.chdir(@wc_read) {
-        out, err = cvs('diff', '-u', "-r1.#{rev1}", "-r1.#{rev2}", encode_filename(page_name))
-        return Diff.parse(@module_id, out)
+    def readrev(name, rev)
+      chdir {
+        out, err = *cvs('up', '-p', "-r1.#{rev}", encode_filename(name))
+        return out
       }
     end
 
-    def diff_from(org)
-      Dir.chdir(@wc_read) {
-        out, err = cvs('diff', '-uN', "-D#{format_time_cvs(org)}")
-        return Diff.parse_diffs(@module_id, out)
+    def write(name, str)
+      assert_chdir
+      File.open(encode_filename(name), 'w') {|f|
+        f.write str
       }
+    end
+
+    def lock(name, &block)
+      assert_chdir
+      lockpath(encode_filename(name), &block)
+    end
+
+    def cvs_diff_all(rev2, name)
+      diff('-uN', '-D2000-01-01 00:00:00', "-r1.#{rev2}", encode_filename(name))
+    end
+
+    def cvs_diff(rev1, rev2, name)
+      diff('-u', "-r1.#{rev1}", "-r1.#{rev2}", encode_filename(name))
+    end
+
+    def cvs_diff_from(time)
+      diff('-uN', "-D#{format_time_cvs(time)}")
     end
 
     def format_time_cvs(time)
@@ -219,6 +423,14 @@ module BitChannel
               time.year, time.month, time.mday,
               time.hour, time.min, time.sec)
     end
+    private :format_time_cvs
+
+    def diff(*options)
+      assert_chdir
+      out, err = *cvs('diff', *options)
+      Diff.parse(@module_id, out)
+    end
+    private :diff
 
     class Diff
       extend FilenameEncoding
@@ -230,15 +442,14 @@ module BitChannel
       end
 
       def Diff.parse(mod, chunk)
-        # cvs output may be corrupted
         meta = chunk.slice!(/\A.*?^(?=@@)/m).to_s
         file = meta.slice(/\A(?:Index:)?\s*(\S+)/, 1).strip
         _, stime, srev = *meta.slice(/^\-\-\- .*/).split("\t", 3)
         _, dtime, drev = *meta.slice(/^\+\+\+ .*/).split("\t", 3)
         new(mod,
             decode_filename(file),
-            srev.to_s.slice(/\A1\.(\d+)/, 1).to_i, Time.parse(stime + ' UTC').getlocal,
-            drev.slice(/\A1\.(\d+)/, 1).to_i, Time.parse(dtime + ' UTC').getlocal,
+            srev.to_s.slice(/\A1\.(\d+)/, 1).to_i, Time.rcsdate(stime).getlocal,
+            drev.slice(/\A1\.(\d+)/, 1).to_i, Time.rcsdate(dtime).getlocal,
             chunk)
       end
 
@@ -261,140 +472,114 @@ module BitChannel
       attr_reader :diff
     end
 
-    def annotate(page_name, rev = nil)
-      page_must_valid page_name
-      page_must_exist page_name
-      Dir.chdir(@wc_read) {
-        optF = (cvs_version() >= '001.011.002') ? '-F' : nil
-        revopt = (rev ? "-r1.#{rev}" : nil)
-        opts = [optF, revopt, encode_filename(page_name)].compact
-        out, err = cvs('annotate', *opts)
-        return out.gsub(/^.*?:/) {|s| sprintf('%4s', s.slice(/\.(\d+)/, 1)) }
-      }
+    def cvs_log(name, rev)
+      assert_chdir
+      out, err = *cvs('log', "-r1.#{rev}", encode_filename(name))
+      Log.parse_logs(out)[0]
     end
 
-    def links(page_name)
-      cache = @link_cache.linkcache(page_name)
-      return cache if cache
-      result = extract_links(self[page_name])
-      @link_cache.set_linkcache page_name, result
-      result
+    def cvs_logs(name)
+      assert_chdir
+      out, err = *cvs('log', encode_filename(name))
+      Log.parse_logs(out)
     end
 
-    def revlinks(page_name)
-      cache = @link_cache.revlinkcache(page_name)
-      return cache if cache
-      result = collect_revlinks(page_name)
-      @link_cache.set_revlinkcache page_name, result
-      result
-    end
-
-    def edit(page_name)
-      page_must_valid page_name
-      page_must_exist page_name
-      new_rev = nil
-      new_text = nil
-      filename = encode_filename(page_name)
-      Dir.chdir(@wc_write) {
-        lock(filename) {
-          cvs 'up', '-A', filename
-          new_text = yield(File.read(filename))
-          File.open(filename, 'w') {|f|
-            f.write new_text
-          }
-          cvs 'ci', '-m', "edit checkin", filename
-          new_rev = read_revision(filename)
-        }
-      }
-      Dir.chdir(@wc_read) {
-        cvs 'up', '-A', filename
-      }
-      repository_updated page_name, new_rev, new_text
-    end
-
-    def checkin(page_name, origrev, new_text)
-      page_must_valid page_name
-      new_rev = nil
-      filename = encode_filename(page_name)
-      Dir.chdir(@wc_write) {
-        lock(filename) {
-          if File.exist?(filename)
-            update_and_checkin filename, origrev, new_text
-          else
-            add_and_checkin filename, new_text
-          end
-          new_rev = read_revision(filename)
-        }
-      }
-      Dir.chdir(@wc_read) {
-        cvs 'up', '-A', filename
-      }
-      repository_updated page_name, new_rev, new_text
-    end
-
-    private
-
-    def repository_updated(page, new_rev, new_text)
-      @Entries = nil
-      @link_cache.update_cache_for page, ToHTML.extract_links(new_text, self)
-      notify page, new_rev
-    end
-
-    def notify(page, new_rev)
-      return unless @notifier
-      # fork twice not to make zombie
-      pid = fork {
-        fork {
-          sleep 2  # dirty hack: wait unlocking
-          Dir.chdir(@wc_read) {
-            org = if new_rev == 1
-                  then '-D2000-01-01 00:00:00'
-                  else "-r1.#{new_rev-1}"
-                  end
-            out, err = cvs('diff', '-uN', org, "-r1.#{new_rev}", encode_filename(page))
-            @notifier.notify Diff.parse(@module_id, out)
-          }
-        }
-      }
-      Process.waitpid pid
-    end
-
-    def update_and_checkin(filename, origrev, new_text)
-      File.open(filename, 'w') {|f|
-        f.write new_text
-      }
-      if origrev
-        out, err = *cvs('up', '-ko', "-j1.#{origrev}", '-jHEAD', filename)
-        if /conflicts during merge/ =~ err
-          log "conflict: #{filename}"
-          merged = File.read(filename)
-          rev = read_revision(filename)
-          File.unlink filename   # prevent next writer from conflict
-          cvs 'up', '-A', filename
-          raise EditConflict.new('conflict found', merged, rev)
-        end
+    class Log
+      def Log.parse_logs(str)
+        logs = str.split(/^----------------------------/)
+        logs.shift  # remove header
+        logs.last.slice!(/\A={8,}/)
+        logs.map {|s| parse(s.strip) }
       end
-      cvs 'ci', '-m', "auto checkin: origrev=#{origrev}", filename
+
+      def Log.parse(str)
+        rline, dline, *msg = *str.to_a
+        new(rline.slice(/\Arevision 1\.(\d+)\s/, 1).to_i,
+            Time.rcsdate(dline.slice(/date: (.*?);/, 1)).getlocal,
+            dline.slice(/lines: \+(\d+)/, 1).to_i,
+            dline.slice(/lines:(?: \+(?:\d+))? -(\d+)/, 1).to_i,
+            msg.join(''))
+      end
+
+      def initialize(rev, date, add, rem, msg)
+        @revision = rev
+        @date = date
+        @n_added = add
+        @n_removed = rem
+        @log = msg
+      end
+
+      attr_reader :revision
+      attr_reader :date
+      attr_reader :n_added
+      attr_reader :n_removed
+      attr_reader :log
     end
 
-    def add_and_checkin(filename, new_text)
-      File.open(filename, 'w') {|f|
-        f.write new_text
-      }
-      cvs 'add', '-kb', filename
-      cvs 'ci', '-m', 'auto checkin: new file', filename
+    def cvs_annotate(name)
+      assert_chdir
+      out, err = *cvs('annotate', *[ann_F(), encode_filename(name)].compact)
+      out.gsub(/^.*?:/) {|s| sprintf('%4s', s.slice(/\.(\d+)/, 1)) }
     end
+
+    def cvs_annotate_rev(name, rev)
+      assert_chdir
+      out, err = *cvs('annotate', *[ann_F(), "-r1.#{rev}", encode_filename(name)].compact)
+      return out.gsub(/^.*?:/) {|s| sprintf('%4s', s.slice(/\.(\d+)/, 1)) }
+    end
+
+    def ann_F
+      (cvs_version() >= '001.011.002') ? '-F' : nil
+    end
+    private :ann_F
 
     def cvs_version
+      @cvs_version ||= read_cvs_version()
+    end
+    private :cvs_version
+
+    def read_cvs_version
+      assert_chdir
       # sould handle "1.11.1p1" like version number??
       out, err = *cvs('--version')
       verdigits = out.slice(/\d+\.\d+\.\d+/).split(/\./).map {|n| n.to_i }
       sprintf((['%03d'] * verdigits.length).join('.'), *verdigits)
     end
+    private :read_cvs_version
+
+    def merge(name, origrev, new_text)
+      write name, new_text
+      out, err = *cvs('up', '-ko', "-j1.#{origrev}", '-jHEAD', encode_filename(name))
+      if /conflicts during merge/ =~ err
+        log "conflict: #{name}"
+        merged = read(name)
+        rev = revision(name)
+        File.unlink encode_filename(filename)   # prevent next writer from conflict
+        cvs_update_A name
+        raise EditConflict.new('conflict found', merged, rev)
+      end
+    end
+
+    def cvs_add(name)
+      assert_chdir
+      cvs 'add', '-kb', encode_filename(name)
+    end
+
+    def cvs_checkin(name, log)
+      assert_chdir
+      cvs 'ci', '-m', log, encode_filename(name)
+    end
+
+    def cvs_update_A(name)
+      assert_chdir
+      cvs 'up', '-A', encode_filename(name)
+    end
 
     def cvs(*args)
       execute(ignore_status_p(args[0]), @cvs_cmd, '-f', '-q', *args)
     end
+
+    private
 
     def ignore_status_p(cmd)
       cmd == 'diff'
@@ -446,38 +631,11 @@ module BitChannel
     end
 
     def log(msg)
-      return unless @logfile
-      File.open(@logfile, 'a') {|f|
-        begin
-          f.flock File::LOCK_EX
-          f.puts "#{format_time(Time.now)};#{$$}; #{module_id()}#{msg}"
-          f.flush
-        ensure
-          f.flock File::LOCK_UN
-        end
-      }
+      @logger.log @module_id, msg
     end
 
-    def module_id
-      @module_id ? "[#{@module_id}] " : ''
-    end
-
-    def page_must_valid(name)
-      raise WrongPageName, "wrong page name: #{name}" if invalid?(name)
-    end
-
-    def page_must_exist(name)
-      File.open("#{@wc_read}/#{encode_filename(name)}", 'r') {
-        ;
-      }
-    end
-
-    def read_revision(pagefile)
-      read_Entries("CVS/Entries")[decode_filename(pagefile)][0]
-    end
-
-    def cvs_Entries
-      @Entries ||= read_Entries("#{@wc_read}/CVS/Entries")
+    def assert_chdir
+      raise "call in chdir" unless @in_chdir
     end
 
     def read_Entries(filename)
@@ -485,132 +643,156 @@ module BitChannel
       File.readlines(filename).each do |line|
         next if /\AD/ =~ line
         ent, rev, mtime = *line.split(%r</>).values_at(1, 2, 3)
-        table[decode_filename(ent).untaint] =
-            [rev.split(%r<\.>).last.to_i, cvstimestamp(mtime).untaint]
+        table[decode_filename(ent.untaint)] =
+            [rev.split(%r<\.>).last.to_i, Time.rcsdate(mtime.untaint).getlocal]
       end
       table
     end
 
-    def cvstimestamp(str)
-      Time.parse(str.sub(/\d+$/) {|y| ' GMT ' + y }).localtime
+  end
+
+
+  class PageEntity
+
+    include TextUtils
+
+    def initialize(repository, name, wc_read, wc_write)
+      @repository = repository
+      @name = name
+      @wc_read = wc_read
+      @wc_write = wc_write
+
+      # cache
+      @mtime = nil
+      @mtimes = []
+      @source = nil
+      @revision = nil
+      @links = nil
+      @revlinks = nil
     end
 
-    def extract_links(page_text)
-      ToHTML.extract_links(page_text, self)
+    attr_reader :repository
+    attr_reader :name
+
+    def orphan?
+      revlinks().empty?
     end
 
-    def collect_revlinks(page_name)
-      page_names().select {|name|
-        ToHTML.extract_links(self[name], self).include?(page_name)
-      }
-    end
-  end   # class Repository
-
-
-  class LinkCache
-    include FilenameEncoding
-    include LockUtils
-
-    def initialize(linkcachedir, revlinkcachedir)
-      @linkcachedir = linkcachedir
-      @revlinkcachedir = revlinkcachedir
+    def size
+      @wc_read.size(@name)
     end
 
-    def clear
-      FileUtils.rm_rf @linkcachedir
-      FileUtils.rm_rf @revlinkcachedir
-    end
-
-    def linkcache(page_name)
-      read_cache(linkcache_file(page_name))
-    end
-
-    def revlinkcache(page_name)
-      read_cache(revlinkcache_file(page_name))
-    end
-
-    def update_cache_for(page_name, links)
-      set_linkcache page_name, links
-      update_revlinkcache_for page_name, links
-    end
-
-    def set_linkcache(page_name, links)
-      lock(@linkcachedir) {|cachedir|
-        Dir.mkdir cachedir unless File.directory?(cachedir)
-        write_cache linkcache_file(page_name), links
-      }
-    end
-
-    def set_revlinkcache(page_name, links)
-      lock(@revlinkcachedir) {|cachedir|
-        Dir.mkdir cachedir unless File.directory?(cachedir)
-        write_cache revlinkcache_file(page_name), links
-      }
-    end
-
-    private
-
-    def update_revlinkcache_for(page_name, links)
-      linktbl = {}
-      links.each do |page|
-        linktbl[page] = true
+    def mtime(rev = nil)
+      unless rev
+        @mtime ||= @wc_read.mtime(@name)
+      else
+        return @mtimes[rev] if @mtimes[rev]
+        @wc_read.chdir {|wc|
+          return @mtimes[rev] = wc.cvs_log(@name, rev).date
+        }
       end
-      lock(@revlinkcachedir) {|cachedir|
-        Dir.mkdir cachedir unless File.directory?(cachedir)
-        foreach_file(cachedir) do |cachefile|
-          if linktbl.delete(decode_filename(File.basename(cachefile)))
-            add_linkcache_entry cachefile, page_name
+    end
+
+    def revision
+      @revision ||= @wc_read.revision(@name)
+    end
+
+    def source(rev = nil)
+      if rev
+      then @wc_read.readrev(@name, rev)
+      else @source = @wc_read.read(@name)
+      end
+    end
+
+    def logs
+      @wc_read.chdir {|wc|
+        return wc.cvs_logs(@name)
+      }
+    end
+
+    def diff(rev1, rev2)
+      @wc_read.chdir {|wc|
+        return wc.cvs_diff(rev1, rev2, @name)
+      }
+    end
+
+    def diff_from(org)
+      @wc_read.chdir {|wc|
+        return wc.cvs_diff_from(org)
+      }
+    end
+
+    def annotate(rev = nil)
+      @wc_read.chdir {|wc|
+        if rev
+          return wc.cvs_annotate_rev(name, rev)
+        else
+          return wc.cvs_annotate(name)
+        end
+      }
+    end
+
+    def links
+      @links ||=
+          (@repository.link_cache[@name] ||= ToHTML.extract_links(page_text))
+    end
+
+    def revlinks
+      @revlinks ||=
+          (@repository.revlink_cache[@name] ||= collect_revlinks())
+    end
+
+    def collect_revlinks
+      @repository.pages\
+          .select {|page| page.links.include?(@name) }\
+          .map {|page| page.name }
+    end
+    private :collect_revlinks
+
+    def checkin(origrev, new_text)
+      new_rev = nil
+      @wc_write.chdir {|wc|
+        wc.lock(@name) {
+          if wc.exist?(@name)
+            if origrev
+              wc.merge @name, origrev, new_text
+              wc.cvs_checkin @name, "auto checkin: origrev=#{origrev} (merged)"
+            else
+              wc.write @name, new_text
+              wc.cvs_checkin @name, "auto checkin: origrev=#{origrev}"
+            end
           else
-            remove_linkcache_entry cachefile, page_name
+            wc.write @name, new_text
+            wc.cvs_add @name
+            wc.cvs_checkin @name, 'auto checkin: new file'
           end
-        end
-        linktbl.each_key do |link|
-          add_linkcache_entry revlinkcache_file(link), page_name
-        end
+          new_rev = wc.revision(@name)
+        }
       }
-    end
-
-    def linkcache_file(page_name)
-      "#{@linkcachedir}/#{encode_filename(page_name)}"
-    end
-
-    def revlinkcache_file(page_name)
-      "#{@revlinkcachedir}/#{encode_filename(page_name)}"
-    end
-
-    def add_linkcache_entry(path, page_name)
-      links = (read_cache(path) || [])
-      write_cache path, (links + [page_name]).uniq.sort
-    end
-
-    def remove_linkcache_entry(path, page_name)
-      links = (read_cache(path) || [])
-      write_cache path, (links - [page_name]).uniq.sort
-    end
-
-    def read_cache(path)
-      File.readlines(path).map {|line| line.strip.untaint }
-    rescue Errno::ENOENT
-      return nil
-    end
-
-    def write_cache(path, links)
-      tmp = "#{path},tmp"
-      File.open(tmp, 'w') {|f|
-        links.each do |lnk|
-          f.puts lnk
-        end
+      @wc_read.chdir {|wc|
+        wc.cvs_update_A @name
       }
-      File.rename tmp, path
-    ensure
-      File.unlink tmp if File.exist?(tmp)
+      @repository.updated @name, new_rev, new_text
     end
 
-    def foreach_file(dir, &block)
-      Dir.entries(dir).map {|ent| "#{dir}/#{ent}".untaint }\
-          .select {|path| File.file?(path) }.each(&block)
+    def edit
+      new_rev = nil
+      new_text = nil
+      @wc_write.chdir {|wc|
+        wc.lock(@name) {
+          wc.cvs_update_A @name
+          new_text = yield(wc.read(@name))
+          wc.write @name, new_text
+          wc.cvs_checkin @name, 'auto checkin'
+          new_rev = wc.revision(@name)
+        }
+      }
+      @wc_read.chdir {|wc|
+        wc.cvs_update_A @name
+      }
+      @repository.updated @name, new_rev, new_text
     end
-
-  end   # class LinkCache
+  
+  end   # class PageEntity
 
 end

@@ -25,7 +25,7 @@ def main
   repo = wiki._repository
   c = BitChannel::ToHTML.new(config, repo)
   ARGV.each do |page_name|
-    puts c.compile(repo[page_name], page_name)
+    puts c.compile(repo[page_name].source, page_name)
   end
 end
 

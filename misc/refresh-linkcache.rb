@@ -19,15 +19,18 @@ def main
 
   load './bitchannelrc'
   setup_environment
-  require 'bitchannel/tohtml'
-
   wiki = bitchannel_context()
-  repo = wiki._repository
-  cache = repo.link_cache
-  cache.clear
-  c = BitChannel::ToHTML.new(wiki._config, repo)
-  repo.page_names.each do |name|
-    cache.update_cache_for name, c.extract_links(repo[name])
+  wiki._repository.link_cache.clear
+  wiki._repository.revlink_cache.clear
+  revlinks = {}
+  wiki._repository.pages.each do |page|
+    page.links
+    page.links.each do |dest|
+      (revlinks[dest] ||= []).push page.name
+    end
+  end
+  revlinks.each do |name, revlinks|
+    wiki._repository.revlink_cache[name] = revlinks
   end
 end
 
