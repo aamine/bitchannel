@@ -1,3 +1,8 @@
+Wed Sep  1 21:22:33 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* template/preview.rhtml: add class="edit" for also preview
+	  textarea.
+
 Wed Sep  1 21:20:57 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/syntax.rb: fix typo. (suppress warning on
