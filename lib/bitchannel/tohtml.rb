@@ -60,8 +60,8 @@ module BitChannel
     #
 
     CAPTION = /\A(?:={2,4}|!{1,4})/
-    UL = /\A\s*\*/
-    OL = /\A\#|\A\s*\(\d+\)/   # should not allow /\A\s+\#/
+    UL = /\A\s*\*|\A-/
+    OL = /\A\s*\(\d+\)|\A\#/   # should not allow spaces before '#'
     DL = /\A:/
     CITE = /\A""/
     BAR_TABLE = /\A\|\|/
@@ -174,7 +174,8 @@ module BitChannel
       mark_re =~ line and indent_deeper?(line)
     end
 
-    def unify_listitem_style(line)
+    def unify_listitem_style(line0)
+      line = line0.sub(/\A-+/) {|s| '*' * s.length }
       if /\A[\*\#]{2,}/ =~ line
       then emulate_rdstyle(line)
       else line
