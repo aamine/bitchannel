@@ -23,7 +23,6 @@ div.main {
 }
 
 div.menu {
-    clear: right;
     float: right;
     position: fixed;
     top: 0px;
