@@ -397,7 +397,7 @@ module BitChannel
         @header['Pragma'] = 'no-cache'
       else
         @header.delete 'Cache-Control'
-        @header.delete 'no-cache'
+        @header.delete 'Pragma'
       end
     end
 
