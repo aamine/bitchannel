@@ -142,10 +142,6 @@ module BitChannel
 
     private
 
-    def css_url
-      escape_html(@config.css_url('default'))
-    end
-
     def node_url(id)
       escape_html("#{@config.node_urlbase}/#{id}/")
     end
@@ -210,18 +206,17 @@ module BitChannel
       UserConfig.parse(hash, 'farmconf') {|conf|
         @farm_url      = conf.get_required(:farm_url)
         @node_urlbase  = conf.get_required(:node_urlbase)
-        @templatedir   = conf.get_required(:templatedir)
-        @themedir      = conf.get_required(:themedir)
         @theme_urlbase = conf.get_required(:theme_urlbase)
+        @themedir      = conf.get_required(:themedir)
+        @templatedir   = conf.get_required(:templatedir)
         @locale        = conf.get_required(:locale)
       }
     end
 
-    attr_reader :locale
-    attr_reader :templatedir
     attr_reader :farm_url
     attr_reader :node_urlbase
-    attr_reader :theme_urlbase
+    attr_reader :templatedir
+    attr_reader :locale
 
     def themes
       Dir.glob("#{@themedir}/*/").map {|path| File.basename(path) }
@@ -231,7 +226,7 @@ module BitChannel
       File.directory?("#{@themedir}/#{encode_filename(name)}")
     end
 
-    def css_url(theme)
+    def css_url(theme = 'default')
       "#{@theme_urlbase}/#{theme}/#{theme}.css"
     end
 
@@ -321,8 +316,7 @@ module BitChannel
         :cgi_url       => "#{@config.node_urlbase}/#{id}/",
         :use_html_url  => "",
         :locale        => @config.locale,
-        :theme_urlbase => @config.theme_urlbase,
-        :theme         => repo.theme,
+        :css_url       => @config.css_url(repo.theme),
         :site_name     => repo.name,
         :logo_url      => repo.logo
       })

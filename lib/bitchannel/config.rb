@@ -73,7 +73,7 @@ module BitChannel
     attr_reader :logo_url
 
     def css_url
-      @css_url || "#{@theme_url}/#{@theme}/#{@theme}.css"
+      @css_url || "#{@theme_urlbase}/#{@theme}/#{@theme}.css"
     end
 
     def html_url?

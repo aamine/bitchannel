@@ -1,3 +1,9 @@
+Sun May  9 12:11:51 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/farm.rb: fix farm/node CSS path.
+
+	* lib/bitchannel/config.rb: should use theme_urlbase.
+
 Sun May  9 11:58:39 2004  Minero Aoki  <aamine@loveruby.net>
 
 	lib/bitchannel/config.rb: theme_url -> theme_urlbase.
