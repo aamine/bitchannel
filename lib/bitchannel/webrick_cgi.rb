@@ -15,9 +15,7 @@ module WEBrick
     def CGI.main(conf, *context)
       app = new(conf)
       app.init_application(*context)
-      each_request do |env, stdin, stdout|
-        app.start env, stdin, stdout
-      end
+      app.run
     end
 
     def CGI.each_cgi_request
@@ -26,6 +24,12 @@ module WEBrick
 
     def CGI.each_request(&block)
       each_cgi_request(&block)
+    end
+
+    def run
+      CGI.each_request do |env, stdin, stdout|
+        start env, stdin, stdout
+      end
     end
   end
 end

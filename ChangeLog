@@ -1,3 +1,7 @@
+Mon May 10 02:48:07 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/webrick_cgi.rb: CGI.run -> CGI#run.
+
 Mon May 10 01:25:32 2004  Minero Aoki  <aamine@loveruby.net>
 
 	lib/bitchannel/fcgi.rb: require 'bitchannel/cgi'.
