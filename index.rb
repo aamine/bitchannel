@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# index.rb
+# $Id$
 #
 # Copyright (C) 2003 Minero Aoki
 #
@@ -26,18 +26,44 @@ class CGI
 end
 
 def main
-  config = AlphaWiki::Config.new(self)
   cgi = CGI.new
-  case cgi.get_param('cmd')
-  when 'view'
-    print AlphaWiki::ViewPage.new(config, cgi.get_param('name')).html
-  when 'edit'
-    print AlphaWiki::EditPage.new(config, cgi.get_param('name')).html
-  when 'save'
-    print AlphaWiki::EditPage.new(config, cgi.get_param('name')).html
-  else
-    print AlphaWiki::ViewPage.new(config, config.index_page_name).html
+  begin
+    wiki_main cgi
+  rescue Exception => err
+    print "Content-Type: text/plain\r\n"
+    print "Connection: close\r\n"
+    print "\r\n"
+    print "#{err.message} (#{err.class})\r\n" unless cgi.request_method.upcase == 'HEAD'
   end
+end
+
+def wiki_main(config, cgi)
+  config = AlphaWiki::Config.new(self)
+  repo = AlphaWiki::Repository.new(@cvs_path, @cvswc_read, @cvswc_write)
+  case cgi.get_param('cmd').to_s.downcase
+  when 'view'
+    send cgi, AlphaWiki::ViewPage.new(config, repo, cgi.get_param('name')).html
+  when 'edit'
+    send cgi, AlphaWiki::EditPage.new(config, repo, cgi.get_param('name')).html
+  when 'save'
+    begin
+      repo.checkin cgi.get_param('name'),
+                   cgi.get_param('origrev'),
+                   cgi.get_param('text')
+      send cgi, AlphaWiki::ViewPage.new(config, repo, cgi.get_param('name')).html
+    rescue AlphaWiki::EditConflict => err
+      send cgi, AlphaWiki::ConflictedPage.new(config, repo, cgi.get_param('name'), err.merged).html
+    end
+  else
+    send cgi, AlphaWiki::ViewPage.new(config, repo, config.index_page_name).html
+  end
+end
+
+def send(cgi, html)
+  cgi.header('status' => '200 OK',
+             'type' => 'text/html', 'charset' => @charset,
+             'Content-Length' => html.length.to_s)
+  print html unless cgi.request_method.upcase == 'HEAD'
 end
 
 main
