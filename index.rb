@@ -35,9 +35,12 @@ def main
     print "\r\n"
     unless cgi.request_method.to_s.upcase == 'HEAD'
       puts "#{err.message} (#{err.class})"
-      err.backtrace.each do |i|
-        puts i
-      end if $DEBUG
+      if true  #$DEBUG
+        puts err.precise_message if err.respond_to?(:precise_message)
+        err.backtrace.each do |i|
+          puts i
+        end
+      end
     end
   end
 end
