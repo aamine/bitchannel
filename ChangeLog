@@ -1,3 +1,9 @@
+Tue May 11 01:07:10 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/farm.rb: new user parameter notifier.
+
+	* lib/bitchannel/farm.rb: pass notifier to node repositories.
+
 Tue May 11 01:04:11 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/repository.rb: implement notifier. (experimental)

@@ -261,6 +261,7 @@ module BitChannel
         @cmd_path    = conf.get_required(:cmd_path)
         @repository  = conf.get_required(:repository)
         @skeleton    = conf.get_required(:skeleton)
+        @notifier    = conf.get_optional(:notifier, nil)
         @logfile     = conf.get_optional(:logfile, nil)
       }
       @nodes = {}
@@ -289,6 +290,7 @@ module BitChannel
         :wc_read      => "#{tmpprefix}/wc.read",
         :wc_write     => "#{tmpprefix}/wc.write",
         :cachedir     => "#{tmpprefix}/cache",
+        :notifier     => @notifier,
         :logfile      => @logfile
       }, id)
       repo.setup_working_copy @repository
@@ -329,6 +331,7 @@ module BitChannel
         :wc_read      => "#{prefix(id)}/wc.read",
         :wc_write     => "#{prefix(id)}/wc.write",
         :cachedir     => "#{prefix(id)}/cache",
+        :notifier     => @notifier,
         :logfile      => @logfile
       }, id)
       conf = Config.new({
