@@ -70,7 +70,7 @@ module BitChannel
       @sync_wc  = args.getopt(:sync_wc)
       @logfile  = args.getopt(:logfile)
       cachedir  = args.getopt(:cachedir)
-      t.each do |k,v|
+      args.each do |k,v|
         raise ConfigError, "Config Error: unknown key: repository.#{k}"
       end
       @link_cache = LinkCache.new("#{cachedir}/link", "#{cachedir}/revlink")
@@ -200,9 +200,7 @@ module BitChannel
         else
           out, err = cvs('ann', '-F', encode_filename(page_name))
         end
-        return out.map {|line|
-          line.sub(/.*?:/) {|s| sprintf('%4s', s.slice(/\.(\d+), 1)) }
-        }.join('').strip
+        return out.gsub(/^.*?:/) {|s| sprintf('%4s', s.slice(/\.(\d+)/, 1)) }
       }
     end
 

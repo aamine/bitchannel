@@ -265,7 +265,11 @@ module BitChannel
     end
 
     def annotate
-      @repository.annotate(@page_name, @revision)
+      @repository.annotate(@page_name, @revision).map {|data|
+        rev = data.slice(/\A\s*\d+/)
+        line = data.sub(/\A\s*\d+\s/, '')
+        %Q[<a href="">#{rev}</a>: #{escape_html(line)}]
+      }
     end
   end
 
