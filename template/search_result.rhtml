@@ -12,6 +12,7 @@
 
 <div class="main">
 <h1><%= logo_url() %>Search Result</h1>
+
 .include search_form
 <ol>
 <%
@@ -25,7 +26,11 @@
 %>
 </ol>
 <p><%= n_hits %> hits.</p>
+
+<%  if n_hits > 0  %>
 .include search_form
+<%  end  %>
+
 </div>
 
 </body>
