@@ -221,7 +221,7 @@ LOG %Q[exec: "#{cmd.join('", "')}"]
     end
 
     def add_linkcache_entry(path, page_name)
-      revlinks = read_linkcache(path)
+      links = read_linkcache(path)
       write_linkcache path, (links + [page_name]).uniq.sort
     end
 
