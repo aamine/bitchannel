@@ -1,3 +1,8 @@
+Mon Mar 28 03:12:17 2005  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/fcgi.rb: use nonblocking mode.  Signal problem finally
+	  resolved.
+
 Mon Mar 28 01:48:00 2005  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/fcgi.rb: use C level signal handler to avoid blocking on

@@ -12,14 +12,7 @@
 
 require 'socket'
 require 'stringio'
-
-# Dirty kludge for ruby 1.9 or later.
-# Blocking I/O differs pure ruby signal handler
-# in single thread environment, force multi threading.
-# See [ruby-dev:25755]
-Thread.fork {
-  loop { sleep 3; 1+1+1 }
-}
+require 'io/nonblock'
 
 class FCGI
 
@@ -115,29 +108,45 @@ class FCGI
     end
 
     def each_request(&block)
-      graceful = false
-      Signal.trap(:USR1) { graceful = true }
+      # We use Errno::EPIPE exception, ignore signal.
+      Signal.trap(:PIPE, 'IGNORE')
+
+      # mod_fcgi requires that FastCGI server must exit
+      # with status 0 on SIGTERM.
       Signal.trap(:TERM, 'EXIT')
-      Signal.trap(:PIPE, 'IGNORE')   # We use Errno::EPIPE exception.
+
+      # mod_fcgi requires that FastCGI server must
+      # execute `graceful' exit on SIGUSR1
+      @exit_requested = false
+      @in_select = false
+      Signal.trap(:USR1) {
+        exit 0 if @in_select
+        @exit_requested = true
+      }
+
+      # Input stream must be in nonblocking mode not to differ
+      # invocation of signal handler on Ruby 1.9.
+      @server.nonblock = true
+
       while true
         begin
-          session(&block)
+          @in_select = true
+          IO.select [@server], nil, nil, nil
+          @in_select = false
+          sock, addr = *@server.accept
+          return unless sock
+          fsock = FastCGISocket.new(sock)
+          req = next_request(fsock)
+          yield req
+          respond_to req, fsock, FCGI_REQUEST_COMPLETE
         rescue Errno::EPIPE, EOFError
           # HTTP request is canceled by the remote user
+        ensure
+          @in_select = false
+          sock.close if sock and not sock.closed?
         end
-        exit 0 if graceful
+        exit 0 if @exit_requested
       end
-    end
-
-    def session
-      sock, addr = *@server.accept
-      return unless sock
-      fsock = FastCGISocket.new(sock)
-      req = next_request(fsock)
-      yield req
-      respond_to req, fsock, FCGI_REQUEST_COMPLETE
-    ensure
-      sock.close if sock and not sock.closed?
     end
 
     private
