@@ -55,7 +55,13 @@ module BitChannel
         @css_url       = conf.get_optional(:css_url, nil)
         @theme         = conf.get_optional(:theme, nil)
         @theme_urlbase = conf.get_optional(:theme_urlbase, 'theme')
-        @html_url_p    = conf.get_required(:use_html_url)
+        fakeurl = conf.get_required(:use_html_url)
+        @html_url_p = (fakeurl ? true : false)
+        @suffix = case
+                  when fakeurl.kind_of?(String) then fakeurl
+                  when fakeurl                  then '.html'
+                  else nil
+                  end
         @site_name     = conf.get_optional(:site_name, nil)
         @logo_url      = conf.get_optional(:logo_url, nil)
         @cgi_url       = conf.get_optional(:cgi_url, nil)
@@ -78,6 +84,10 @@ module BitChannel
 
     def html_url?
       @html_url_p
+    end
+
+    def document_suffix
+      @suffix
     end
 
     def suggest_cgi_url(url)

@@ -412,7 +412,7 @@ module BitChannel
 
     def view_url(name)
       if @config.html_url?
-      then "#{escape_html(URI.escape(name))}.html"
+      then "#{escape_html(URI.escape(name))}#{@config.document_suffix}"
       else "#{cgi_href()}?cmd=view;name=#{escape_html(URI.escape(name))}"
       end
     end
