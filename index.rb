@@ -59,10 +59,10 @@ def wiki_main(cgi)
                                         'Text saved without page name; make sure.').html
       return
     end
+    origrev = cgi.get_param('origrev').to_i
+    origrev = nil if origrev == 0
     begin
-      repo.checkin page_name,
-                   cgi.get_param('origrev').to_i,
-                   (cgi.get_param('text') || "")
+      repo.checkin page_name, origrev, (cgi.get_param('text') || "")
       view repo, config, cgi, cgi.get_param('name')
     rescue AlphaWiki::EditConflict => err
       send cgi, AlphaWiki::EditPage.new(config, repo,
