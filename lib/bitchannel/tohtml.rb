@@ -51,7 +51,7 @@ module BitChannel
       str.strip.empty?
     end
 
-    CAPTION = /\A={2,6}/
+    CAPTION = /\A[=!]{2,6}/
     UL = /\A\s*\*/
     OL = /\A\s*\#|\A\s*\(\d+\)/
     DL = /\A\s*:/
@@ -76,8 +76,8 @@ module BitChannel
     end
 
     def caption(line)
-      level = line.slice(/\A(=+)/, 1).length
-      str = line.sub(/\A=+/, '').strip
+      level = line.slice(/\A([=!]+)/, 1).length
+      str = line.sub(/\A[=!]+/, '').strip
       puts "<h#{level}>#{escape_html(str)}</h#{level}>"
     end
 
