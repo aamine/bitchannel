@@ -7,10 +7,6 @@ def bitchannel_cgidir
 end
 
 def setup_environment
-  $BitChannelInitialized ||= false
-  return if $BitChannelInitialized
-  $BitChannelInitialized = true
-
   $KCODE = 'EUC'
   $LOAD_PATH.unshift "#{bitchannel_cgidir()}/lib"
   require 'bitchannel'
@@ -18,8 +14,6 @@ def setup_environment
 end
 
 def bitchannel_context
-  setup_environment
-
   cgidir = bitchannel_cgidir()
 
   config = BitChannel::Config.new(
