@@ -20,7 +20,7 @@ Diff
 .include search_form
 </div>
 
-<h1>Recent Edit</h1>
+<h1><%= logo_url() %>Recent Edit</h1>
 <ol><%
    page_list().each do |page, mtime| %>
 <li><%= format_time(mtime) %>: <a href="<%= cgi_url() %>?cmd=view;name=<%= page %>"><%= page %></a></li><%

@@ -29,6 +29,7 @@ module BitChannel
 
       # Optional
       @site_name   = t.fetch(:site_name, nil);  t.delete(:site_name)
+      @logo_url    = t.fetch(:logo_url, nil);   t.delete(:logo_url)
 
       t.each do |k,v|
         raise ConfigError, "Config Error: unknown key: config.#{k}"
@@ -38,6 +39,7 @@ module BitChannel
     attr_reader :templatedir
     attr_reader :charset
     attr_reader :css_url
+    attr_reader :logo_url
 
     def html_url?
       @html_url_p

@@ -41,6 +41,10 @@ h1 {
     text-aligh: left;
 }
 
+img.sitelogo {
+    vertical-align: middle;
+}
+
 h2 {
     font-size: 150%;
     text-align: left;

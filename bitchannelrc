@@ -13,11 +13,14 @@ def initialize_environment
   BitChannel.lang = 'ja'
 
   config = BitChannel::Config.new(
-    # :site_name  => 'My Site',   # shown on FrontPage
+    # :site_name    => 'My Site',   # shown on FrontPage
+    # :logo_url     => '/images/logo.png',
     :templatedir  => "#{cgidir}/template",
-    :charset      => 'euc-jp',
+    :charset      => 'euc-jp',   # I have tested only euc-jp
     :css_url      => 'default.css',
-    :use_html_url => false        # true: PageName.html,  false: ?cmd=view;name=PageName
+    :use_html_url => false
+        # true: PageName.html
+        # false: ?cmd=view;name=PageName
   )
   repo = BitChannel::Repository.new(
     :cmd_path  => '/usr/bin/cvs',

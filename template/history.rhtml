@@ -26,7 +26,7 @@ History
 .include search_form
 </div>
 
-<h1><%= page_name() %> : History</h1>
+<h1><%= logo_url() %><%= page_name() %> : History</h1>
 <ul><%
   logs().each do |rev, log|   %>
     <li><a href="<%= cgi_url() %>?cmd=view;rev=<%= rev %>;name=<%= page_url() %>"><% %><%= log.sub(/:/, '</a>:') %><%

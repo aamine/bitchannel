@@ -66,6 +66,11 @@ module BitChannel
       url(@config.cgi_url)
     end
 
+    def logo_url
+      u = @config.logo_url
+      u ? %[<img class="sitelogo" src="#{escape_html(u)}" alt=""> ] : ''
+    end
+
     def index_page_url
       view_url(FRONT_PAGE_NAME)
     end
