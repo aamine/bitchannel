@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# Copyright (C) 2003,2004 Minero Aoki
+# Copyright (c) 2003-2005 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the terms of
@@ -23,6 +23,10 @@ module BitChannel
 
     def charset
       'us-ascii'
+    end
+
+    def xml_lang
+      'en'
     end
 
     def to_local(str)

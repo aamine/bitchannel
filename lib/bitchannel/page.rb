@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# Copyright (C) 2003,2004 Minero Aoki
+# Copyright (c) 2003-2005 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the terms of
@@ -13,6 +13,7 @@ require 'bitchannel/textutils'
 
 module BitChannel
 
+  # place holder for farm service methods.
   class Page
   end
 
@@ -584,6 +585,115 @@ module BitChannel
 
     def charset
       @locale.charset
+    end
+  end
+
+
+  class SiteRSS < Page
+    include TextUtils
+
+    def initialize(config, repo, org)
+      @config = config
+      @repository = repo
+      @origin = org
+      # cache
+      @items = nil
+    end
+
+    def xml_lang
+      @config.locale.xml_lang
+    end
+
+    def type
+      'application/xml'   # 'application/rss+xml' in future
+    end
+
+    def charset
+      if @config.locale.utf8_enabled?
+      then 'utf-8'
+      else @config.locale.charset
+      end
+    end
+
+    def last_modified
+      items().first ? items().first.last_modified : @origin
+    end
+
+    def content
+      erb = ERB.new(File.read("#{@config.templatedir}/siterss.rdf"), nil, 2)
+      erb.filename = 'siterss.rdf'
+      erb.result(binding())
+    end
+
+    private
+
+    def rdf_about
+      "#{@config.cgi_url}?cmd=gdiff;org=cookie;fmt=rss"
+    end
+
+    def site_url
+      @config.cgi_url
+    end
+
+    def site_name
+      if @config.site_name
+      then @config.locale.to_utf8(@config.site_name)
+      else @config.cgi_url
+      end
+    end
+
+    def dc_date
+      make_dcdate(last_modified())
+    end
+
+    def origin_time
+      @origin
+    end
+
+    def items
+      @items ||= @repository.diff_from(@origin)\
+                     .sort_by {|diff| -diff.time2.to_i }\
+                     .map {|diff| DiffRSSItem.new(@config, diff) }
+    end
+  end
+
+
+  class DiffRSSItem
+    include TextUtils
+
+    def initialize(config, diff)
+      @config = config
+      @diff = diff
+    end
+
+    def url
+      "#{@config.cgi_url}?cmd=diff;name=#{URI.escape(@diff.page_name)};rev1=#{@diff.rev1};rev2=#{@diff.rev2}"
+    end
+
+    def last_modified
+      @diff.time2
+    end
+
+    def dc_date
+      make_dcdate(@diff.time2)
+    end
+
+    def page_name
+      @config.locale.to_utf8(@diff.page_name)
+    end
+
+    def rev1
+      @diff.rev1
+    end
+
+    def rev2
+      @diff.rev2
+    end
+
+    def content_cdata
+      '<pre>' +
+      @config.locale.to_utf8(escape_cdata(@diff.diff)) +
+      '</pre>'
     end
   end
 

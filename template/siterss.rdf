@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="<%= charset() %>"?>
+<rdf:RDF
+    xmlns="http://purl.org/rss/1.0/"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:content="http://purl.org/rss/1.0/modules/content/"
+    xml:lang="<%= xml_lang() %>">
+<channel rdf:about="<%= escape_xml(rdf_about()) %>">
+    <title><%= site_name() %> / Diff from <%= format_time(origin_time()) %></title>
+    <link><%= escape_xml(site_url()) %></link>
+    <items><rdf:Seq><% items().each do |item| %>
+    <rdf:li rdf:resource="<%= escape_xml(item.url) %>"/>
+    <% end %></rdf:Seq></items>
+</channel>
+<% items().each do |item| %>
+<item rdf:about="<%= escape_xml(item.url) %>">
+    <link><%= escape_xml(item.url) %></link>
+    <dc:date><%= escape_xml(item.dc_date) %></dc:date>
+    <title><%= escape_xml(item.page_name) %> : Diff rev <%= item.rev1 %> &lt;=%gt; <%= item.rev2 %></title>
+    <content:encoded><![CDATA[<%= item.content_cdata %>]]></content:encoded>
+</item>
+<% end %>
+</rdf:RDF>

@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# Copyright (C) 2003,2004 Minero Aoki
+# Copyright (c) 2003-2005 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the terms of
@@ -134,8 +134,13 @@ module BitChannel
       RecentPage.new(@config, @repository)
     end
 
-    def gdiff(org, reloadp)
-      GlobalDiffPage.new(@config, @repository, org, reloadp)
+    def gdiff(org, reloadp, format = 'html')
+      case format
+      when 'rss'
+        SiteRSS.new(@config, @repository, org)
+      else
+        GlobalDiffPage.new(@config, @repository, org, reloadp)
+      end
     end
 
     def search(query, patterns)

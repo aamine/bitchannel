@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# Copyright (C) 2003,2004 Minero Aoki
+# Copyright (c) 2003-2005 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the terms of
@@ -25,6 +25,10 @@ module BitChannel
     attr_reader :encoding
     alias mime_charset encoding
     alias charset encoding
+
+    def xml_lang
+      'ja'
+    end
 
     begin
       begin

@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# Copyright (C) 2003,2004 Minero Aoki
+# Copyright (c) 2003-2005 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the terms of
@@ -13,7 +13,6 @@ require 'bitchannel/page'
 require 'bitchannel/textutils'
 require 'webrick/cookie'
 require 'webrick/httpstatus'
-require 'uri'
 require 'date'
 require 'time'
 
@@ -159,7 +158,7 @@ module BitChannel
             when req.gdiff_origin_specified? then req.gdiff_origin_time
             else default_origin_time()
             end
-      res = @wiki.gdiff(org, req.gdiff_reload?).response
+      res = @wiki.gdiff(org, req.gdiff_reload?, req.format).response
       res.set_cookie req.new_gdiff_cookie
       res
     end
@@ -323,6 +322,10 @@ module BitChannel
       c.path = (File.dirname(@request.script_name) + '/').sub(%r</+\z>, '/')
       c.expires = now.getutc + 90*24*60*60
       c
+    end
+
+    def format
+      get('fmt')
     end
 
     def search_query
