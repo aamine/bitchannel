@@ -161,7 +161,9 @@ module BitChannel
     end
 
     def normalize_text(text)
-      text.map {|line| detab(line).rstrip + "\r\n" }.join('')
+      unify_encoding(text, @config.charset).map {|line|
+        detab(line).rstrip + "\r\n"
+      }.join('')
     end
 
     def reedit_response(text, msg)

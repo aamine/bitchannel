@@ -78,6 +78,63 @@ module BitChannel
           .split(/[\s#{Z_SPACE}]+/oe)
     end
 
+    begin
+      begin
+        require 'uconv'
+
+        MIME_CHARSET_TO_UCONV = {
+          'euc-jp'    => :u8toeuc,
+          'shift_jis' => :u8tosjis
+        }
+
+        def unify_encoding(text, code)
+          method = MIME_CHARSET_TO_UCONV[code] or return text
+          Uconv.__send__(method, text)
+        rescue Uconv::Error
+          unify_encoding_NKF(text, code)
+        end
+      rescue LoadError
+        require 'iconv'
+
+        check = lambda {|code|
+          begin
+            Iconv.iconv(code, 'UTF-8', 'test string')
+            true
+          rescue Iconv::InvalidEncoding
+            false
+          end
+        }
+
+        MIME_CHARSET_TO_ICONV = {
+          'euc-jp'    => %w(eucJP euc-jp EUC-JP).find {|c| check(c) },
+          'shift_jis' => %w(SJIS shift_jis Shift_JIS).find {|c| check(c) }
+        }
+
+        def unify_encoding(text, code)
+          dest = MIME_CHARSET_TO_ICONV[code] or return text
+          Iconv.iconv(dest, 'UTF-8', text)
+        rescue Iconv::Failure
+          unify_encoding_NKF(text, code)
+        end
+      end
+    rescue LoadError
+      def unify_encoding(text, code)
+        unify_encoding_NKF(text, code)
+      end
+    end
+
+    require 'nkf'
+
+    MIME_CHARSET_TO_NKF = {
+      'euc-jp'    => '-e -m0 -X',
+      'shift_jis' => '-s -m0 -x'
+    }
+
+    def unify_encoding_NKF(text, code)
+      flags = MIME_CHARSET_TO_NKF[code] or return text
+      NKF.nkf(flags, text)
+    end
+
   end
 
 end   # module BitChannel
