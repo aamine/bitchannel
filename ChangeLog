@@ -1,3 +1,7 @@
+Thu Sep  2 00:23:55 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb: gracefully ignore rev 1.1.1.1.
+
 Wed Sep  1 23:50:39 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/repository.rb (LinkCache#entries): reject

@@ -355,6 +355,14 @@ module BitChannel
   end
 
 
+  module CVSRevision
+    def cvsrev_to_i(rev, on1111 = 1)
+      return on1111 if rev == '1.1.1.1'
+      rev.slice(/\A1\.(\d+)\z/, 1).to_i
+    end
+  end
+
+
   class CVSWorkingCopy
 
     include FilenameEncoding
@@ -474,6 +482,7 @@ module BitChannel
 
     class Diff
       extend FilenameEncoding
+      extend CVSRevision
 
       def Diff.parse_diffs(mod, out)
         chunks = out.split(/^Index: /)
@@ -493,8 +502,8 @@ module BitChannel
         _, dtime, drev = *meta.slice(/^\+\+\+ .*/).split("\t", 3)
         new(mod,
             decode_filename(file),
-            srev.to_s.slice(/\A1\.(\d+)/, 1).to_i, Time.diffdate(stime).getlocal,
-            drev.slice(/\A1\.(\d+)/, 1).to_i, Time.diffdate(dtime).getlocal,
+            cvsrev_to_i(srev.to_s), Time.diffdate(stime).getlocal,
+            cvsrev_to_i(drev), Time.diffdate(dtime).getlocal,
             chunk)
       end
 
@@ -530,16 +539,18 @@ module BitChannel
     end
 
     class Log
+      extend CVSRevision
+
       def Log.parse_logs(str)
         logs = str.split(/^----------------------------/)
         logs.shift  # remove header
         logs.last.slice!(/\A={8,}/)
-        logs.map {|s| parse(s.strip) }
+        logs.map {|s| parse(s.strip) }.reject {|log| log.revision.nil? }
       end
 
       def Log.parse(str)
         rline, dline, *msg = *str.to_a
-        new(rline.slice(/\Arevision 1\.(\d+)\s/, 1).to_i,
+        new(cvsrev_to_i(rline.slice(/\Arevision (1(?:\.\d+)+)\s/, 1), nil),
             Time.rcslogdate(dline.slice(/date: (.*?);/, 1)).getlocal,
             dline.slice(/lines: \+(\d+)/, 1).to_i,
             dline.slice(/lines:(?: \+(?:\d+))? -(\d+)/, 1).to_i,
@@ -570,7 +581,7 @@ module BitChannel
     def cvs_annotate_rev(name, rev)
       assert_chdir
       out, err = *cvs('annotate', *[ann_F(), "-r1.#{rev}", encode_filename(name)].compact)
-      return out.gsub(/^.*?:/) {|s| sprintf('%4s', s.slice(/\.(\d+)/, 1)) }
+      return out.gsub(/^.*?:/) {|s| sprintf('%4s', s.slice(/1\.(\d+)\s/, 1)) }
     end
 
     def ann_F
