@@ -11,7 +11,6 @@
 
 .include menu
 
-<div class="main">
 <h1><%= logo_url() %><%= page_name() %> rev <%= revision() %></h1>
 
 <p><span class="lastmodified">Saved at: <%= format_time(last_modified()) %></span></p>
@@ -30,7 +29,8 @@ rev<%= revision() %>
 </p>
 
 <%= body() %>
-</div>
+
+.include systeminfo
 
 </body>
 </html>

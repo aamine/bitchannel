@@ -11,7 +11,6 @@
 
 .include menu
 
-<div class="main">
 <h1><%= logo_url() %>List of All Pages</h1>
 <ol>
 <%  page_list().each do |page|  %>
@@ -19,7 +18,8 @@
     <%  if orphan_page?(page)  %>[orphan]<%  end  %></li>
 <%  end  %>
 </ol>
-</div>
+
+.include systeminfo
 
 </body>
 </html>

@@ -12,7 +12,6 @@
 
 .include menu
 
-<div class="main">
 <h1><%= logo_url() %>Diff from <%= format_time(origin_time()) %></h1>
 
 <p><a href="<%= cgi_url() %>?cmd=gdiff;org=cookie">[Diff from my last visit]</a></p>
@@ -49,7 +48,8 @@
 <% unless auto_reload? %>
 <p><a href="<%= cgi_url() %>?cmd=gdiff;org=cookie;reload=on">[Turn on auto reload]</a></p>
 <% end %>
-</div>
+
+.include systeminfo
 
 </body>
 </html>

@@ -11,7 +11,6 @@
 
 .include menu
 
-<div class="main">
 <h1><%= logo_url() %><%= page_name() %> : Annotate<%= (revision() ? " rev #{revision()}" : '') %></h1>
 
 <p class="revnavi">[<a href="<%= page_view_url() %>">&gt;&gt;HEAD</a>]</p>
@@ -28,7 +27,8 @@ Latest Revisions:
 <pre class="annotate">
 <%= annotate() %>
 </pre>
-</div>
+
+.include systeminfo
 
 </body>
 </html>

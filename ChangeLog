@@ -1,3 +1,31 @@
+Sun Apr 11 01:42:01 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* template/annotate.rhtml: include systeminfo.rhtml.
+
+	* template/diff.rhtml: ditto.
+
+	* template/edit.rhtml: ditto.
+
+	* template/gdiff.rhtml: ditto.
+
+	* template/history.rhtml: ditto.
+
+	* template/list.rhtml: ditto.
+
+	* template/preview.rhtml: ditto.
+
+	* template/recent.rhtml: ditto.
+
+	* template/search_error.rhtml: ditto.
+
+	* template/search_result.rhtml: ditto.
+
+	* template/view.rhtml: ditto.
+
+	* template/viewrev.rhtml: ditto.
+
+	* template/systeminfo.rhtml: new file.
+
 Sat Apr 10 01:27:34 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* template/gdiff.rhtml: add refresh meta element.

@@ -19,7 +19,6 @@
 
 .include menu
 
-<div class="main">
 <h1><%= logo_url() %>Recent Edit</h1>
 <p><a href="<%= cgi_url() %>?cmd=gdiff;org=cookie">[Diff from my last visit]</a></p>
 <ol>
@@ -27,7 +26,8 @@
 <li><%= format_time(mtime) %>: <a href="<%= view_url(page) %>"><%= escape_html(page) %></a></li>
 <%  end  %>
 </ol>
-</div>
+
+.include systeminfo
 
 </body>
 </html>

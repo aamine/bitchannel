@@ -10,7 +10,6 @@
 
 .include menu
 
-<div class="main">
 <h1><%= logo_url() %><%= front_page?() ? site_name() : page_name() %></h1>
 <p>
 <span class="lastmodified"><%= format_time(last_modified()) %></span>
@@ -20,10 +19,8 @@ rev <%= revision() %>
 <%= body() %>
 
 <hr>
-<div class="footer">
 .include revlinks
-</div>
-</div>
+.include systeminfo
 
 </body>
 </html>
