@@ -8,3 +8,8 @@ $KCODE = 'EUC'
 @templatedir = File.dirname(File.expand_path(__FILE__)) + '/template'
 @cgi_url = 'index.rb'
 @css_url = 'default.css'
+
+# CVS
+@cvs_path = '/usr/bin/cvs'
+@cvswc_read = File.dirname(File.expand_path(__FILE__)) + '/wc.read'
+@cvswc_write = File.dirname(File.expand_path(__FILE__)) + '/wc.write'

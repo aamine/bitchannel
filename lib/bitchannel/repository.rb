@@ -9,6 +9,7 @@
 #
 
 require 'alphawiki/textutils'
+require 'alphawiki/exception'
 
 module AlphaWiki
 
@@ -16,26 +17,46 @@ module AlphaWiki
 
     include TextUtils
 
-    def initialize(dir)
-      @dir = dir
+    def initialize(cvs, wc_read, wc_write)
+      @cvs_cmd = cvs
+      @wc_read = wc_read
+      @wc_write = wc_write
     end
 
     def [](page_name)
-      File.read(real_path(page_name))
+      File.read("#{@wc_read}/#{escape_html(page_name)}")
     end
 
     def checkin(page_name, origrev, content)
-      lock(real_path(page_name)) {
-        File.open(real_path(page_name), 'w') {|f|
-          f.write content
+      filename = escape_html(page_name)
+      Dir.chdir(@wc_write) {
+        lock(filename) {
+          cvs 'up', "-r1.#{origrev}", filename
+          File.open(filename, 'w') {|f|
+            f.write content
+          }
+          out, err = *cvs('up', '-A', filename)
+          if /conflicts during merge/ =~ err
+            raise EditConflict.new('conflict found', File.read(filename))
+          end
+          cvs 'ci', filename
         }
+      }
+      Dir.chdir(@wc_read) {
+        cvs 'up', '-A', filename
       }
     end
 
     private
 
-    def real_path(page_name)
-      "#{@dir}/#{escape_html(page_name)}"
+    def cvs(*args)
+      execute(@cvs_cmd, *args)
+    end
+
+    def execute(*cmd)
+      popen3(*cmd) {|stdin, stdout, stderr|
+        return stdout.read, stderr.read
+      }
     end
 
     def lock(path)
@@ -69,6 +90,51 @@ module AlphaWiki
 
     def too_old?(t)
       Time.now.to_i - st.ctime > 15 * 60   # 15min
+    end
+
+    #
+    # open3
+    #
+
+    def popen3(*cmd)
+      pw = IO.pipe
+      pr = IO.pipe
+      pe = IO.pipe
+      pid = fork {
+        fork{
+          pw[1].close
+          STDIN.reopen(pw[0])
+          pw[0].close
+
+          pr[0].close
+          STDOUT.reopen(pr[1])
+          pr[1].close
+
+          pe[0].close
+          STDERR.reopen(pe[1])
+          pe[1].close
+
+          exec(*cmd)
+        }
+        exit!
+      }
+      pw[0].close
+      pr[1].close
+      pe[1].close
+      pipes = [pw[1], pr[0], pe[0]]
+      pw[1].sync = true
+
+      dummy, status = Process.waitpid2(pid)
+      raise CommandFailed, "Command failed: #{cmd.join ' '}" \
+          unless status.exitstatus == 0
+
+      begin
+        return yield(*pipes)
+      ensure
+        pipes.each do |f|
+          f.close unless f.closed?
+        end
+      end
     end
 
   end
