@@ -111,11 +111,8 @@ module BitChannel
       url(@page_name)
     end
 
-    def page_full_url
-      if true
-      then "#{cgi_url()}?cmd=view;name=#{page_url()}"
-      else "#{page_url()}.html"
-      end
+    def page_view_url
+      view_url(@page_name)
     end
 
     def size
@@ -136,8 +133,8 @@ module BitChannel
 
     def ordered_revlinks
       leaves, nodes = revlinks().partition {|page| num_links(page) < 2 }
-      nodes.sort_by {|page| @repository.size(page) / num_links(page) } +
-        leaves.sort_by {|page| -@repository.size(page) }
+      nodes.sort_by {|page| @repository.size(page) / num_links(page) rescue 10000 } +
+          leaves.sort_by {|page| -@repository.size(page) rescue 0 }
     end
 
     def num_links(page)
@@ -167,8 +164,7 @@ module BitChannel
     end
 
     def revision
-      # FIXME: `|| 0' needed?
-      @revision ||= (@repository.revision(@page_name) || 0)
+      @revision ||= @repository.revision(@page_name)
     end
 
     def body
@@ -253,10 +249,19 @@ module BitChannel
 
 
   class HistoryPage < Page
+    def initialize(config, repo, page_name)
+      super
+      @revision = nil
+    end
+
     private
 
     def template_id
       'history'
+    end
+
+    def revision
+      @revision ||= @repository.revision(@page_name)
     end
 
     def logs
