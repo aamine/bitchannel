@@ -195,11 +195,10 @@ module BitChannel
       page_must_valid page_name
       page_must_exist page_name
       Dir.chdir(@wc_read) {
-        if rev
-          out, err = cvs('ann', '-F', "-r1.#{rev}", encode_filename(page_name))
-        else
-          out, err = cvs('ann', '-F', encode_filename(page_name))
-        end
+        optF = (cvs_version() >= '001.011.002') ? '-F' : nil
+        revopt = (rev ? "-r1.#{rev}" : nil)
+        opts = [optF, revopt, encode_filename(page_name)].compact
+        out, err = cvs('annotate', *opts)
         return out.gsub(/^.*?:/) {|s| sprintf('%4s', s.slice(/\.(\d+)/, 1)) }
       }
     end
@@ -264,6 +263,13 @@ module BitChannel
       }
       cvs 'add', '-kb', filename
       cvs 'ci', '-m', 'auto checkin: new file', filename
+    end
+
+    def cvs_version
+      # sould handle "1.11.1p1" like version number??
+      out, err = *cvs('--version')
+      verdigits = out.slice(/\d+\.\d+\.\d+/).split(/\./).map {|n| n.to_i }
+      sprintf((['%03d'] * verdigits.length).join('.'), *verdigits)
     end
 
     def cvs(*args)
