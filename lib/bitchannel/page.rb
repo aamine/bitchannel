@@ -268,7 +268,7 @@ module BitChannel
       @repository.annotate(@page_name, @revision).map {|data|
         rev = data.slice(/\A\s*\d+/)
         line = data.sub(/\A\s*\d+\s/, '')
-        %Q[<a href="">#{rev}</a>: #{escape_html(line)}]
+        %Q[<a href="#{@config.cgi_url}?cmd=view;rev=#{rev.to_i};name=#{page_url()}">#{rev}</a>: #{escape_html(line)}]
       }
     end
   end
