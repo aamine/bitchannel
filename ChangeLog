@@ -1,3 +1,7 @@
+Sat Dec 25 11:41:22 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/erdsyntax.rb: new file.
+
 Thu Dec 23 09:56:30 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/handler.rb (handle): check_IfModifiedSince does
