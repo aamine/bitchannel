@@ -20,8 +20,9 @@ def main
   load './bitchannelrc'
   setup_environment
   require 'bitchannel/tohtml'
-
-  config, repo = *bitchannel_context()
+  wiki = bitchannel_context()
+  config = wiki._config
+  repo = wiki._repository
   c = BitChannel::ToHTML.new(config, repo)
   ARGV.each do |page_name|
     puts c.compile(repo[page_name], page_name)

@@ -22,6 +22,14 @@ module BitChannel
       @repository = repo
     end
 
+    # misc command use only
+    def _config
+      @config
+    end
+    def _repository
+      @repository
+    end
+
     def locale
       @config.locale
     end

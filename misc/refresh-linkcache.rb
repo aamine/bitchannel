@@ -21,12 +21,13 @@ def main
   setup_environment
   require 'bitchannel/tohtml'
 
-  config, repo = *bitchannel_context()
+  wiki = bitchannel_context()
+  repo = wiki._repository
   cache = repo.link_cache
   cache.clear
-  c = BitChannel::ToHTML.new(config, repo)
-  repo.entries.each do |page_name|
-    cache.update_cache_for page_name, c.extract_links(repo[page_name])
+  c = BitChannel::ToHTML.new(wiki._config, repo)
+  repo.page_names.each do |name|
+    cache.update_cache_for name, c.extract_links(repo[name])
   end
 end
 

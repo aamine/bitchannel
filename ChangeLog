@@ -1,3 +1,14 @@
+Mon May 10 01:14:33 2004  Minero Aoki  <aamine@loveruby.net>
+
+	misc/refresh-linkcache.rb: modify for bitchannelrc change.
+
+	misc/tohtml.rb: ditto.
+
+	misc/orphan-pages.rb: removed.
+
+	lib/bitchannel/wikispace.rb: new method _config and _repository
+	  for misc/ commands.
+
 Mon May 10 01:04:05 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* farmrc.sample.ja: new file.
