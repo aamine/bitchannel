@@ -1,3 +1,8 @@
+Wed Sep  1 23:50:39 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb (LinkCache#entries): reject
+	  tmpfiles.
+
 Wed Sep  1 23:03:20 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/userconfig.rb: new file.  This file contains

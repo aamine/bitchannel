@@ -255,6 +255,7 @@ module BitChannel
 
     def entries
       Dir.entries(@dir)\
+          .reject {|ent| /\,tmp\z/ =~ ent }\
           .select {|ent| File.file?("#{@dir}/#{ent.untaint}") }\
           .map {|ent| decode_filename(ent) }
     end
