@@ -1,3 +1,9 @@
+Thu Jun 10 18:56:51 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* template/edit.rhtml: must escape body. [XSS CRITICAL]
+
+	* template/preview.rhtml: ditto.
+
 Thu Apr  1 16:24:03 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/handler.rb (fcgi_main, cgi_main): clear
