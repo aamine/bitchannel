@@ -38,4 +38,7 @@ module BitChannel
     attr_reader :merged
     attr_reader :revision
   end
+
+  class KillListParseError < BitChannelError; end
+  class IntListParseError < BitChannelError; end
 end

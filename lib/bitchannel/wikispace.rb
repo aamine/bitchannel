@@ -88,7 +88,7 @@ module BitChannel
     end
 
     def preview(name, orgrev, text)
-      PreviewPage.new(@config, @repository[name], text, orgrev)
+      PreviewPage.new(@config, @repository.fetch(name), text, orgrev)
     end
 
     def save(name, origrev, text)

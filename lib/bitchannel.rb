@@ -1,4 +1,6 @@
 require 'bitchannel/wikispace'
 require 'bitchannel/config'
 require 'bitchannel/repository'
+require 'bitchannel/killlist'
 require 'bitchannel/locale'
+require 'bitchannel/logger'

@@ -16,6 +16,8 @@ module BitChannel
   HELP_PAGE_NAME = 'HelpPage'
   TMP_PAGE_NAME = 'tmp'
 
+  DEFAULT_KILL_FILE = 'kill'
+
   class Config
 
     def initialize(hash)

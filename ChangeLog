@@ -1,3 +1,44 @@
+Thu Sep  2 04:07:39 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/config.rb: define default kill file name.
+
+	* lib/bitchannel/repository.rb (WC#readrev): support kill list.
+
+	* lib/bitchannel/repository.rb (WC#cvs_diff): ditto.
+
+	* lib/bitchannel/repository.rb (WC#cvs_diff_all): ditto.
+
+	* lib/bitchannel/repository.rb (WC#cvs_diff_from): ditto.
+
+	* lib/bitchannel/repository.rb (WC#cvs_log): ditto.
+
+	* lib/bitchannel/repository.rb (WC#cvs_logs): ditto.
+
+	* lib/bitchannel/killlist.rb: new file.
+
+	* lib/bitchannel/exception.rb: add exceptions for KillList.
+
+	* template/history.rhtml: do not link to killed revision.
+
+	* test/test_killlist.rb: new file.
+
+	* lib/bitchannel/page.rb (annotate): Repository#annotate now
+	  returns [AnnotateLine].
+
+	* lib/bitchannel/page.rb (EditPage): PageEntity#revision does not
+	  raise ENOENT.
+
+	* lib/bitchannel/page.rb (PreviewPage): ditto.
+
+	* lib/bitchannel/wikispace.rb: preview might be done for new (not
+	  exist) page.
+
+	* lib/bitchannel/repository.rb: split off logger classes.
+
+	* lib/bitchannel/logger.rb: new file.
+
+	* lib/bitchannel.rb: add killlist.rb and logger.rb.
+
 Thu Sep  2 00:58:33 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* theme/default/default.css: add rules for printing. (contributed by zunda)

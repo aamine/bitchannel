@@ -9,6 +9,8 @@
 #
 
 require 'bitchannel/userconfig'
+require 'bitchannel/logger'
+require 'bitchannel/killlist'
 require 'bitchannel/textutils'
 require 'bitchannel/exception'
 require 'time'
@@ -92,10 +94,11 @@ module BitChannel
         logger = conf.get(:logfile) {|path| FileLogger.new(path) } ||
                  conf[:logger] ||
                  NullLogger.new
-        @wc_read  = CVSWorkingCopy.new(id, conf[:wc_read], conf[:cmd_path], logger)
+        kill = KillList.load(DEFAULT_KILL_FILE)
+        @wc_read  = CVSWorkingCopy.new(id, conf[:wc_read], conf[:cmd_path], logger, kill)
         unless @read_only_p
           conf.required! :wc_write
-          @wc_write = CVSWorkingCopy.new(id, conf[:wc_write], conf[:cmd_path], logger)
+          @wc_write = CVSWorkingCopy.new(id, conf[:wc_write], conf[:cmd_path], logger, kill)
         else
           conf.ignore :wc_write
           @wc_write = nil
@@ -328,33 +331,6 @@ module BitChannel
   end   # class LinkCache
 
 
-  class FileLogger
-    include TextUtils
-
-    def initialize(path)
-      @path = path
-    end
-
-    def log(id, msg)
-      File.open(@path, 'a') {|f|
-        f.puts "#{format_time(Time.now)};#{$$}; #{module_id(id)}#{msg}"
-      }
-    end
-
-    private
-
-    def module_id(id)
-      id ? "[#{id}] " : ''
-    end
-  end
-
-
-  class NullLogger
-    def log(id, msg)
-    end
-  end
-
-
   module CVSRevision
     def cvsrev_to_i(rev, on1111 = 1)
       return on1111 if rev == '1.1.1.1'
@@ -368,11 +344,12 @@ module BitChannel
     include FilenameEncoding
     include LockUtils
 
-    def initialize(id, dir, cmd, logger)
+    def initialize(id, dir, cmd, logger, killlist)
       @module_id = id
       @dir = dir
       @cvs_cmd = cmd
       @logger = logger
+      @killlist = killlist
       @in_chdir = false
       # per-process cache
       @cvs_version = nil
@@ -434,6 +411,7 @@ module BitChannel
     end
 
     def readrev(name, rev)
+      return 'This revision is removed by administrator' if @killlist[name].include?(rev)
       chdir {
         out, err = *cvs('up', '-p', "-r1.#{rev}", encode_filename(name))
         return out
@@ -453,32 +431,40 @@ module BitChannel
     end
 
     def cvs_diff_all(rev2, name)
-      diff('-uN', '-D2000-01-01 00:00:00', "-r1.#{rev2}", encode_filename(name))
+      d = diff('-uN', '-D2000-01-01 00:00:00', "-r1.#{rev2}", encode_filename(name))
+      d.kill if @killlist[name].overlap?(d.revision_range)
+      d
     end
 
     def cvs_diff(rev1, rev2, name)
-      diff('-u', "-r1.#{rev1}", "-r1.#{rev2}", encode_filename(name))
+      d = diff('-u', "-r1.#{rev1}", "-r1.#{rev2}", encode_filename(name))
+      d.kill if @killlist[name].overlap?(d.revision_range)
+      d
     end
 
     def cvs_diff_from(time)
       assert_chdir
       out, err = *cvs('diff', '-uN', "-D#{format_time_cvs(time)}")
-      Diff.parse_diffs(@module_id, out)
+      ds = Diff.parse_diffs(@module_id, out)
+      ds.each do |d|
+        d.kill if @killlist[d.page_name].overlap?(d.revision_range)
+      end
+      d
     end
+
+    private
 
     def format_time_cvs(time)
       sprintf('%04d-%02d-%02d %02d:%02d:%02d',
               time.year, time.month, time.mday,
               time.hour, time.min, time.sec)
     end
-    private :format_time_cvs
 
     def diff(*options)
       assert_chdir
       out, err = *cvs('diff', *options)
       Diff.parse(@module_id, out)
     end
-    private :diff
 
     class Diff
       extend FilenameEncoding
@@ -515,6 +501,7 @@ module BitChannel
         @rev2 = drev
         @time2 = dtime
         @diff = diff
+        @killed = false
       end
 
       attr_reader :module
@@ -523,19 +510,43 @@ module BitChannel
       attr_reader :time1
       attr_reader :rev2
       attr_reader :time2
-      attr_reader :diff
+
+      def diff
+        @killed ? 'This revision is removed by administrator' : @diff
+      end
+
+      def original_diff
+        @diff
+      end
+
+      def revision_range
+        (@rev1 || 0) .. @rev2
+      end
+
+      def kill
+        @killed = true
+      end
     end
+
+    public
 
     def cvs_log(name, rev)
       assert_chdir
       out, err = *cvs('log', "-r1.#{rev}", encode_filename(name))
-      Log.parse_logs(out)[0]
+      log = Log.parse_logs(out)[0]
+      log.kill if @killlist[name].include?(log.revision)
+      log
     end
 
     def cvs_logs(name)
       assert_chdir
       out, err = *cvs('log', encode_filename(name))
-      Log.parse_logs(out)
+      logs = Log.parse_logs(out)
+      kill = @killlist[name]
+      logs.each do |log|
+        log.kill if kill.include?(log.revision)
+      end
+      logs
     end
 
     class Log
@@ -563,6 +574,7 @@ module BitChannel
         @n_added = add
         @n_removed = rem
         @log = msg
+        @killed = false
       end
 
       attr_reader :revision
@@ -570,38 +582,70 @@ module BitChannel
       attr_reader :n_added
       attr_reader :n_removed
       attr_reader :log
+
+      def killed?
+        @killed
+      end
+
+      def kill
+        @killed = true
+      end
     end
+
+    public
 
     def cvs_annotate(name)
       assert_chdir
       out, err = *cvs('annotate', *[ann_F(), encode_filename(name)].compact)
-      out.gsub(/^.*?:/) {|s| sprintf('%4s', s.slice(/\.(\d+)/, 1)) }
+      parse_annotation(name, out)
     end
 
     def cvs_annotate_rev(name, rev)
       assert_chdir
       out, err = *cvs('annotate', *[ann_F(), "-r1.#{rev}", encode_filename(name)].compact)
-      return out.gsub(/^.*?:/) {|s| sprintf('%4s', s.slice(/1\.(\d+)\s/, 1)) }
+      parse_annotation(name, out)
+    end
+
+    private
+
+    def parse_annotation(name, out)
+      kill = @killlist[name]
+      out.map {|line|
+        revstr, content = line.split(': ', 2)
+        rev = revstr.slice(/1\.(\d+)/, 1).to_i
+        AnnotateLine.new(name, rev, content.rstrip, kill.include?(rev))
+      }
     end
 
     def ann_F
       (cvs_version() >= '001.011.002') ? '-F' : nil
     end
-    private :ann_F
 
-    def cvs_version
-      @cvs_version ||= read_cvs_version()
-    end
-    private :cvs_version
+    class AnnotateLine
+      def initialize(name, rev, line, killed)
+        @name = name
+        @revision = rev
+        @line = line
+        @killed = killed
+      end
 
-    def read_cvs_version
-      assert_chdir
-      # sould handle "1.11.1p1" like version number??
-      out, err = *cvs('--version')
-      verdigits = out.slice(/\d+\.\d+\.\d+/).split(/\./).map {|n| n.to_i }
-      sprintf((['%03d'] * verdigits.length).join('.'), *verdigits)
+      attr_reader :name
+      attr_reader :revision
+
+      def line
+        @killed ? '' : @line
+      end
+
+      def original_line
+        @line
+      end
+
+      def killed?
+        @killed
+      end
     end
-    private :read_cvs_version
+
+    public
 
     def merge(name, origrev, new_text)
       write name, new_text
@@ -631,11 +675,23 @@ module BitChannel
       cvs 'up', '-A', encode_filename(name)
     end
 
+    private
+
+    def cvs_version
+      @cvs_version ||= read_cvs_version()
+    end
+
+    def read_cvs_version
+      assert_chdir
+      # sould handle "1.11.1p1" like version number??
+      out, err = *cvs('--version')
+      verdigits = out.slice(/\d+\.\d+\.\d+/).split(/\./).map {|n| n.to_i }
+      sprintf((['%03d'] * verdigits.length).join('.'), *verdigits)
+    end
+
     def cvs(*args)
       execute(ignore_status_p(args[0]), @cvs_cmd, '-f', '-q', *args)
     end
-
-    private
 
     def ignore_status_p(cmd)
       cmd == 'diff'
@@ -848,4 +904,4 @@ module BitChannel
   
   end   # class PageEntity
 
-end
+end   # module BitChannel

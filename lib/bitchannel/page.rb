@@ -321,12 +321,11 @@ module BitChannel
 
     def annotate
       latest = annotate_revision()
-      @page.annotate(@revision).map {|line|
-        rev = line.slice(/\d+/).to_i
+      @page.annotate(@revision).map {|a|
         sprintf(%Q[<a href="%s?cmd=view;rev=%d;name=%s">%4d</a>: <span class="new%d">%s</span>\n],
-                @config.cgi_url, rev, page_url(), rev,
-                latest - rev,
-                escape_html(line.sub(/\A\s*\d+\s/, '').rstrip))
+                @config.cgi_url, a.revision, page_url(), a.revision,
+                latest - a.revision,
+                escape_html(a.line))
       }
     end
   end
@@ -382,8 +381,6 @@ module BitChannel
 
     def diff_base_revision
       @original_revision || @page.revision || 0
-    rescue Errno::ENOENT
-      return 0
     end
     
     def opt_message
@@ -415,9 +412,7 @@ module BitChannel
     end
 
     def diff_base_revision
-      @original_revision || @page.revision
-    rescue Errno::ENOENT
-      return 0
+      @original_revision || @page.revision || 0
     end
 
     def original_revision

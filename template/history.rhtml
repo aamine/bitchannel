@@ -17,12 +17,17 @@
     logs().sort_by {|log| -log.revision }.each do |log| %>
 <li>
 <%= format_time(log.date) %>:
+<% unless log.killed? %>
 <a href="<%= cgi_url() %>?cmd=view;rev=<%= log.revision %>;name=<%= page_url() %>">revision <%= log.revision %></a>
+<% else %>
+revision <%= log.revision %>
+<% end %>
 (-<%= log.n_removed %> +<%= log.n_added %></a>)
-<% if log.revision > 1 %>
+<% if log.revision > 1 and not log.killed? %>
 <a href="<%= cgi_url() %>?cmd=diff;rev1=<%= log.revision-1 %>;rev2=<%= log.revision %>;name=<%= page_url() %>">[diff]</a>
 <a href="<%= cgi_url() %>?cmd=annotate;rev=<%= log.revision %>;name=<%= page_url() %>">[annotate]</a>
 <% end %>
+<% if log.killed? %>removed<% end %>
 </li>
 <%  end
 %>
