@@ -382,12 +382,9 @@ module BitChannel
     # Inline
     #
 
-    WikiName = /\b(?:[A-Z][a-z0-9]+){2,}\b/n   # /\b/ requires `n' option
-    BracketLink = /\[\[\S+?\]\]/e
-        # FIXME: `e' option does not effect in the final regexp.
-    schemes = %w( http ftp )
-    SeemsURL = /\b(?=#{Regexp.union(*schemes)}:)#{URI::PATTERN::X_ABS_URI}/xn
-        # from uri/common.rb:URI.extract
+    WikiName = /\b(?:[A-Z][a-z0-9]+){2,}\b/n
+    BracketLink = /\[\[[!-~]+?\]\]/n
+    SeemsURL = URI.regexp(%w(http ftp))
     NeedESC = /[&"<>]/
 
     def text(str)
@@ -473,14 +470,14 @@ module BitChannel
       sprintf(table[name], vary)
     end
 
-    def interwikiname_table
-      @interwikinames ||= read_interwikiname_table()
-    end
-
     InterWikiName_LIST_PAGE = 'InterWikiName'
 
-    def read_interwikiname_table()
-      text = @repository[InterWikiName_LIST_PAGE] or return {}
+    def interwikiname_table
+      @interwikinames ||= read_interwikiname_table(InterWikiName_LIST_PAGE)
+    end
+
+    def read_interwikiname_table(page_name)
+      text = @repository[page_name] or return {}
       table = {}
       text.each do |line|
         if /\A\s*\*\s*(\S+?):/ =~ line

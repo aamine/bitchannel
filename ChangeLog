@@ -1,3 +1,7 @@
+Wed Apr 28 19:22:30 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/tohtml.rb: inline patterns handle only ASCII.
+
 Wed Apr 28 18:17:11 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* misc/webrick-sample.rb: -> standaline.rb
