@@ -27,7 +27,11 @@
 </div>
 
 <h1><%= logo_url() %><%= front_page?() ? site_name() : page_name() %></h1>
-<p>rev <%= revision() %>; <span class="lastmodified">Last Modified: <%= format_time(last_modified()) %></span> (<%= times_before(last_modified()) %>)</p>
+<p>
+<span class="lastmodified"><%= format_time(last_modified()) %></span>
+(<%= times_before(last_modified()) %>);
+rev <%= revision() %>
+</p>
 <%= body() %>
 
 <hr>
