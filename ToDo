@@ -1,0 +1,9 @@
+* prepend '?' to dangling link
+* "Thanks" page (auto refresh)
+* 1. -> (1)
+* ReverseLink
+* InterWikiName
+* inline image
+* search
+* simplify syntax (list): one item per one line
+* simplify syntax (verbatim): introduce explicit declaration
