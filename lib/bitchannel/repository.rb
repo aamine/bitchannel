@@ -32,7 +32,7 @@ module AlphaWiki
     def entries
       Dir.entries(@wc_read)\
           .select {|ent| File.file?("#{@wc_read}/#{ent}") }\
-          .map {|ent| decode_filename(page_name) }
+          .map {|ent| decode_filename(ent) }
     end
 
     def mtime(page_name)
@@ -90,7 +90,7 @@ module AlphaWiki
         f.write new_text
       }
       cvs 'add', filename
-      cvs 'ci', filename
+      cvs 'ci', '-m', 'auto checkin: new file', filename
     end
 
     def cvs(*args)
@@ -98,7 +98,7 @@ module AlphaWiki
     end
 
 def LOG(msg)
-  File.open('log', 'a') {|f|
+  File.open('../log', 'a') {|f|
     f.puts "#{Time.now.inspect}: #{msg}"
   }
 end
