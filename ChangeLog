@@ -1,0 +1,1465 @@
+Tue Mar  2 17:40:57 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/tohtml.rb (unindent): missing #{}.
+	  Thanks FUJIMOTO Hisakuni.
+
+Mon Jan 19 12:42:37 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb (checkin): always sync wc_read
+	  (sync_wc config is already removed in previous commit).
+
+Mon Jan 19 12:10:41 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* bitchannelrc.sample.ja: remove config entry "sync_wc".
+
+	* lib/bitchannel/repository.rb (initialize): dittp.
+
+	* lib/bitchannel/repository.rb (initialize): hash may contains
+	  nil/false, simple boolean check is not valid.
+
+	* bitchannelrc.sample.ja: missing "logfile" entry.
+
+Mon Jan 19 11:58:56 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* README.ja: fix document URL.
+
+Mon Jan 19 11:58:30 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* README.ja: better description.
+
+	* README.ja: modify file location.
+
+Mon Jan 19 11:22:40 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb (annotate): detect CVS version and
+	  adjust "cvs ann -F" option. (cvs 1.11.2 or later have -F option)
+
+Mon Jan 19 11:06:01 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/page.rb (ListPage#page_list): name should be
+	  escaped in template.
+
+	* lib/bitchannel/page.rb (RecentPage#page_list): ditto.
+
+	* template/list.rhtml: should honour config.use_html_url.
+
+	* template/recent.rhtml: ditto.
+
+Tue Jan 13 17:51:49 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* pages/IndexPage: removed.
+
+	* pages/BitChannelSyntax: new file.
+
+	* pages/BitChannelSyntaxDetail: new file.
+
+	* pages/FrontPage: new file.
+
+	* pages/HelpPage: new file.
+
+	* pages/InterWikiName: new file.
+
+	* pages/SitePolicy: new file.
+
+Tue Jan 13 03:35:09 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/tohtml.rb: "!" means <h1>, "!!" == <h2>...
+
+Mon Jan 12 09:51:44 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/page.rb (annotate): did not make link.
+
+Mon Jan 12 06:58:36 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/page.rb (AnnotatePage): make revision a
+	  hyperlink.
+
+	* lib/bitchannel/repository.rb (annotate): strip commit user and
+	  date.
+
+	* template/annotate.rhtml: result of #annotate is now already
+	  escaped.
+
+Mon Jan 12 06:43:53 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb (annotate): remove "1." from
+	  revision.
+
+	* lib/bitchannel/repository.rb (initialize): use singleton method.
+
+Mon Jan 12 05:33:25 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb: parameterize logfile path.
+
+Mon Jan 12 05:22:44 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/page.rb: RecentPage, ListPage requires
+	  repository.
+
+Mon Jan 12 04:11:30 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/handler.rb: fix typo.
+
+Mon Jan 12 04:06:02 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/handler.rb: split ThanksPage (use correct page
+	  URL).
+
+	* lib/bitchannel/page.rb: new class ThanksPage.
+
+	* lib/bitchannel/page.rb: GenericPage may not require Repository.
+
+Mon Jan 12 04:04:18 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* template/thanks.rhtml: new file.
+
+Fri Jan  9 00:51:13 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/tohtml.rb: fix easy bugs.
+
+Thu Jan  8 23:52:55 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/tohtml.rb (cite): implement cite block.
+
+	* lib/bitchannel/tohtml.rb (table): avoid odd-number-item error.
+
+Thu Jan  8 21:31:09 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* template/*.rhtml: r1.x -> revX.
+
+	* template/diff.rhtml: add navigation bar.
+
+	* template/viewrev.rhtml: ditto.
+
+Sun Jan  4 07:28:38 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* default.css: adjust margins for IE6.
+
+Sun Jan  4 07:09:10 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* .cvsignore: add bitchannelrc.
+
+Sun Jan  4 07:08:01 2004  Minero Aoki  <aamine@loveruby.net>
+
+	bitchannelrc -> bitchannelrc.sample.ja
+
+Sat Jan  3 11:32:21 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/handler.rb (handle_src): fix typo.
+
+Sat Jan  3 09:35:44 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* default.css: use larger font for <h3>.
+
+Sat Jan  3 09:31:09 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/page.rb: #url -> #escape_url.
+
+	* template/revlinks.rhtml: ditto.
+
+	* template/search_result.rhtml: ditto.
+
+	* template/search_result.rhtml: "List" menu was wrongly works as
+	  "Recent".
+
+Sat Jan  3 09:22:48 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* bitchannelrc: add logo_url entry.
+
+	* default.css: add img.sitelogo.
+
+	* lib/bitchannel/config.rb: new method Config#logo_url.
+
+	* lib/bitchannel/page.rb: new method GenericPage#logo_url.
+
+	* template/*.rhtml: add logo in <h1>.
+
+Sat Jan  3 09:06:33 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/handler.rb (handle_save): save without revision
+	  should be allowed (at least, for new page).
+
+Fri Jan  2 16:17:00 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel.rb: load libraries required by all commands.
+
+	* lib/bitchannel/handler.rb: Request-Response style.
+
+	* lib/bitchannel/page.rb: new method GenericPage#last_modified.
+
+	* index.cgi: explicitly require bitchannel/handler.
+
+	* misc/tohtml.rb: explicitly require bitchannel/tohtml.
+
+	* misc/refresh-linkcache.rb: ditto.
+
+Fri Jan  2 13:29:52 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* bitchannelrc:
+
+	* lib/bitchannel/config.rb: config removed: index_page_name.
+
+	* lib/bitchannel/config.rb: config removed: help_page_name.
+
+	* lib/bitchannel/config.rb: config removed: tmp_page_name.
+
+	* lib/bitchannel/config.rb: new constant FRONT_PAGE_NAME.
+
+	* lib/bitchannel/config.rb: new constant HELP_PAGE_NAME.
+
+	* lib/bitchannel/config.rb: new constant TMP_PAGE_NAME.
+
+	* lib/bitchannel/handler.rb: remove use of
+	  @config.index_page_name.
+
+	* lib/bitchannel/page.rb: ditto.
+
+	* lib/bitchannel/page.rb: new method Page#page_charset.
+
+Fri Jan  2 13:23:20 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb: _link_cache -> link_cache.
+
+	* misc/refresh-linkcache.rb: ditto.
+
+Fri Jan  2 13:07:14 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* misc/refresh-linkcache.rb: Config#*_cachedir were removed.
+
+	* misc/refresh-linkcache.rb: get LinkCache from Repository.
+
+	* lib/bitchannel/repository.rb: define LinkCache access interface
+	  (internal use only).
+
+Fri Jan  2 11:15:50 2004  Minero Aoki  <aamine@loveruby.net>
+
+	Lesser GPL is version 2.1.
+
+Fri Jan  2 10:24:52 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* bitchannelrc: config.cachedir -> repository.cachedir
+
+	* lib/bitchannel/config.rb: ditto.
+
+	* lib/bitchannel/config.rb: default tmp_page_name is 'tmp'.
+
+	* lib/bitchannel/repository.rb: does not need Config.
+
+	* lib/bitchannel/tohtml.rb: new method ToHTML.extract_links.
+
+Thu Jan  1 16:01:01 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* dot.htaccess: simplify a file pattern using <FilesMatch>.
+
+Thu Jan  1 15:50:36 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/handler.rb (thanks): escape page_name.
+
+Thu Jan  1 15:29:11 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* README.ja: new file.
+
+Thu Jan  1 14:39:46 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb (log): change log format.
+
+Thu Jan  1 14:38:45 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* .cvsignore: add .htaccess.
+
+Thu Jan  1 14:32:21 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb (log): change log file name.
+
+Thu Jan  1 14:22:20 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* index.cgi: add CVS Id.
+
+Thu Jan  1 14:21:58 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* index.rb -> index.cgi
+
+	* dot.htaccess: new file.
+
+Thu Jan  1 13:16:07 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* template/diff.rhtml: add link to specific revisions.
+
+Thu Jan  1 12:46:54 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/handler.rb: reduce warning.
+
+Thu Jan  1 12:28:04 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/handler.rb: refactoring: new method #send_error.
+
+	* lib/bitchannel/handler.rb: rescue WrongPageName.
+
+	* lib/bitchannel/handler.rb: reject editing invalid page.
+
+	* lib/bitchannel/repository.rb (invalid?): unreadable page is
+	  invalid.
+
+	* lib/bitchannel/repository.rb: new method Repository#valid?.
+
+	* lib/bitchannel/repository.rb (size): page must be valid.
+
+	* lib/bitchannel/repository.rb (mtime): ditto.
+
+	* lib/bitchannel/repository.rb (revision): ditto.
+
+	* lib/bitchannel/repository.rb ([]): ditto.
+
+	* lib/bitchannel/repository.rb (getlog): ditto.
+
+	* lib/bitchannel/repository.rb (diff): ditto.
+
+	* lib/bitchannel/repository.rb (annotate): ditto.
+
+	* lib/bitchannel/repository.rb (checkin): ditto.
+
+Thu Jan  1 11:56:45 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/handler.rb (handle_view): get REV by
+	  get_rev_param (as int).
+
+	* lib/bitchannel/handler.rb (handle_save): handle WrongPageName.
+
+	* lib/bitchannel/repository.rb (exist?): does not check invalid
+	  page name.
+
+	* lib/bitchannel/repository.rb: new method Repository#invalid?.
+
+	* lib/bitchannel/repository.rb ([]): check invalid page name.
+
+	* lib/bitchannel/repository.rb (getlog): check page existance.
+
+	* lib/bitchannel/repository.rb (diff): ditto.
+
+	* lib/bitchannel/repository.rb (annotate): ditto.
+
+	* lib/bitchannel/repository.rb: CVS Entries holds mtime in GMT.
+
+	* lib/bitchannel/tohtml.rb: does not make WikiName a hyperlink if
+	  the name is invalid page name.
+
+Thu Jan  1 11:11:00 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* bitchannelrc: config.cgi_url is obsolete.
+
+	* bitchannelrc: new configuration item config.use_html_url.
+
+	* bitchannelrc: new configuration item config.index_page.
+
+	* bitchannelrc: new configuration item config.help_page.
+
+	* lib/bitchannel/config.rb: new method Config#html_url?
+
+	* lib/bitchannel/config.rb (cgi_url): compute based on $0.
+
+	* lib/bitchannel/page.rb: use "PageName.html" style on html_url?.
+
+	* lib/bitchannel/tohtml.rb: ditto.
+
+	* lib/bitchannel/tohtml.rb: refactoring: #wikiname, #explicit_link
+	  -> #internal_link.
+
+	* lib/bitchannel/tohtml.rb: refactoring: #interwikiname ->
+	  #interwiki.
+
+	* lib/bitchannel/tohtml.rb: InterWikiName must include '%s'.
+
+Wed Dec 31 08:19:37 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb: cache parsed CVS/Entries.
+
+	* lib/bitchannel/repository.rb (mtime): check if page does exist.
+
+	* lib/bitchannel/repository.rb (revision): ditto.
+
+Tue Dec 30 17:52:29 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* bitchannelrc: new configuration entry config.site_name.
+
+	* lib/bitchannel/config.rb: new method Config#site_name.
+
+	* lib/bitchannel/page.rb: new method Page#front_page?.
+
+	* lib/bitchannel/page.rb: new method Page#site_name.
+
+	* template/view.rhtml: show site name on the front page.
+
+Tue Dec 30 17:45:23 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* template/edit.rhtml: fix typo.
+
+Tue Dec 30 17:39:34 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/textutils.rb: new method #times_before.
+
+	* template/view.rhtml: show page revision.
+
+	* template/view.rhtml: show `n'-times-before stamp.
+
+Tue Dec 30 17:30:03 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/tohtml.rb (explicit_link): make only '?' a hyper
+	  link.
+
+Tue Dec 30 17:29:14 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/page.rb (ordered_revlinks): reject non-exist
+	  pages first.
+
+Tue Dec 30 17:18:19 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/page.rb (page_view_url): fix typo (wrong method
+	  name).
+
+	* lib/bitchannel/page.rb (ordered_revlinks): rescue error for not
+	  existing page name.
+
+	* lib/bitchannel/page.rb: new method HistoryPage#revision.
+
+Tue Dec 30 16:48:46 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* template/*.rhtml: unify menu item order:
+	  Edit,Recent,List,Hist,Ann,Diff,Top,Help.
+
+	* template/*.rhtml: use #page_view_url instead of explicit CGI URL
+	  path.
+
+	* template/*.rhtml: use #index_page_url to parameterize index URL.
+
+	* template/*.rhtml: use #help_page_url to parameterize help URL.
+
+	* lib/bitchannel/config.rb: new method Config#help_page_name.
+
+	* lib/bitchannel/page.rb: new method GenericPage#index_page_url.
+
+	* lib/bitchannel/page.rb: new method GenericPage#help_page_url.
+
+	* lib/bitchannel/page.rb: new method Page#page_full_url.
+
+Tue Dec 30 16:41:24 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb (log): change log format.
+
+Tue Dec 30 15:24:56 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/config.rb: IndexPage -> FrontPage
+
+	* lib/bitchannel/tohtml.rb: remove constats.rb.
+
+	* lib/bitchannel/constants.rb: removed.
+
+Tue Dec 30 15:24:03 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb (annotate): remove space.
+
+Tue Dec 30 11:16:17 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/tohtml.rb: "^!+" is a caption
+
+Tue Dec 30 11:03:23 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* default.css: remove vi tag.
+
+Tue Dec 30 10:58:12 2003  Minero Aoki  <aamine@loveruby.net>
+
+	wikitik -> bitchannel
+
+	Wikitik -> BitChannel
+
+Tue Dec 30 10:56:30 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* wikitik -> bitchannel
+
+	* Wikitik -> BitChannel
+
+Tue Dec 30 09:49:50 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* misc/orphan-pages.rb: new file.
+
+	* lib/wikitik/repository.rb: new method Repository#orphan_pages.
+
+	* lib/wikitik/repository.rb: (refactoring) new method
+	  Repository#page_names (alias entries).
+
+	* lib/wikitik/repository.rb: reject page name `CVS'.
+
+	* lib/wikitik/exception.rb: new exception WrongPageName.
+
+	* lib/wikitik/repository.rb ([]): always raises ENOENT if file
+	  does not exist.
+
+	* lib/wikitik/repository.rb (links): returns valid result even in
+	  cache miss.
+
+	* lib/wikitik/repository.rb (revlinks): returns valid result even
+	  in cache miss.
+
+	* lib/wikitik/repository.rb: new method LinkCache#set_linkcache.
+
+	* lib/wikitik/repository.rb: new method
+	  LinkCache#set_revlinkcache.
+
+	* lib/wikitik/repository.rb: reverse_links -> revlinks.
+
+	* lib/wikitik/page.rb: ditto.
+
+	* template/revlinks.rhtml: ditto.
+
+	* misc/refresh-linkcache.rb: should load RC file before getopts.
+
+	* misc/tohtml.rb: ditto.
+
+Tue Dec 30 09:43:09 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/tohtml.rb (wikiname): make only '?' a hyperlink.
+
+Mon Dec 29 16:28:57 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/tohtml.rb (text): missing var.
+
+Mon Dec 29 14:43:12 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/repository.rb: now read_link may returne nil.
+
+Thu Dec 18 18:05:06 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* misc/refresh-linkcache.rb: new file.
+
+	* misc/tohtml.rb: new file.
+
+Thu Dec 18 18:04:49 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* index.rb: devide configuration to wikitikrc.
+
+	* wikitikrc: new file.
+
+	* lib/wikitik/handler.rb: Wikitik.cgi_main takes (config, repo).
+
+	* lib/wikitik/repository.rb: new module FilenameEncoding.
+
+	* lib/wikitik/repository.rb: new module LockUtils.
+
+	* lib/wikitik/repository.rb: new class LinkCache.
+
+	* lib/wikitik/repository.rb: does not update wc_read if
+	  @sync_wc=false.
+
+Thu Dec 18 15:01:10 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/handler.rb: refactoring (devide method): wiki_main.
+
+	* lib/wikitik/handler.rb (handle_edit): edit based on specific
+	  revision.
+
+	* lib/wikitik/handler.rb: rename method: send -> send_html.
+
+	* lib/wikitik/handler.rb: rename method: send0 -> send_page.
+
+	* lib/wikitik/page.rb (EditPage): .new takes text and origrev
+	  always.
+
+	* lib/wikitik/page.rb (EditPage): let templates escape paramters.
+
+	* lib/wikitik/repository.rb: new method Repository#fetch.
+
+	* template/edit.rhtml: display current revision (origrev) and
+	  edit-started-time.
+
+	* template/edit.rhtml: embed origrev only when it is needed.
+
+	* template/diff.rhtml: menu: HEAD -> ViewHEAD.
+
+	* template/history.rhtml: menu: View -> ViewHEAD.
+
+	* template/history.rhtml: menu: Edit -> EditHEAD.
+
+	* template/viewrev.rhtml: menu: HEAD -> ViewHEAD.
+
+	* template/viewrev.rhtml: menu: add EditHEAD.
+
+	* template/viewrev.rhtml: menu: add EditThis.
+
+Thu Dec 18 15:01:09 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/handler.rb: refactoring (devide method): wiki_main.
+
+	* lib/wikitik/handler.rb (handle_edit): edit based on specific
+	  revision.
+
+	* lib/wikitik/handler.rb: rename method: send -> send_html.
+
+	* lib/wikitik/handler.rb: rename method: send0 -> send_page.
+
+	* lib/wikitik/page.rb (EditPage): .new takes text and origrev
+	  always.
+
+	* lib/wikitik/page.rb (EditPage): let templates escape paramters.
+
+	* lib/wikitik/repository.rb: new method Repository#fetch.
+
+	* template/edit.rhtml: display current revision (origrev) and
+	  edit-started-time.
+
+	* template/edit.rhtml: embed origrev only when it is needed.
+
+	* template/diff.rhtml: menu: HEAD -> ViewHEAD.
+
+	* template/history.rhtml: menu: View -> ViewHEAD.
+
+	* template/history.rhtml: menu: Edit -> EditHEAD.
+
+	* template/viewrev.rhtml: menu: HEAD -> ViewHEAD.
+
+	* template/viewrev.rhtml: menu: add EditHEAD.
+
+	* template/viewrev.rhtml: menu: add EditThis.
+
+Thu Dec 18 13:22:30 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/handler.rb: pass `rev' param to AnnotatePage.
+
+	* lib/wikitik/page.rb: AnnotatePage.new takes 4th arg `rev'.
+
+	* lib/wikitik/page.rb: new method AnnotatePage#revision.
+
+	* lib/wikitik/repository.rb: #annotate takes optional argument
+	  `rev'.
+
+	* template/annotate.rhtml: show revision.
+
+	* template/diff.rhtml: modify title (page name first, command
+	  second).
+
+	* template/edit.rhtml: ditto.
+
+	* template/recent.rhtml: ditto.
+
+	* template/history.rhtml: ditto.
+
+	* template/history.rhtml: add View and Edit menu.
+
+Thu Dec 18 12:49:49 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/handler.rb: handle `annotate' command.
+
+	* lib/wikitik/page.rb: new class AnnotatePage.
+
+	* lib/wikitik/repository.rb: new method #annotate.
+
+	* template/diff.rhtml: add `annotate' menu.
+
+	* template/history.rhtml: ditto.
+
+	* template/viewrev.rhtml: ditto.
+
+	* template/annotate.rhtml: new file.
+
+Thu Dec 18 11:40:47 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* template/diff.rhtml: add search form.
+
+	* template/edit.rhtml: ditto.
+
+	* template/history.rhtml: ditto.
+
+	* template/list.rhtml: ditto.
+
+	* template/recent.rhtml: ditto.
+
+	* template/viewrev.rhtml: ditto.
+
+Thu Dec 18 11:37:24 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* default.css: add search_form attributes.
+
+	* lib/wikitik/handler.rb: handle `search' command.
+
+	* lib/wikitik/page.rb: new page class SearchResultPage.
+
+	* lib/wikitik/page.rb: new page class SearchErrorPage.
+
+	* lib/wikitik/page.rb: read template recursively (support
+	  .include).
+
+	* lib/wikitik/textutils.rb: new method #jsplit.
+
+	* lib/wikitik/exception.rb: new exception WrongQuery.
+
+	* lib/wikitik/config.rb: #read_rhtml -> #templatedir.
+
+	* template/view.rhtml: use `revlinks' sub template.
+
+	* template/view.rhtml: add search form.
+
+	* template/search_result.rhtml: new main template.
+
+	* template/search_error.rhtml: new main template.
+
+	* template/search_form.rhtml: new sub template.
+
+	* template/revlinks.rhtml: new sub template.
+
+Thu Dec 18 11:32:22 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/constants.rb: new file.
+
+	* lib/wikitik/config.rb: move INDEX_PAGE to constants.rb.
+
+	* lib/wikitik/tohtml.rb: move InterWikiName_LIST_PAGE to
+	  constants.rb.
+
+	* lib/wikitik/config.rb (initialize): fetch @index_page from user
+	  arg.
+
+	* lib/wikitik/tohtml.rb: remove main.
+
+Sat Dec 13 09:53:30 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* index.rb
+
+	* lib/wikitik/exception.rb: new exception Wikitik::ResourceError.
+
+	* lib/wikitik/handler.rb: rc key name changed.
+
+	* lib/wikitik/rc.rb: change resource system.
+
+	* lib/wikitik/rc/en.rb: ditto.
+
+	* lib/wikitik/rc/ja.rb: ditto.
+
+	* lib/wikitik/rc.rb: new method Wikitik.lang(=).
+
+Sat Dec 13 09:27:36 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/handler.rb (wiki_main): unify line terminator to
+	  CRLF.
+
+Sat Dec 13 08:46:13 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* template/list.rhtml: use ol.
+
+	* template/recent.rhtml: ditto.
+
+Sat Dec 13 07:38:14 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/handler.rb: new command "src".
+
+Sat Dec 13 07:37:54 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* template/diff.rhtml: add menu item "Top".
+
+	* template/edit.rhtml: add menu item "Recent".
+
+	* template/edit.rhtml: add menu item "List".
+
+	* template/edit.rhtml: add menu item "History".
+
+	* template/edit.rhtml: add menu item "Diff".
+
+	* template/edit.rhtml: add menu item "Top".
+
+	* template/history.rhtml: add menu item "Top".
+
+Sat Dec 13 07:36:18 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/repository.rb: fix typo.
+
+Sat Dec 13 06:55:15 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/page.rb (ordered_reverse_links): does not reject
+	  leaves, but append.
+
+Fri Dec 12 18:19:12 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/page.rb: new abstract class GenericPage.
+
+	* lib/wikitik/page.rb (ordered_reverse_link): reject if number of
+	  links < 2.
+
+	* lib/wikitik/repository.rb: remove method #bytes_per_link.
+
+	* lib/wikitik/repository.rb: new method #links.
+
+	* lib/wikitik/repository.rb: generic subroutine #add_linkcache.
+
+	* lib/wikitik/repository.rb: generic subroutine #remove_linkcache.
+
+	* lib/wikitik/repository.rb: generic subroutine #read_linkcache.
+
+	* lib/wikitik/repository.rb: generic subroutine #write_linkcache.
+
+	* template/edit.rhtml: ban title() method.
+
+	* template/view.rhtml: ditto.
+
+	* template/viewrev.rhtml: ditto.
+
+Fri Dec 12 13:56:49 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/tohtml.rb: InterWikiName list page is
+	  DefInterWikiName.
+
+Thu Dec 11 06:33:51 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/page.rb (ListPage#page_list): sort pages
+	  alphabetically, ignoring case.
+
+Thu Dec 11 06:29:09 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* .cvsignore: add cache/.
+
+Thu Dec 11 06:27:32 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/tohtml.rb (text): refactoring: devide method.
+
+	* lib/wikitik/tohtml.rb (text): does not make WikiNameToSelf a
+	  hyper link.
+
+	* lib/wikitik/page.rb: pass @page_name to ToHTML.
+
+Thu Dec 11 05:44:17 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/page.rb (ordered_reverse_links): does not remove
+	  system pages.
+
+	* lib/wikitik/page.rb (reverse_links): reject self.
+
+Wed Dec 10 04:59:19 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/tohtml.rb: support InterWikiName.
+
+Tue Dec  9 06:51:02 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/page.rb (reverse_links): reject system pages.
+
+Tue Dec  9 05:33:12 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/config.rb: new method link_cachedir.
+
+	* lib/wikitik/page.rb: new method #ordered_reverse_links.
+
+	* lib/wikitik/page.rb: remove reverse_links_in_nrevorder.
+
+	* lib/wikitik/page.rb: #num_revlinks always returns num-revlinks
+	  of self.
+
+	* lib/wikitik/repository.rb: new method #size.
+
+	* lib/wikitik/repository.rb: new method #bytes_per_link.
+
+	* lib/wikitik/repository.rb: update forward link cache.
+
+	* lib/wikitik/repository.rb: does not try to remove lockdir
+	  although it is too old.
+
+	* lib/wikitik/textutils.rb: move (encode|decode)_filename to
+	  repository.rb.
+
+	* template/view.rhtml: change revlink order.
+
+Tue Dec  9 05:29:15 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/tohtml.rb (puts): \n not printed on "".
+
+Tue Dec  9 04:32:51 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* default.css: more spaces between paragraphs.
+
+Tue Dec  9 03:34:00 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/tohtml.rb: remove redundant initializer.
+
+Mon Dec  8 08:32:03 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* template/diff.rhtml: page_name -> page_url in href.
+
+	* template/edit.rhtml: ditto.
+
+	* template/history.rhtml: ditto.
+
+	* template/list.rhtml: ditto.
+
+	* template/recent.rhtml: ditto.
+
+	* template/viewrev.rhtml: ditto.
+
+Mon Dec  8 08:18:37 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* index.rb: Repository.new requires a Config object.
+
+	* lib/wikitik/config.rb: move lock_revlink_cachedir to Repository.
+
+	* lib/wikitik/handler.rb: move update_revlink_caahe to Repository.
+
+	* lib/wikitik/page.rb: new method #reverse_links.
+
+	* lib/wikitik/page.rb: new method #reverse_links_in_nrevorder.
+
+	* lib/wikitik/page.rb: new method #num_revlinks.
+
+	* lib/wikitik/repository.rb: new method #reverse_links.
+
+	* lib/wikitik/repository.rb: new method #num_revlinks.
+
+	* lib/wikitik/repository.rb: update reverse link cache after
+	  checkin.
+
+	* template/view.rhtml: add reverse link list.
+
+	* lib/wikitik/tohtml.rb: does not allow spaces/empty string in
+	  [[...]].
+
+	* lib/wikitik/page.rb: new method #url.
+
+	* lib/wikitik/page.rb: escape all URLs.
+
+	* lib/wikitik/page.rb: display template file name on erb error.
+
+	* lib/wikitik/handler.rb (thanks): in Refresh header, URI cannot
+	  include ';'.
+
+Mon Dec  8 08:16:56 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* template/list.rhtml: add "Top" menu item.
+
+	* template/recent.rhtml: add "Top" menu item.
+
+Sun Dec  7 04:41:48 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* index.rb: add cachedir config.
+
+	* lib/wikitik/config.rb: new method lock_revlink_cachedir.
+
+	* lib/wikitik/handler.rb: update_revlink after save.
+
+	* lib/wikitik/tohtml.rb: new method #extract_links.
+
+	* lib/wikitik/tohtml.rb: generate <img> if URL seems image link.
+
+Sun Dec  7 03:20:57 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/tohtml.rb: 1. -> (1)
+
+	* lib/wikitik/tohtml.rb: introduce `#' style ol.
+
+	* lib/wikitik/tohtml.rb: introduce `**' style ul.
+
+	* lib/wikitik/tohtml.rb: deny multiline lists.
+
+	* lib/wikitik/tohtml.rb: introduce '{{{....}}}' style verbatim.
+
+	* lib/wikitik/tohtml.rb: remove RD style verbatim.
+
+	* lib/wikitik/tohtml.rb: implement table.
+
+Sun Dec  7 01:18:51 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/handler.rb (wiki_main): send `thanks' page after
+	  edit, to avoid sending same edit request on user reload (e.g. F5).
+
+Sun Dec  7 01:01:23 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/page.rb: pass repository to a ToHTML object.
+
+	* lib/wikitik/tohtml.rb: prepend '?' if page does not exist.
+
+Thu Nov 27 16:44:06 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/page.rb: pass Config to ToHTML.
+
+	* lib/wikitik/tohtml.rb (text): implement WikiName link.
+
+	* lib/wikitik/tohtml.rb (text): implement explicit link.
+
+	* lib/wikitik/tohtml.rb (text): implement in-place URL.
+
+	* lib/wikitik/tohtml.rb (caption): caption does not include links.
+
+	* template/recent.rhtml: wrongyl #{...} was inserted.
+
+Thu Nov 27 12:47:33 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* index.rb: Wikitik.main -> .cgi_main.
+
+	* lib/wikitik/handler.rb: new method CGI#get_rev_param.
+
+	* lib/wikitik/handler.rb (wiki_main): check all CGI params in
+	  #wiki_main.
+
+	* lib/wikitik/handler.rb: handles `diff' event.
+
+	* lib/wikitik/page.rb: new class DiffPage.
+
+	* lib/wikitik/page.rb (ViewPage): new method #revision, to
+	  implement `diff'.
+
+	* lib/wikitik/repository.rb: new method Repository#diff.
+
+	* lib/wikitik/repository.rb (cvs): call cvs with -f (ignore
+	  .cvsrc) and -q.
+
+	* template/diff.rhtml: new file.
+
+	* template/history.rhtml: add link to diff.
+
+	* template/view.rhtml: wrap timestamp by <span
+	  class="lastmodified">.
+
+	* template/viewrev.rhtml: ditto.
+
+	* default.css: add span.lastmodified.
+
+	* default.css: add div.footer.
+
+	* default.css: add address.
+
+Thu Nov 27 09:42:54 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* template/view.rhtml: gettext is not needed here.
+
+	* template/viewrev.rhtml: ditto.
+
+Wed Nov 26 08:37:27 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/textutils.rb: add comment.
+
+Wed Nov 26 08:24:13 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/wikitik/handler.rb: remove `Wikitik::' prefix.
+
+Wed Nov 26 08:23:47 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* template/history.rhtml: beautify.
+
+Wed Nov 26 08:12:26 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* index.rb: contents moved to lib/wikitik/handler.rb.
+
+	* lib/wikitik/handler.rb: new file.
+
+	* config: contents moved to index.rb.
+
+	* config: removed.
+
+	* lib/wikitik.rb: load wikitik/handler.
+
+	* lib/wikitik/config.rb: get arguments from hash.
+
+	* lib/wikitik/exception.rb: new exception ConfigError.
+
+	* lib/wikitik/rc.rb: new method Kernel#gettext.
+
+	* lib/wikitik/repository.rb: get arguments from hash.
+
+	* template/view.rhtml: text -> gettext.
+
+	* template/viewrev.rhtml: ditto.
+
+Wed Nov 26 06:23:26 2003  Minero Aoki  <aamine@loveruby.net>
+
+	Project rename: AlphaWiki -> Wikitik.
+
+Tue Nov 25 16:01:44 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* template/viewrev.rhtml: new file.
+
+Tue Nov 25 16:01:29 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* index.rb: implement #viewrev.
+
+	* lib/alphawiki/exception.rb: new exception UnknownRCSLogFormat.
+
+	* lib/alphawiki/page.rb: ViewPage#last_modified is public.
+
+	* lib/alphawiki/page.rb: new class ViewRevPage.
+
+	* lib/alphawiki/repository.rb: #mtime, #[] accepts second arg
+	  `rev'.
+
+Tue Nov 25 15:12:19 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* template/history.rhtml: new file.
+
+Tue Nov 25 15:11:44 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* template/recent.rhtml: link only page names.
+
+Tue Nov 25 14:32:55 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* index.rb: implement #history.
+
+	* lib/alphawiki/page.rb: wrote HistoryPage.
+
+	* lib/alphawiki/repository.rb: new method #getlog.
+
+Tue Nov 25 13:58:09 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/alphawiki.rb: load alphawiki/rc.
+
+	* template/view.rhtml: add last modified time.
+
+	* lib/alphawiki/page.rb (ViewPage): new method #last_modified.
+
+	* lib/alphawiki/rc/ja.rb: new resource :last_modified.
+
+	* lib/alphawiki/rc/en.rb: ditto.
+
+Tue Nov 25 13:47:34 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* config: @lang -> @LC_MESSAGES.
+
+	* lib/alphawiki/rc.rb: ditto.
+
+Tue Nov 25 13:36:18 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/alphawiki/page.rb: does not construct HTML in Page objects.
+
+	* template/list.rhtml: ditto.
+
+	* template/recent.rhtml: ditto.
+
+Tue Nov 25 13:35:21 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/alphawiki/repository.rb (add_and_checkin): missing -m
+	  option.
+
+Tue Nov 25 13:26:10 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/alphawiki/textutils.rb: fix typo.
+
+Tue Nov 25 13:24:50 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/alphawiki/config.rb: @datadir is not used.
+
+Tue Nov 25 13:00:32 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* index.rb: view selected page when unknown command given.
+
+	* index.rb: handle `list'.
+
+	* index.rb: handle `recent'.
+
+	* lib/alphawiki/page.rb: new class ListPage.
+
+	* lib/alphawiki/page.rb: new class RecentPage.
+
+	* lib/alphawiki/repository.rb: new method #entries.
+
+	* lib/alphawiki/repository.rb: new method #mtime.
+
+	* lib/alphawiki/repository.rb: encode_filename != escape_html
+
+	* lib/alphawiki/textutils.rb: new method #wikiname?.
+
+	* lib/alphawiki/textutils.rb: new method #unescape_html.
+
+	* lib/alphawiki/textutils.rb: new method #encode_filename.
+
+	* lib/alphawiki/textutils.rb: new method #decode_filename.
+
+	* lib/alphawiki/textutils.rb: new method #format_time.
+
+	* template/list.rhtml: new file.
+
+	* template/recent.rhtml: new file.
+
+Tue Nov 25 13:00:31 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* index.rb: view selected page when unknown command given.
+
+	* index.rb: handle `list'.
+
+	* index.rb: handle `recent'.
+
+	* lib/alphawiki/page.rb: new class ListPage.
+
+	* lib/alphawiki/page.rb: new class RecentPage.
+
+	* lib/alphawiki/repository.rb: new method #entries.
+
+	* lib/alphawiki/repository.rb: new method #mtime.
+
+	* lib/alphawiki/repository.rb: encode_filename != escape_html
+
+	* lib/alphawiki/textutils.rb: new method #wikiname?.
+
+	* lib/alphawiki/textutils.rb: new method #unescape_html.
+
+	* lib/alphawiki/textutils.rb: new method #encode_filename.
+
+	* lib/alphawiki/textutils.rb: new method #decode_filename.
+
+	* lib/alphawiki/textutils.rb: new method #format_time.
+
+	* template/list.rhtml: new file.
+
+	* template/recent.rhtml: new file.
+
+Tue Nov 25 12:55:18 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* template/view.rhtml: help is implemented as view(HelpPage).
+
+Tue Nov 25 12:53:52 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* default.css: fix UL indent.
+
+Tue Nov 25 11:30:04 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/alphawiki/repository.rb (revision): extract `4' from
+	  `1.2.3.4' (or, `2' from `1.2')
+
+	* lib/alphawiki/repository.rb (update_and_checkin): forgot checkin
+	  message (ci -m).
+
+	* lib/alphawiki/repository.rb (lock): limit retry count.
+
+	* lib/alphawiki/repository.rb (popen3): fork only once. refer:
+	  [ruby-list:25538]
+
+	* lib/alphawiki/repository.rb (popen3): check status of CVS
+	  process.
+
+	* lib/alphawiki/repository.rb (popen3): read stdout/stderr then
+	  waitpid2.
+
+Tue Nov 25 11:26:08 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/alphawiki/exception.rb: CommandFailed takes precise reason.
+
+Tue Nov 25 11:25:03 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* template/edit.rhtml: parameter name was wrong.
+
+Tue Nov 25 09:58:32 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* default.css: revise dl and dt.
+
+Tue Nov 25 09:55:27 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* default.css (a): link is bold.
+
+Tue Nov 25 09:54:18 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* default.css: revise.
+
+Tue Nov 25 09:47:44 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* default.css: written.
+
+	* template/edit.rhtml: add navigation manu.
+
+	* template/view.rhtml: ditto.
+
+Tue Nov 25 09:33:02 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/alphawiki/repository.rb (revision): Enum#detect requires
+	  block.
+
+Tue Nov 25 08:34:56 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* config: wrote description.
+
+	* config: @datadir is not used.
+
+	* index.rb: prepend @libdir only when @libdir exists.
+
+	* lib/alphawiki/page.rb (EditPage): get page revision before
+	  contents.
+
+	* lib/alphawiki/repository.rb: new method #revision.
+
+	* lib/alphawiki/repository.rb (checkin): can check in new file.
+
+Tue Nov 25 07:37:09 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* index.rb (view): editing unexist page caused infinite loop.
+
+	* lib/alphawiki/page.rb: remove #opt_headers for YAGNI mind.
+
+	* template/view.rhtml: ditto.
+
+	* template/edit.rhtml: ditto.
+
+	* lib/alphawiki/page.rb (EditPage): @message -> @opt_message.
+
+	* template/edit.rhtml: ditto.
+
+	* config: add @lang parameter.
+
+	* index.rb: parameterize text resource.
+
+	* lib/alphawiki/rc.rb: new file.
+
+	* lib/alphawiki/rc/ja.rb: new file.
+
+	* lib/alphawiki/rc/en.rb: new file.
+
+Tue Nov 25 07:08:00 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* index.rb: #edit causes infinite loop on missing page_name.
+
+	* lib/alphawiki/config.rb: pass @charset.
+
+	* lib/alphawiki/page.rb: forward @charset.
+
+	* template/view.rhtml: parameterize charset.
+
+	* template/edit.rhtml: ditto.
+
+Mon Nov 24 17:25:04 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* index.rb (main): print backtrace if $DEBUG.
+
+	* index.rb (wiki_main): check CGI parameters strictly.
+
+	* lib/alphawiki/config.rb: new method #tmp_page_name.
+
+	* lib/alphawiki/page.rb: Page.new accept second arg Repository.
+
+	* lib/alphawiki/page.rb: EditPage.new takes optional args: rev,
+	  text, msg.
+
+	* lib/alphawiki/repository.rb: new method #exist?.
+
+	* lib/alphawiki/repository.rb: origrev may become nil (but not 0).
+
+Mon Nov 24 16:21:07 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* .cvsignore: new file.
+
+Mon Nov 24 15:46:43 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* config: add CVS related parameters.
+
+	* lib/alphawiki/repository.rb (.new): takes 3 args, cvs_path,
+	  wc_read, wc_write.
+
+	* lib/alphawiki/repository.rb (checkin): implements CVS checkin
+	  code.
+
+	* lib/alphawiki/repository.rb (popen3): imported from
+	  lib/open3.rb.
+
+	* lib/alphawiki/exception.rb: new file.
+
+Sun Nov 23 17:54:49 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* index.rb: define CGI#get_param.
+
+	* index.rb: fetch paramters from CGI object.
+
+	* lib/alphawiki.rb: load alphawiki/page instead of handler.
+
+	* lib/alphawiki/handler.rb: removed.
+
+	* lib/alphawiki/page.rb: new file.
+
+	* lib/alphawiki/config.rb: new method #index_page_name.
+
+	* lib/alphawiki/config.rb: remove method #read_pagesrc (moved to
+	  Repository).
+
+	* lib/alphawiki/config.rb (read_rhtml): add .rhtml suffix.
+
+	* lib/alphawiki/tohtml.rb: disallow '=' in source level.
+
+	* lib/alphawiki/repository.rb: new file.
+
+	* template/view.rhtml: introduce page_name().
+
+	* template/edit.rhtml: ditto.
+
+	* template/edit.rhtml: embed `page' and `origrev' parameters.
+
+Sun Nov 23 17:54:48 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* index.rb: define CGI#get_param.
+
+	* index.rb: fetch paramters from CGI object.
+
+	* lib/alphawiki.rb: load alphawiki/page instead of handler.
+
+	* lib/alphawiki/handler.rb: removed.
+
+	* lib/alphawiki/page.rb: new file.
+
+	* lib/alphawiki/config.rb: new method #index_page_name.
+
+	* lib/alphawiki/config.rb: remove method #read_pagesrc (moved to
+	  Repository).
+
+	* lib/alphawiki/config.rb (read_rhtml): add .rhtml suffix.
+
+	* lib/alphawiki/tohtml.rb: disallow '=' in source level.
+
+	* lib/alphawiki/repository.rb: new file.
+
+	* template/view.rhtml: introduce page_name().
+
+	* template/edit.rhtml: ditto.
+
+	* template/edit.rhtml: embed `page' and `origrev' parameters.
+
+Sun Nov 23 16:35:50 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* config: new param @cgi_url.
+
+	* index.rb: new CGI command `edit'.
+
+	* lib/alphawiki/config.rb: new method #cgi_url.
+
+	* lib/alphawiki/handler.rb: new class AlphaWiki::Edit.
+
+	* lib/alphawiki/textutils.rb: new method #escape_html.
+
+	* lib/alphawiki/tohtml.rb: use TextUtils#escape_html.
+
+	* template/edit.rhtml: new file.
+
+Sun Nov 23 16:14:15 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* first experiment successed.
+
+	* config: new param @templatedir.
+
+	* config: new param @css_url.
+
+	* index.rb: create and pass Config object to the handler.
+
+	* lib/alphawiki.rb: load alphawiki/config.
+
+	* lib/alphawiki.rb: load alphawiki/handler.
+
+	* lib/alphawiki/handler.rb: debug.
+
+	* lib/alphawiki/tohtml.rb: adjust method names.
+
+	* default.css: new file.
+
+	* lib/alphawiki/config.rb: new file.
+
+	* lib/alphawiki/textutils.rb: new file.
+
+Sun Nov 23 15:52:00 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/alphawiki/handler.rb: new file.
+
+Sun Nov 23 15:43:36 2003  Minero Aoki  <aamine@loveruby.net>
+
+	* config: new file.
+
+	* index.rb: new file.
+
+	* lib/alphawiki.rb: new file.
+
+	* lib/alphawiki/tohtml.rb: new file.
+
+	* template/view.rhtml: new file.
+
+	* pages/IndexPage: new file.
+
