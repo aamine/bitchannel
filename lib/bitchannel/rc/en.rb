@@ -14,5 +14,6 @@ module AlphaWiki
   Resource_en = Hash.new {|h,k| raise ResourceError, "unknown resource key: #{k}" }
   Resource_en[:save_without_name] = 'Text saved without page name; make sure.'
   Resource_en[:conflict] = 'Edit conflicted; make sure.'
+  Resource_en[:last_modified] = 'Last Modified'
   @resource = Resource_en
 end

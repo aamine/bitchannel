@@ -15,4 +15,5 @@ module AlphaWiki
   @resource = Resource_ja
   Resource_ja[:save_without_name] = 'Text saved without page name; make sure.'
   Resource_ja[:conflict] = 'Edit conflicted; make sure.'
+  Resource_ja[:last_modified] = 'Last Modified'
 end

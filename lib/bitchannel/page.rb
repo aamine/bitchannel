@@ -59,6 +59,10 @@ module AlphaWiki
     def body
       ToHTML.compile(@repository[@page_name])
     end
+
+    def last_modified
+      @repository.mtime(@page_name)
+    end
   
   end
 
