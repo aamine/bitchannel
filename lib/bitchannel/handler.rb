@@ -126,6 +126,19 @@ module Wikitik
           return
         end
         send cgi, HistoryPage.new(@config, @repository, page_name).html
+      when 'src'
+        page_name = (cgi.get_param('name') || @config.index_page_name)
+        begin
+          body = @repository[page_name]
+        rescue Errno::ENOENT
+          body = ''
+        end
+        begin
+          mtime = @repository.mtime(page_name)
+        rescue Errno::ENOENT
+          mtime = nil
+        end
+        send_text cgi, body, mtime
       when 'list'
         send cgi, ListPage.new(@config, @repository).html
       when 'recent'
@@ -174,6 +187,19 @@ raise ArgumentError, "view page=nil" unless page_name
       header['Last-Modified'] = CGI.rfc1123_date(mtime) if mtime
       print cgi.header(header)
       print html unless cgi.request_method.to_s.upcase == 'HEAD'
+      $stdout.flush
+    end
+
+    def send_text(cgi, text, mtime = nil)
+      header = {'status' => '200 OK',
+                'type' => 'text/plain',
+                'charset' => @config.charset,
+                'Pragma' => 'no-cache',
+                'Cache-Control' => 'no-cache',
+                'Content-Length' => text.length.to_s}
+      header['Last-Modified'] = CGI.rfc1123_date(mtime) if mtime
+      print cgi.header(header)
+      print text unless cgi.request_method.to_s.upcase == 'HEAD'
       $stdout.flush
     end
 
