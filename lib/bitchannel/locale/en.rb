@@ -24,6 +24,14 @@ module BitChannel
     def charset
       'us-ascii'
     end
+
+    def unify_encoding(str)
+      str
+    end
+
+    def split_words(str)
+      str.strip.split
+    end
   end
 
   loc = Locale_en.new

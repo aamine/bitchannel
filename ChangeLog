@@ -1,3 +1,64 @@
+Sun May  9 10:39:16 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* WikiFarm implemented.
+
+	* farm.cgi: new file.
+
+	* lib/bitchannel/farm.rb: new file.
+
+	* template/farm.rhtml: new file.
+
+	* template/farmthanks.rhtml: new file.
+
+	* lib/bitchannel/exception.rb: new exception NodeExist.
+
+	* lib/bitchannel/cgi.rb: Wiki node context is
+	  BitChannel::WikiSpace.
+
+	* lib/bitchannel/fcgi.rb: ditto.
+
+	* lib/bitchannel/webrickservlet.rb: ditto.
+
+	* index.cgi: ditto.
+
+	* index.fcgi: ditto.
+
+	* index.rbx: ditto.
+
+	* bitchannelrc.sample.ja: ditto.
+
+	* lib/bitchannel/wikispace.rb: new file.
+
+	* lib/bitchannel.rb: require bitchannel/wikispace.
+
+	* lib/bitchannel/webrick_cgi.rb: new file.  WEBrick::CGI
+	  enhancement to support FCGI.
+
+	* lib/bitchannel/webrick_fcgi.rb: new file.  WEBrick::CGI
+	  enhancement to support FCGI.
+
+	* lib/bitchannel/config.rb: stop delegation to @locale.
+
+	* lib/bitchannel/handler.rb: rewritten.
+
+	* lib/bitchannel/page.rb: change class tree to support WikiFarm
+	  pages.
+
+	* lib/bitchannel/page.rb: new class TextPage.
+
+	* lib/bitchannel/repository.rb: pass original revision on edit
+	  confliction.
+
+	* lib/bitchannel/exception.rb: EditConflicts.new takes one more
+	  arg, original revision.
+
+	* lib/bitchannel/textutils.rb: remove #jsplit and #unify_encoding.
+
+	* lib/bitchannel/locale/en.rb: new method #unify_encoding,
+	  #split_words.
+
+	* lib/bitchannel/locale/ja.rb: ditto.
+
 Sun May  9 06:49:38 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/cgi.rb: create Request object in BitChannel::CGI.

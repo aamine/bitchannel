@@ -9,4 +9,4 @@
 load './bitchannelrc'
 setup_environment
 require 'bitchannel/cgi'
-BitChannel::CGI.main(*bitchannel_context())
+BitChannel::CGI.main bitchannel_context()

@@ -68,19 +68,12 @@ module BitChannel
       end
     end
 
+    attr_reader :locale
     attr_reader :templatedir
     attr_reader :logo_url
 
     def css_url
       @css_url || "#{@theme_url}/#{@theme}/#{@theme}.css"
-    end
-
-    def charset
-      @locale.charset
-    end
-
-    def text(key)
-      @locale.text(key)
     end
 
     def html_url?

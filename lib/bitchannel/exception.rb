@@ -15,6 +15,7 @@ module BitChannel
   class UnknownRCSLogFormat < BitChannelError; end
   class WrongQuery < BitChannelError; end
   class WrongPageName < BitChannelError; end
+  class NodeExist < BitChannelError; end
 
   class CommandFailed < BitChannelError
     def initialize(msg, status)
@@ -28,11 +29,13 @@ module BitChannel
   end
 
   class EditConflict < BitChannelError
-    def initialize(msg, merged)
+    def initialize(msg, merged, rev)
       super msg
       @merged = merged
+      @revision = rev
     end
 
     attr_reader :merged
+    attr_reader :revision
   end
 end

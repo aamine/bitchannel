@@ -9,31 +9,23 @@
 #
 
 require 'bitchannel/handler'
-require 'webrick/cgi'
+require 'bitchannel/webrick_cgi'
 
 module BitChannel
-
   class CGI < WEBrick::CGI
-    def CGI.main(*context)
-      run new({}, *context)
+    def CGI.main(wiki)
+      super({}, wiki)
     end
 
-    def CGI.run(app)
-      each_request do |env, stdin, stdout|
-        app.start env, stdin, stdout
-      end
-    end
-
-    def CGI.each_request
-      yield ENV, $stdin, $stdout
+    def init_application(wiki)
+      @wiki = wiki
     end
 
     def do_GET(req, res)
-      h = Handler.new(*@options)
-      h.handle(Request.new(req, h.config, false)).update_for res
+      bcres = Handler.new(@wiki).handle(Request.new(req, @wiki.locale, false))
+      bcres.update_for res
     end
 
     alias do_POST do_GET
   end
-
 end

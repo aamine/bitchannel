@@ -14,7 +14,11 @@ require 'bitchannel/textutils'
 
 module BitChannel
 
-  class GenericPage
+  class Page
+  end
+
+
+  class RhtmlPage < Page
     include ErbUtils
     include TextUtils
 
@@ -22,18 +26,39 @@ module BitChannel
       @config = config
     end
 
-    def html
+    def content
       run_erb(@config.templatedir, template_id())
+    end
+
+    def type
+      'text/html'
+    end
+
+    def charset
+      @config.locale.charset
     end
 
     def last_modified
       nil
     end
 
-    def charset
-      @config.charset
+    private
+
+    def page_charset
+      escape_url(@config.locale.charset)
     end
 
+    def css_url
+      escape_url(@config.css_url)
+    end
+
+    def escape_url(str)
+      escape_html(URI.escape(str))
+    end
+  end
+
+
+  class WikiPage < RhtmlPage
     private
 
     def menuitem_diff_enabled?()     false end
@@ -45,14 +70,6 @@ module BitChannel
     def menuitem_top_enabled?()      true end
     def menuitem_help_enabled?()     true end
     def menuitem_search_enabled?()   true end
-
-    def page_charset
-      escape_url(@config.charset)
-    end
-
-    def css_url
-      escape_url(@config.css_url)
-    end
 
     def cgi_url
       escape_url(@config.cgi_url)
@@ -78,18 +95,13 @@ module BitChannel
       end
     end
 
-    def escape_url(str)
-      escape_html(URI.escape(str))
-    end
-
     def query_string
       ''
     end
   end
 
 
-  # a page object which is associated with a real file
-  class Page < GenericPage
+  class NamedPage < WikiPage
     def initialize(config, repo, page_name)
       super config
       @repository = repo
@@ -167,7 +179,7 @@ module BitChannel
   end
 
 
-  class ViewPage < Page
+  class ViewPage < NamedPage
     def initialize(config, repo, page_name)
       super
       @revision = nil
@@ -205,7 +217,7 @@ module BitChannel
   end
 
 
-  class ViewRevPage < Page
+  class ViewRevPage < NamedPage
     def initialize(config, repo, page_name, rev)
       super config, repo, page_name
       @revision = rev
@@ -235,7 +247,7 @@ module BitChannel
   end
 
 
-  class DiffPage < Page
+  class DiffPage < NamedPage
     def initialize(config, repo, page_name, rev1, rev2)
       super config, repo, page_name
       @rev1 = rev1
@@ -266,7 +278,7 @@ module BitChannel
   end
 
 
-  class GlobalDiffPage < GenericPage
+  class GlobalDiffPage < WikiPage
     def initialize(config, repo, org, reload)
       super config
       @repository = repo
@@ -294,7 +306,7 @@ module BitChannel
   end
 
 
-  class AnnotatePage < Page
+  class AnnotatePage < NamedPage
     def initialize(config, repo, page_name, rev)
       super config, repo, page_name
       @revision = rev
@@ -335,7 +347,7 @@ module BitChannel
   end
 
 
-  class HistoryPage < Page
+  class HistoryPage < NamedPage
     def initialize(config, repo, page_name)
       super
       @revision = nil
@@ -365,12 +377,12 @@ module BitChannel
   end
 
 
-  class EditPage < Page
-    def initialize(config, repo, page_name, text, origrev, msg = nil)
+  class EditPage < NamedPage
+    def initialize(config, repo, page_name, text, origrev, reason = nil)
       super config, repo, page_name
       @text = text
       @original_revision = origrev
-      @opt_message = msg
+      @invalid_edit_reason = reason
     end
 
     private
@@ -390,7 +402,8 @@ module BitChannel
     end
     
     def opt_message
-      @opt_message
+      return nil unless @invalid_edit_reason
+      @config.locale.text(@invalid_edit_reason)
     end
 
     def body
@@ -403,7 +416,7 @@ module BitChannel
   end
 
 
-  class PreviewPage < Page
+  class PreviewPage < NamedPage
     def initialize(config, repo, page_name, text, origrev)
       super config, repo, page_name
       @text = text
@@ -436,7 +449,7 @@ module BitChannel
   end
 
 
-  class ThanksPage < GenericPage
+  class ThanksPage < WikiPage
     def initialize(config, page_name)
       super config
       @page_name = page_name
@@ -458,7 +471,7 @@ module BitChannel
   end
 
 
-  class ListPage < GenericPage
+  class ListPage < WikiPage
     def initialize(config, repo)
       super config
       @repository = repo
@@ -484,7 +497,7 @@ module BitChannel
   end
 
 
-  class RecentPage < GenericPage
+  class RecentPage < WikiPage
     def initialize(config, repo)
       super config
       @repository = repo
@@ -512,7 +525,7 @@ module BitChannel
   end
 
 
-  class SearchResultPage < GenericPage
+  class SearchResultPage < WikiPage
     def initialize(config, repo, q, patterns)
       super config
       @repository = repo
@@ -555,7 +568,7 @@ module BitChannel
   end
 
 
-  class SearchErrorPage < GenericPage
+  class SearchErrorPage < WikiPage
     def initialize(config, query, err)
       super config
       @query = query
@@ -578,6 +591,26 @@ module BitChannel
 
     def query_string
       escape_html(Array(@query).join(' '))
+    end
+  end
+
+
+  class TextPage < Page
+    def initialize(locale, text, lm)
+      @locale = locale
+      @content = text
+      @last_modified = lm
+    end
+
+    attr_reader :content
+    attr_reader :last_modified
+
+    def type
+      'text/plain'
+    end
+
+    def charset
+      @locale.charset
     end
   end
 

@@ -339,9 +339,10 @@ module BitChannel
         if /conflicts during merge/ =~ err
           log "conflict: #{filename}"
           merged = File.read(filename)
+          rev = read_Entries("CVS/Entries")[decode_filename(filename)][0]
           File.unlink filename   # prevent next writer from conflict
           cvs 'up', '-A', filename
-          raise EditConflict.new('conflict found', merged)
+          raise EditConflict.new('conflict found', merged, rev)
         end
       end
       cvs 'ci', '-m', "auto checkin: origrev=#{origrev}", filename

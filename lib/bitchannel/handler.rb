@@ -8,9 +8,9 @@
 # the GNU LGPL, Lesser General Public License version 2.1.
 #
 
+require 'bitchannel/config'
 require 'bitchannel/page'
 require 'bitchannel/textutils'
-require 'bitchannel/config'
 require 'webrick/cookie'
 require 'uri'
 require 'date'
@@ -29,25 +29,20 @@ module BitChannel
   class Handler
     include TextUtils
 
-    def initialize(config, repo)
-      @config = config
-      @repository = repo
+    def initialize(wiki)
+      @wiki = wiki
     end
-
-    attr_reader :config
 
     def handle(req)
-      return _handle(req)
+      handle_request(req) || @wiki.view(FRONT_PAGE_NAME).response
     rescue Exception => err
-      return error_response(err, true)
+      error_response(err, true)
     end
 
-    def _handle(req)
+    def handle_request(req)
       mid = "handle_#{req.cmd}"
-      if respond_to?(mid, true)
-      then __send__(mid, req)
-      else view_page(req.page_name || FRONT_PAGE_NAME)
-      end
+      return nil unless respond_to?(mid, true)
+      __send__(mid, req)
     end
 
     private
@@ -70,99 +65,74 @@ module BitChannel
       html << "</pre>\n</body></html>"
 
       res = Response.new
-      res.set_content_body html, 'text/html', @config.charset
+      res.set_content_body html, 'text/html', @wiki.locale.charset
       res
     end
 
     def handle_view(req)
-      page_name = (req.page_name || FRONT_PAGE_NAME)
-      if rev = req.rev
-      then ViewRevPage.new(@config, @repository, page_name, rev).response
-      else view_page(page_name)
+      if req.rev
+      then __handle_viewrev(req)
+      else __handle_view_latest(req)
       end
     end
 
-    def view_page(name)
-      if not @repository.exist?(name) and @repository.valid?(name)
-        return EditPage.new(@config, @repository, name, '', nil).response
+    def __handle_view_latest(req)
+      return nil unless req.page_name
+      return nil unless @wiki.valid?(req.page_name)
+      unless @wiki.exist?(req.page_name)
+        return @wiki.edit_new(req.page_name).response
       end
-      ViewPage.new(@config, @repository, name).response
+      @wiki.view(req.page_name).response
     end
 
-    def front_page
-      ViewPage.new(@config, @repository, FRONT_PAGE_NAME).response
+    def __handle_viewrev(req)
+      return nil unless req.page_name
+      return nil unless @wiki.exist?(req.page_name)
+      @wiki.viewrev(req.page_name, req.rev).response
     end
 
     def handle_edit(req)
-      page_name = req.page_name or return front_page()
-      orgrev = @repository.revision(page_name)
-      srcrev = (req.rev || orgrev)
-      EditPage.new(@config, @repository, page_name,
-                   @repository.fetch(page_name, srcrev) { '' },
-                   orgrev).response
-    end
-
-    def handle_preview(req)
-      page_name = req.page_name or return front_page()
-      PreviewPage.new(@config, @repository,
-                      page_name, req.normalized_text, req.origrev).response
+      return nil unless req.page_name
+      return nil unless @wiki.valid?(req.page_name)
+      if req.rev
+      then @wiki.edit_revision(req.page_name, req.rev).response
+      else @wiki.edit(req.page_name).response
+      end
     end
 
     def handle_save(req)
-      return handle_preview(req) if req.preview?
-      page_name = req.page_name or
-          return reedit_response(req.normalized_text, @config.text(:save_without_name))
-      text = req.normalized_text
+      return invalid_edit(req.normalized_text, :save_without_name) \
+          unless req.page_name
+      return invalid_edit(req.normalized_text, :invalid_page_name) \
+          unless @wiki.valid?(req.page_name)
+      return __handle_preview(req) if req.preview?
       begin
-        @repository.checkin page_name, req.origrev, text
-        return thanks_response(page_name)
+        text = req.normalized_text
+        @wiki.save(req.page_name, req.origrev, text).response
       rescue EditConflict => err
-        return EditPage.new(@config, @repository,
-                            page_name, err.merged,
-                            @repository.revision(page_name),
-                            @config.text(:edit_conflicted)).response
-      rescue WrongPageName => err
-        return reedit(text, err.message)
+        @wiki.edit_again(req.page_name, err.merged, err.revision).response
       end
     end
 
-    def reedit_response(text, msg)
-      EditPage.new(@config, @repository,
-                   TMP_PAGE_NAME, text,
-                   @repository.revision(TMP_PAGE_NAME), msg).response
+    def __handle_preview(req)
+      @wiki.preview(req.page_name, req.normalized_text, req.origrev).response
     end
 
-    def thanks_response(name)
-      ThanksPage.new(@config, name).response
+    def invalid_edit(text, reason)
+      @wiki.edit_again(TMP_PAGE_NAME, text, nil, reason).response
     end
 
     def handle_comment(req)
-      page_name = req.page_name
-      return front_page() if not page_name or not @repository.exist?(page_name)
-      uname = req.cmtbox_username
-      comment = req.cmtbox_comment
-      @repository.edit(page_name) {|text|
-        insert_comment(@repository[page_name], uname, comment)
-      }
-      thanks_response(page_name)
-    end
-
-    def insert_comment(text, uname, comment)
-      cmtline = "* #{format_time(Time.now)}: #{uname}: #{comment}"
-      unless /\[\[\#comment(:.*?)?\]\]/n =~ text
-        text << "\n" << cmtline
-        return text
-      end
-      text.sub(/\[\[\#comment(:.*?)?\]\]/n) { $& + "\n" + cmtline }
+      return nil unless req.page_name
+      return nil unless @wiki.exist?(req.page_name)
+      @wiki.comment(req.page_name, req.cmtbox_username, req.cmtbox_comment).response
     end
 
     def handle_diff(req)
-      page_name = req.page_name
-      return front_page() if not page_name or not @repository.exist?(page_name)
-      rev1 = req.rev1
-      rev2 = req.rev2
-      return view_page(page_name) unless rev1 and rev2
-      DiffPage.new(@config, @repository, page_name, rev1, rev2).response
+      return nil unless req.page_name
+      return nil unless @wiki.exist?(req.page_name)
+      return nil unless req.rev1 and req.rev2
+      @wiki.diff(req.page_name, req.rev1, req.rev2).response
     end
 
     def handle_gdiff(req)
@@ -171,8 +141,7 @@ module BitChannel
             when req.gdiff_origin_specified? then req.gdiff_origin_time
             else default_origin_time()
             end
-      res = GlobalDiffPage.new(@config, @repository,
-                               org, req.gdiff_reload?).response
+      res = @wiki.gdiff(org, req.gdiff_reload?).response
       res.set_cookie req.new_gdiff_cookie
       res
     end
@@ -182,62 +151,43 @@ module BitChannel
     end
 
     def handle_history(req)
-      name = req.page_name
-      return front_page() if not name or not @repository.exist?(name)
-      HistoryPage.new(@config, @repository, name).response
+      return nil unless req.page_name
+      return nil unless @wiki.exist?(req.page_name)
+      @wiki.history(name).response
     end
 
     def handle_annotate(req)
-      name = req.page_name
-      return front_page() if not name or not @repository.exist?(name)
-      AnnotatePage.new(@config, @repository, name, req.rev).response
+      return nil unless req.page_name
+      return nil unless @wiki.exist?(req.page_name)
+      @wiki.annotate(req.page_name, req.rev).response
     end
 
     def handle_src(req)
-      res = Response.new
-      name = (req.page_name || FRONT_PAGE_NAME)
-      begin
-        res.last_modified = @repository.mtime(name)
-      rescue Errno::ENOENT
-        ;
-      end
-      begin
-        res.set_content_body @repository[name], 'text/plain', @config.charset
-      rescue Errno::ENOENT
-        res.set_content_body '', 'text/plain', @config.charset
-      end
-      res
+      return not_found() unless req.page_name
+      return not_found() unless @wiki.exist?(req.page_name)
+      @wiki.src(req.page_name).response
+    end
+
+    def not_found
+      nil   # FIXME
     end
 
     def handle_extent(req)
-      buf = ''
-      @repository.page_names.sort.each do |name|
-        buf << "= #{name}\r\n"
-        buf << "\r\n"
-        buf << @repository[name]
-        buf << "\r\n"
-      end
-      res = Response.new
-      res.last_modified = @repository.latest_mtime
-      res.set_content_body buf, 'text/plain', @config.charset
-      res
+      @wiki.extent.response
     end
 
     def handle_list(req)
-      ListPage.new(@config, @repository).response
+      @wiki.list.response
     end
 
     def handle_recent(req)
-      RecentPage.new(@config, @repository).response
+      @wiki.recent.response
     end
 
     def handle_search(req)
-      begin
-        SearchResultPage.new(@config, @repository,
-                             req.search_query, req.search_regexps).response
-      rescue WrongQuery => err
-        return SearchErrorPage.new(@config, req.search_query, err).response
-      end
+      @wiki.search(req.search_query, req.search_regexps).response
+    rescue WrongQuery => err
+      @wiki.search_error(req.search_query, err)
     end
   end
 
@@ -272,7 +222,7 @@ module BitChannel
     end
 
     def cmtbox_username
-      unify_encoding(get('uname').to_s.strip, @config.charset)
+      @locale.unify_encoding(get('uname').to_s.strip)
     end
 
     def cmtbox_comment
@@ -351,7 +301,7 @@ module BitChannel
     end
 
     def search_query
-      unify_encoding(get('q').to_s.strip, @config.charset)
+      @locale.unify_encoding(get('q').to_s.strip)
     end
 
     def search_regexps
@@ -360,9 +310,9 @@ module BitChannel
 
     def setup_query(query)
       raise WrongQuery, 'no pattern' unless query
-      patterns = jsplit(query).map {|pat|
+      patterns = @locale.split_words(query).map {|pat|
         check_pattern pat
-        /#{Regexp.quote(pat)}/ie
+        /#{Regexp.quote(pat)}/i
       }
       raise WrongQuery, 'no pattern' if patterns.empty?
       raise WrongQuery, 'too many sub patterns' if patterns.length > 8
@@ -381,7 +331,7 @@ module BitChannel
     private
 
     def normalize_text(text)
-      unify_encoding(text, @config.charset).map {|line|
+      @locale.unify_encoding(text).map {|line|
         detab(line).rstrip + "\r\n"
       }.join('')
     end
@@ -396,6 +346,13 @@ module BitChannel
 
 
   class Response
+    def Response.new_from_page(page)
+      res = new()
+      res.last_modified = page.last_modified
+      res.set_content_body page.content, page.type, page.charset
+      res
+    end
+
     def initialize
       @status = nil
       @header = {}
@@ -439,7 +396,7 @@ module BitChannel
     end
 
     def no_cache?
-      @header['Cache-Control'] ? true : false
+      @header.key?('Cache-Control')
     end
 
     def set_cookie(c)
@@ -457,12 +414,9 @@ module BitChannel
   end
 
 
-  class GenericPage   # redefine
+  class Page   # redefine
     def response
-      res = Response.new
-      res.last_modified = last_modified()
-      res.set_content_body html(), 'text/html', charset()
-      res
+      Response.new_from_page(self)
     end
   end
 

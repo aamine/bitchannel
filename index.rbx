@@ -2,12 +2,10 @@
 # $Id$
 
 load './bitchannelrc'
-
-$BitChannelInitialized ||= false
-unless $BitChannelInitialized
+$BitChannelContext ||= nil
+unless $BitChannelContext
   setup_environment
-  $BitChannelInitialized = true
+  $BitChannelContext = bitchannel_context()
 end
-
 require 'bitchannel/cgi'
-BitChannel::CGI.main(*bitchannel_context())
+BitChannel::CGI.main $BitChannelContext

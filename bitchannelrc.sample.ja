@@ -10,7 +10,6 @@ def setup_environment
   $KCODE = 'EUC'
   $LOAD_PATH.unshift "#{bitchannel_cgidir()}/lib"
   require 'bitchannel'
-  BitChannel.lang = 'ja'
 end
 
 def bitchannel_context
@@ -21,8 +20,8 @@ def bitchannel_context
         # The name of site.
         # This string is shown on FrontPage.
 
-    # :logo_url     => '/images/logo.png',
-        # Site logo.
+    # :logo_url     => 'logo.png',
+        # The URL of site logo.
         # This image is shown on all pages.
 
     :templatedir  => "#{cgidir}/template",
@@ -31,16 +30,17 @@ def bitchannel_context
         # The locale.
         # I have tested only ja_JP.eucJP.
 
-    # :cgi_url      => nil,       # auto detect
-    # :cgi_url      => '/wiki/',  # static
+    :cgi_url      => nil,       # auto detect
+    #:cgi_url      => '/wiki/',  # static
 
     #:css_url      => 'default.css',
     :theme        => 'default',
 
-    :use_html_url => false
+    :use_html_url => nil
         # You MUST set up mod_rewrite before turning this flag on.
-        # true: PageName.html
-        # false: ?cmd=view;name=PageName
+        #     ".html" : PageName.html
+        #          "" : PageName
+        #         nil : ?cmd=view;name=PageName
   )
   repository = BitChannel::Repository.new(
     :cmd_path  => '/usr/bin/cvs',
@@ -50,5 +50,5 @@ def bitchannel_context
     :logfile   => nil
   )
 
-  return config, repository
+  BitChannel::WikiSpace.new(config, repository)
 end
