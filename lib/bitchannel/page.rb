@@ -109,7 +109,7 @@ module BitChannel
 
     private
 
-    def menuitem_edit_enabled?()     true end
+    def menuitem_edit_enabled?()     not @page.repository.read_only? end
     def menuitem_diff_enabled?()     diff_base_revision() > 1 end
     def menuitem_history_enabled?()  true end
     def menuitem_annotate_enabled?() true end

@@ -80,6 +80,7 @@ module BitChannel
       return nil unless req.page_name
       return nil unless @wiki.valid?(req.page_name)
       unless @wiki.exist?(req.page_name)
+        return nil if @wiki.read_only?
         return @wiki.edit_new(req.page_name).response
       end
       @wiki.view(req.page_name).response
@@ -92,6 +93,7 @@ module BitChannel
     end
 
     def handle_edit(req)
+      return nil if @wiki.read_only?
       return nil unless req.page_name
       return nil unless @wiki.valid?(req.page_name)
       if req.rev
@@ -101,6 +103,7 @@ module BitChannel
     end
 
     def handle_save(req)
+      return nil if @wiki.read_only?
       return invalid_edit(req.normalized_text, :save_without_name) \
           unless req.page_name
       return invalid_edit(req.normalized_text, :invalid_page_name) \
@@ -123,6 +126,7 @@ module BitChannel
     end
 
     def handle_comment(req)
+      return nil if @wiki.read_only?
       return nil unless req.page_name
       return nil unless @wiki.exist?(req.page_name)
       @wiki.comment(req.page_name, req.cmtbox_username, req.cmtbox_comment).response

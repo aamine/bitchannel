@@ -97,8 +97,14 @@ module BitChannel
         end
 
         cmd = conf.get_required(:cmd_path)
+        @read_only_p = conf.get_optional(:read_only, false)
         @wc_read  = CVSWorkingCopy.new(id, conf.get_required(:wc_read), cmd, logger)
-        @wc_write = CVSWorkingCopy.new(id, conf.get_required(:wc_write), cmd, logger)
+        unless @read_only_p
+          @wc_write = CVSWorkingCopy.new(id, conf.get_required(:wc_write), cmd, logger)
+        else
+          conf.get_optional(:wc_write, nil)   # discard
+          @wc_write = nil
+        end
         cachedir  = conf.get_required(:cachedir)
         @link_cache = LinkCache.new("#{cachedir}/link")
         @revlink_cache = LinkCache.new("#{cachedir}/revlink")
@@ -113,12 +119,16 @@ module BitChannel
     def clear_per_request_cache
       @pages.clear
       @wc_read.clear_cache
-      @wc_write.clear_cache
+      @wc_write.clear_cache if @wc_write
     end
 
     # internal use only
     attr_reader :link_cache
     attr_reader :revlink_cache
+
+    def read_only?
+      @read_only_p
+    end
 
     def page_names
       @wc_read.cvs_Entries.keys.map {|name| decode_filename(name) }
@@ -161,7 +171,10 @@ module BitChannel
     private :page_must_valid
 
     def last_modified
-      @wc_write.last_modified
+      if read_only?
+      then @wc_read.last_modified
+      else @wc_write.last_modified
+      end
     end
 
     def [](name)
@@ -762,6 +775,7 @@ module BitChannel
     private :collect_revlinks
 
     def checkin(origrev, new_text)
+      raise 'repository is read only' if @repository.read_only?
       new_rev = nil
       @wc_write.chdir {|wc|
         wc.lock(@name) {
@@ -788,6 +802,7 @@ module BitChannel
     end
 
     def edit
+      raise 'repository is read only' if @repository.read_only?
       new_rev = nil
       new_text = nil
       @wc_write.chdir {|wc|

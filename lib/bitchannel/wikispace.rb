@@ -38,6 +38,10 @@ module BitChannel
       @repository.clear_per_request_cache
     end
 
+    def read_only?
+      @repository.read_only?
+    end
+
     def locale
       @config.locale
     end

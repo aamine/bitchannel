@@ -1,3 +1,14 @@
+Sat Aug 14 14:16:53 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/handler.rb: reject edit/save/comment in read-only
+	  mode.
+
+	* lib/bitchannel/page.rb: turn off EDIT in read-only mode.
+
+	* lib/bitchannel/repository.rb: read_only support.
+
+	* lib/bitchannel/wikispace.rb: #read_only? forwarding.
+
 Mon Aug  9 04:43:28 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/fcgi.rb: make record buffers persisitent. (IMPORTANT FIX for
