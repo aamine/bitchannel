@@ -76,6 +76,8 @@ module BitChannel
       end
       @link_cache = LinkCache.new(@config.link_cachedir,
                                   @config.revlink_cachedir)
+      # in-process cache
+      @Entries = nil
     end
 
     def page_names
@@ -94,7 +96,7 @@ module BitChannel
       raise 'page_name == nil' unless page_name
       raise 'page_name == ""' if page_name.empty?
       raise WrongPageName, "do not use `CVS' for a page name" if /\ACVS\z/i =~ page_name
-      File.exist?("#{@wc_read}/#{encode_filename(page_name)}")
+      File.file?("#{@wc_read}/#{encode_filename(page_name)}")
     end
 
     def size(page_name)
@@ -102,25 +104,33 @@ module BitChannel
     end
 
     def mtime(page_name, rev = nil)
+      page_must_exist page_name
       unless rev
-        File.mtime("#{@wc_read}/#{encode_filename(page_name)}")
+        @Entries ||= read_Entries("#{@wc_read}/CVS/Entries")
+        rev, mtime = *@Entries[page_name]
+        mtime
       else
         Dir.chdir(@wc_read) {
           out, err = cvs('log', "-r1.#{rev}", encode_filename(page_name))
-          dateline = out.detect {|line| /\Adate: / =~ line }
-          raise UnknownRCSLogFormat, "unknown RCS log format; given up" \
-              unless dateline
+          dateline = out.detect {|line| /\Adate: / =~ line } or
+              raise UnknownRCSLogFormat, "unknown RCS log format; given up"
           return Time.parse(line.slice(/\Adate: (.*?);/, 1))
         }
       end
+    end
+
+    def revision(page_name)
+      page_must_exist page_name
+      @Entries ||= read_Entries("#{@wc_read}/CVS/Entries")
+      rev, mtime = *@Entries[page_name]
+      rev
     end
 
     def [](page_name, rev = nil)
       unless rev
         File.read("#{@wc_read}/#{encode_filename(page_name)}")
       else
-        # raise ENOENT if file does not exist.
-        File.open("#{@wc_read}/#{encode_filename(page_name)}", 'r') { }
+        page_must_exist page_name
         Dir.chdir(@wc_read) {
           out, err = cvs('up', '-p', "-r1.#{rev}", encode_filename(page_name))
           return out
@@ -134,13 +144,6 @@ module BitChannel
       rescue Errno::ENOENT
         return yield
       end
-    end
-
-    def revision(page_name)
-      re = %r<\A/#{Regexp.quote(encode_filename(page_name))}/1>
-      line = File.readlines("#{@wc_read}/CVS/Entries").detect {|s| re =~ s }
-      return nil unless line   # file not checked in
-      line.split(%r</>)[2].split(%r<\.>).last.to_i
     end
 
     # [[rev,logstr]]
@@ -302,6 +305,23 @@ module BitChannel
           f.flock(File::LOCK_UN)
         end
       }
+    end
+
+    def page_must_exist(page_name)
+      File.open("#{@wc_read}/#{encode_filename(page_name)}", 'r') {
+        ;
+      }
+    end
+
+    def read_Entries(filename)
+      table = {}
+      File.readlines(filename).each do |line|
+        next if /\AD/ =~ line
+        ent, rev, mtime = *line.split(%r</>).values_at(1, 2, 3)
+        table[decode_filename(ent)] = [rev.split(%r<\.>).last.to_i,
+                                       Time.parse(mtime)]
+      end
+      table
     end
 
     def extract_links(page_text)
