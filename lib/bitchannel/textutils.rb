@@ -106,8 +106,8 @@ module BitChannel
         }
 
         MIME_CHARSET_TO_ICONV = {
-          'euc-jp'    => %w(eucJP euc-jp EUC-JP).find {|c| check(c) },
-          'shift_jis' => %w(SJIS shift_jis Shift_JIS).find {|c| check(c) }
+          'euc-jp'    => %w(eucJP euc-jp EUC-JP).find {|c| check[c] },
+          'shift_jis' => %w(SJIS shift_jis Shift_JIS).find {|c| check[c] }
         }
 
         def unify_encoding(text, code)

@@ -1,3 +1,7 @@
+Sat Mar 27 16:51:19 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/textutils.rb: `check' is a Proc, not method.
+
 Sat Mar 27 05:58:56 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* bitchannelrc.sample.ja: untaint cgidir.
