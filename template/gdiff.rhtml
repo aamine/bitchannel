@@ -14,6 +14,8 @@
 <div class="main">
 <h1><%= logo_url() %>Diff from <%= format_time(origin_time()) %></h1>
 
+<p><a href="<%= cgi_url() %>?cmd=gdiff;org=cookie">[Diff from my last visit]</a></p>
+
 <% diffs().each do |log| %>
 <div>
 <h2><a href="<%= view_url(log.page_name) %>"><%= escape_html(log.page_name) %></a></h2>
