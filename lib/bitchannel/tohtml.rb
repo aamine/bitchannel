@@ -221,11 +221,12 @@ module BitChannel
       esctable = TextUtils::ESC
       str.gsub(/(#{NeedESC})|(#{WikiName})|(#{BlacketLink})|(#{SeemsURL})/on) {
         if    ch  = $1 then esctable[ch]
-        elsif tok = $2 then wikiname(tok)
+        elsif tok = $2 then internal_link(tok)
         elsif tok = $3
           case link = tok[2..-3]
-          when /\A[\w\-]+:/n then interwikiname(link)
-          when /\A\w+\z/n    then explicit_link(link)
+          when SeemsURL      then %[<a href="#{escape_html(link)}">#{escape_html(link)}</a>]
+          when /\A[\w\-]+:/n then interwiki(*link.split(/:/, 2))
+          when /\A\w+\z/n    then internal_link(link)
           else                    tok
           end
         elsif tok = $4 then seems_url(tok)
@@ -235,31 +236,29 @@ module BitChannel
       }
     end
 
-    def wikiname(name)
+    def internal_link(name)
       return escape_html(name) if name == @page_name
       @internal_links.push name
-      href = escape_html(URI.escape(name))
-      anchor = escape_html(name)
       if @repository.exist?(name)
-      then %Q[<a href="#{cgi_href()}?cmd=view;name=#{href}">#{anchor}</a>]
-      else %Q[<a href="#{cgi_href()}?cmd=view;name=#{href}">?</a>#{anchor}]
+      then %Q[<a href="#{view_url(name)}">#{escape_html(name)}</a>]
+      else %Q[<a href="#{view_url(name)}">?</a>#{escape_html(name)}]
       end
     end
 
-    def explicit_link(exlink)
-      @internal_links.push exlink
-      href = escape_html(URI.escape(exlink))
-      anchor = escape_html(exlink)
-      if @repository.exist?(exlink)
-      then %Q[<a href="#{cgi_href()}?cmd=view;name=#{href}">#{anchor}</a>]
-      else %Q[<a href="#{cgi_href()}?cmd=view;name=#{href}">?</a>#{anchor}]
+    def view_url(name)
+      if @config.html_url?
+      then "#{escape_html(URI.escape(name))}.html"
+      else "#{cgi_href()}?cmd=view;name=#{escape_html(URI.escape(name))}"
       end
     end
 
-    def interwikiname(name)
-      interwikiname, vary = name.split(/:/, 2)
-      href = resolve_interwikiname(interwikiname, vary)
-      anchor = escape_html("[#{name}]")
+    def cgi_href
+      escape_html(@config.cgi_url)
+    end
+
+    def interwiki(id, vary)
+      href = resolve_interwikiname(id, vary)
+      anchor = escape_html("[#{id}:#{vary}]")
       if href
       then %Q[<a href="#{escape_html(URI.escape(href))}">#{anchor}</a>]
       else '?' + anchor
@@ -269,7 +268,7 @@ module BitChannel
     def resolve_interwikiname(name, vary)
       table = interwikiname_table() or return nil
       return nil unless table.key?(name)
-      table[name] + vary
+      sprintf(table[name], vary)
     end
 
     def interwikiname_table
@@ -310,10 +309,6 @@ module BitChannel
 
     def paren_balanced?(str)
       str.count('(') == str.count(')')
-    end
-
-    def cgi_href
-      escape_html(@config.cgi_url)
     end
 
     #

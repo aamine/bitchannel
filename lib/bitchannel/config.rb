@@ -17,23 +17,44 @@ module BitChannel
         raise ConfigError, "Config Error: not set: config.#{k}"
       }
       t.update args
-      @templatedir = t[:templatedir]; t.delete(:templatedir)
-      @cachedir    = t[:cachedir];    t.delete(:cachedir)
-      @charset     = t[:charset];     t.delete(:charset)
-      @cgi_url     = t[:cgi_url];     t.delete(:cgi_url)
-      @css_url     = t[:css_url];     t.delete(:css_url)
-      @index_page = t.fetch(:index_page, nil); t.delete(:index_page)
-      @site_name = t.fetch(:site_name, nil); t.delete(:site_name)
+
+      # Required
+      @templatedir = t[:templatedir];  t.delete(:templatedir)
+      @cachedir    = t[:cachedir];     t.delete(:cachedir)
+      @charset     = t[:charset];      t.delete(:charset)
+      @css_url     = t[:css_url];      t.delete(:css_url)
+      @html_url_p  = t[:use_html_url]; t.delete(:use_html_url)
+
+      # Optional
+      @index_page  = t.fetch(:index_page, nil); t.delete(:index_page)
+      @help_page   = t.fetch(:help_page, nil);  t.delete(:help_page)
+      @site_name   = t.fetch(:site_name, nil);  t.delete(:site_name)
+
       t.each do |k,v|
         raise ConfigError, "Config Error: unknown key: config.#{k}"
       end
     end
 
-    attr_reader :charset
-    attr_reader :cgi_url
-    attr_reader :css_url
-    attr_reader :datadir
     attr_reader :templatedir
+
+    def link_cachedir
+      "#{@cachedir}/link"
+    end
+
+    def revlink_cachedir
+      "#{@cachedir}/revlink"
+    end
+
+    attr_reader :charset
+    attr_reader :css_url
+
+    def html_url?
+      @html_url_p
+    end
+
+    def cgi_url
+      File.basename($0)
+    end
 
     def site_name
       @site_name || index_page_name()
@@ -44,19 +65,11 @@ module BitChannel
     end
 
     def help_page_name
-      'HelpPage'
+      @help_page || 'HelpPage'
     end
 
     def tmp_page_name
       'SandBox'
-    end
-
-    def link_cachedir
-      "#{@cachedir}/link"
-    end
-
-    def revlink_cachedir
-      "#{@cachedir}/revlink"
     end
 
   end

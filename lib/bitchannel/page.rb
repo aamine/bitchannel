@@ -67,9 +67,9 @@ module BitChannel
     end
 
     def view_url(page_name)
-      if true
-      then "#{cgi_url()}?cmd=view;name=#{url(page_name)}"
-      else "#{url(page_name)}.html"
+      if @config.html_url?
+      then "#{url(page_name)}.html"
+      else "#{cgi_url()}?cmd=view;name=#{url(page_name)}"
       end
     end
 
