@@ -452,7 +452,7 @@ module BitChannel
       ds.each do |d|
         d.kill if @killlist[d.page_name].overlap?(d.revision_range)
       end
-      d
+      ds
     end
 
     private

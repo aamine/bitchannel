@@ -1,3 +1,7 @@
+Thu Sep  2 14:31:11 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb (cvs_diff_from): fix typo.
+
 Thu Sep  2 05:34:06 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/repository.rb: replace WC for each reqests.
