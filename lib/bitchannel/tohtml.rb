@@ -54,7 +54,7 @@ module BitChannel
     # Block
     #
 
-    CAPTION = /\A[=!]{2,6}/
+    CAPTION = /\A(?:={2,4}|!{1,4})/
     UL = /\A\s*\*/
     OL = /\A\s*\#|\A\s*\(\d+\)/
     DL = /\A\s*:/
@@ -83,7 +83,12 @@ module BitChannel
     end
 
     def caption(line)
-      level = line.slice(/\A([=!]+)/, 1).length
+      head = line.slice(/\A([=!]+)/, 1)
+      if head[0,1] == '!'
+        level = head.length + 1
+      else
+        level = head.length
+      end
       str = line.sub(/\A[=!]+/, '').strip
       puts "<h#{level}>#{escape_html(str)}</h#{level}>"
     end
