@@ -1,4 +1,7 @@
 <div class="menu">
+<%  if menuitem_search_enabled?  %>
+<form method="post" action="<%= cgi_url() %>">
+<%  end  %>
 <p>
 <%  if menuitem_edit_enabled?  %>
 <a href="<%= cgi_url() %>?cmd=edit;name=<%= page_url() %>">Edit</a>
@@ -48,8 +51,13 @@ Top
 Help
 <%  end
 %>
+<%  if menuitem_search_enabled?  %>
+<input type="hidden" name="cmd" value="search">
+<input type="text" name="q" size="9" value="">
+<input type="submit" value="Search">
+<%  end  %>
 </p>
 <%  if menuitem_search_enabled?  %>
-.include search_form
+</form>
 <%  end  %>
 </div>
