@@ -8,9 +8,10 @@
 - table   || item || item ||
 - インライン画像
 - ReverseLink
-* ReverseLink のソート順を考える
-* InterWikiName
+- ReverseLink のソート順を考える
+- InterWikiName
 * 検索
 * コメントボックス (追加のみ)
 * "load rev XX" on edit page
 * 情報が古くなっていく (ページが古くなったことがわかる)
+* ReverseLink のソート順を考える more
