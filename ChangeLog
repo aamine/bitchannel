@@ -1,3 +1,7 @@
+Sun Mar 28 18:34:05 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/tohtml.rb: new method DUMMY_CONFIG.inspect.
+
 Sun Mar 28 18:30:12 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/tohtml.rb: new syntax: citation by '>' (1 level only).
