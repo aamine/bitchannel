@@ -14,7 +14,7 @@
 <h1>Recent</h1>
 <ul><%
    page_list().each do |page, mtime| %>
-<li><a href="<%= cgi_url() %>?cmd=view;name=#{page}"><%= format_time(mtime) %>: <%= page %></a></li><%
+<li><%= format_time(mtime) %>: <a href="<%= cgi_url() %>?cmd=view;name=#{page}"><%= page %></a></li><%
    end
 %>
 </ul>
