@@ -1,3 +1,7 @@
+Fri Sep  3 11:46:10 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* version 0.3.1 released.
+
 Thu Sep  2 14:56:45 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/farm.rb: now CVSWC.new takes KillList.
