@@ -270,7 +270,7 @@ module Wikitik
 
     def puts(str)
       @result << str
-      @result << "\n" unless @result[-1,1] == "\n"
+      @result << "\n" unless /\n\z/ === str
     end
 
     class LineInput
