@@ -95,8 +95,14 @@ module BitChannel
     def exist?(page_name)
       raise 'page_name == nil' unless page_name
       raise 'page_name == ""' if page_name.empty?
-      raise WrongPageName, "do not use `CVS' for a page name" if /\ACVS\z/i =~ page_name
       File.file?("#{@wc_read}/#{encode_filename(page_name)}")
+    end
+
+    def invalid?(page_name)
+      st = File.stat("#{@wc_read}/#{encode_filename(page_name)}")
+      not st.file?
+    rescue Errno::ENOENT
+      return false
     end
 
     def size(page_name)
@@ -127,6 +133,7 @@ module BitChannel
     end
 
     def [](page_name, rev = nil)
+      check_page_name page_name
       unless rev
         File.read("#{@wc_read}/#{encode_filename(page_name)}")
       else
@@ -148,6 +155,7 @@ module BitChannel
 
     # [[rev,logstr]]
     def getlog(page_name)
+      page_must_exist page_name
       Dir.chdir(@wc_read) {
         out, err = cvs('log', encode_filename(page_name))
         result = []
@@ -168,6 +176,7 @@ module BitChannel
     end
 
     def diff(page_name, rev1, rev2)
+      page_must_exist page_name
       Dir.chdir(@wc_read) {
         out, err = cvs('diff', '-u', "-r1.#{rev1}", "-r1.#{rev2}", encode_filename(page_name))
         return out.sub(/\A.*^diff .*?\n/m, '')
@@ -175,6 +184,7 @@ module BitChannel
     end
 
     def annotate(page_name, rev = nil)
+      page_must_exist page_name
       Dir.chdir(@wc_read) {
         if rev
           out, err = cvs('ann', '-F', "-r1.#{rev}", encode_filename(page_name))
@@ -202,6 +212,7 @@ module BitChannel
     end
 
     def checkin(page_name, origrev, new_text)
+      check_page_name page_name
       filename = encode_filename(page_name)
       Dir.chdir(@wc_write) {
         lock(filename) {
@@ -307,6 +318,10 @@ module BitChannel
       }
     end
 
+    def check_page_name(name)
+      raise WrongPageName, "wrong page name: #{name}" if invalid?(name)
+    end
+
     def page_must_exist(page_name)
       File.open("#{@wc_read}/#{encode_filename(page_name)}", 'r') {
         ;
@@ -319,9 +334,13 @@ module BitChannel
         next if /\AD/ =~ line
         ent, rev, mtime = *line.split(%r</>).values_at(1, 2, 3)
         table[decode_filename(ent)] = [rev.split(%r<\.>).last.to_i,
-                                       Time.parse(mtime)]
+                                       cvstimestamp(mtime)]
       end
       table
+    end
+
+    def cvstimestamp(str)
+      Time.parse(str.sub(/\d+$/) {|y| ' GMT ' + y }).localtime
     end
 
     def extract_links(page_text)

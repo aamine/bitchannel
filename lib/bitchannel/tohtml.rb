@@ -238,6 +238,7 @@ module BitChannel
 
     def internal_link(name)
       return escape_html(name) if name == @page_name
+      return escape_html(name) if @repository.invalid?(name)
       @internal_links.push name
       if @repository.exist?(name)
       then %Q[<a href="#{view_url(name)}">#{escape_html(name)}</a>]

@@ -87,7 +87,7 @@ module BitChannel
 
     def handle_view(cgi)
       page_name = (cgi.get_param('name') || @config.index_page_name)
-      rev = cgi.get_param('rev')
+      rev = cgi.get_rev_param('rev')
       if rev
         page = ViewRevPage.new(@config, @repository, page_name, rev)
         send_html cgi, page.html, page.last_modified
@@ -113,11 +113,7 @@ module BitChannel
     def handle_save(cgi)
       page_name = cgi.get_param('name')
       unless page_name
-        send_html cgi, EditPage.new(@config, @repository,
-                                    @config.tmp_page_name,
-                                    cgi.get_param('text').to_s,
-                                    @repository.revision(@config.tmp_page_name),
-                                    gettext(:save_without_name)).html
+        reedit cgi, cgi.get_param('text').to_s, gettext(:save_without_name)
         return
       end
       begin
@@ -132,7 +128,17 @@ module BitChannel
                                     err.merged,
                                     @repository.revision(page_name),
                                     gettext(:edit_conflicted)).html
+      rescue WrongPageName => err
+        reedit cgi, text, err.message
       end
+    end
+
+    def reedit(cgi, text, msg)
+      send_html cgi, EditPage.new(@config, @repository,
+                                  @config.tmp_page_name,
+                                  text,
+                                  @repository.revision(@config.tmp_page_name),
+                                  msg).html
     end
 
     def thanks(cgi, page_name)
