@@ -1,3 +1,7 @@
+Sun Mar 28 18:17:30 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/tohtml.rb: new syntax: CSV table.
+
 Sun Mar 28 17:27:27 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/handler.rb: new handler #handle_comment.

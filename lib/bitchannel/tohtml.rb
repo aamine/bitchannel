@@ -11,6 +11,7 @@
 require 'bitchannel/textutils'
 require 'stringio'
 require 'uri'
+require 'csv'
 
 module BitChannel
 
@@ -63,24 +64,27 @@ module BitChannel
     OL = /\A\#|\A\s*\(\d+\)/   # should not allow /\A\s+\#/
     DL = /\A:/
     CITE = /\A""/
-    TABLE = /\A\|\|/
+    BAR_TABLE = /\A\|\|/
+    CSV_TABLE = /\A,/
     PRE = /\A\{\{\{/
     INDENTED = /\A\s+\S/
     BLOCKEXT = /\A\[\[\#(\w+)(:.*?)?\]\]$/
 
-    PARAGRAPH_END = Regexp.union(CAPTION, UL, OL, DL, CITE, TABLE, PRE, INDENTED, BLOCKEXT)
+    PARAGRAPH_END = Regexp.union(CAPTION, UL, OL, DL,
+        CITE, BAR_TABLE, CSV_TABLE, PRE, INDENTED, BLOCKEXT)
 
     def do_compile
       while @f.next?
         case @f.peek
-        when CAPTION  then caption @f.gets
-        when UL       then ul
-        when OL       then ol
-        when DL       then dl
-        when CITE     then cite
-        when TABLE    then table
-        when PRE      then pre
-        when INDENTED then indented_pre   # must be checked after ul/ol
+        when CAPTION   then caption @f.gets
+        when UL        then ul
+        when OL        then ol
+        when DL        then dl
+        when CITE      then cite
+        when BAR_TABLE then bar_table
+        when CSV_TABLE then csv_table
+        when PRE       then pre
+        when INDENTED  then indented_pre   # must be placed after UL/OL
         when BLOCKEXT
           name = $1
           arg = $2
@@ -231,26 +235,49 @@ module BitChannel
       puts '</blockquote>'
     end
 
-    def table
+    def bar_table
       buf = []
-      @f.while_match(TABLE) do |line|
-        cols = line.strip.split(/(\|\|\|?)/)
+      @f.while_match(BAR_TABLE) do |line|
+        cols = line.strip.split(/(\|\|\|?)/, -1)
         cols.shift   # discard first ""
-        cols.pop if (cols.last == '||') or (cols.size % 2 == 1)
-        tmp = []
+        row = []
         until cols.empty?
-          th = (cols.shift == '|||')
-          tmp.push [cols.shift, th]
+          isheader = (cols.shift == '|||')
+          row.push [cols.shift, isheader]
         end
-        buf.push tmp
+        buf.push row
       end
-      n_maxcols = buf.map {|cols| cols.size }.max
-      puts '<table>'
-      buf.each do |cols|
+      output_table adjust_ncols(buf)
+    end
+
+    def csv_table
+      buf = []
+      @f.while_match(CSV_TABLE) do |line|
+        buf.push CSV.parse_line(line[1..-1]).map {|cell| [cell.to_s, false] }
+      end
+      output_table adjust_ncols(buf)
+    end
+
+    def adjust_ncols(rows)
+      rows.each do |cols|
+        while cols.last and cols.last[0].strip.empty?
+          cols.pop
+          cols.pop
+        end
+      end
+      n_maxcols = rows.map {|cols| cols.size }.max
+      rows.each do |cols|
         cols.concat [['',false]] * (n_maxcols - cols.size)
+      end
+      rows
+    end
+
+    def output_table(rows)
+      puts '<table>'
+      rows.each do |cols|
         puts '<tr>' +
-             cols.map {|col, th|
-               if th
+             cols.map {|col, isheader|
+               if isheader
                then "<th>#{text(col.strip)}</th>"
                else "<td>#{text(col.strip)}</td>"
                end
