@@ -41,14 +41,6 @@ module Wikitik
       str.gsub(/&\w+;/) {|s| table[s] }
     end
 
-    def encode_filename(name)
-      name.gsub(/[^a-z\d]/in) {|c| sprintf('%%%02x', c[0]) }
-    end
-
-    def decode_filename(name)
-      name.gsub(/%([\da-h]{2})/i) { $1.hex.chr }
-    end
-
     def format_time(time)
       # strftime() is locale sensitive, we should not rely on strftime().
       # From tmail/textutils.rb:

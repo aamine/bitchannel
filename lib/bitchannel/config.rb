@@ -47,6 +47,10 @@ module Wikitik
       File.read("#{@templatedir}/#{name}.rhtml")
     end
 
+    def link_cachedir
+      "#{@cachedir}/link"
+    end
+
     def revlink_cachedir
       "#{@cachedir}/revlink"
     end

@@ -106,18 +106,18 @@ module Wikitik
       }
     end
 
-    def reverse_links(page_name)
-      File.readlines(revlink_cache(page_name)).map {|s| s.strip }[1..-1]
-    rescue Errno::ENOENT
-      return []
+    def size(page_name)
+      File.size("#{@wc_read}/#{encode_filename(page_name)}")
     end
 
-    def num_revlinks(page_name)
-      File.open(revlink_cache(page_name)) {|f|
-        return f.gets.strip.to_i
-      }
+    def bytes_per_link(page_name)
+      (size(page_name) / (links(page_name).size + 0.1)).to_i
     rescue Errno::ENOENT
       return 0
+    end
+
+    def reverse_links(page_name)
+      read_revlink_cache(revlink_cache(page_name))
     end
 
     def checkin(page_name, origrev, new_text)
@@ -134,7 +134,9 @@ module Wikitik
       Dir.chdir(@wc_read) {
         cvs 'up', '-A', filename
       }
-      update_revlink_cache page_name, new_text
+      links = ToHTML.new(@config, self).extract_links(new_text)
+      update_link_cache page_name, links
+      update_revlink_cache page_name, links
     end
 
     private
@@ -160,7 +162,7 @@ module Wikitik
       File.open(filename, 'w') {|f|
         f.write new_text
       }
-      cvs 'add', filename
+      cvs 'add', '-kb', filename
       cvs 'ci', '-m', 'auto checkin: new file', filename
     end
 
@@ -181,78 +183,102 @@ LOG %Q[exec: "#{cmd.join('", "')}"]
       }
     end
 
-    def revlink_cache(page_name)
-      "#{@config.revlink_cachedir}/#{encode_filename(page_name)}"
+    def update_link_cache(page_name, links)
+      lock(@config.link_cachedir) {|cachedir|
+        Dir.mkdir cachedir unless File.directory?(cachedir)
+        File.open(link_cache(page_name) + ',tmp', 'w') {|f|
+          links.each do |lnk|
+            f.puts lnk
+          end
+        }
+      }
     end
 
-    # FIXME: cannot handle link-is-removed case
-    def update_revlink_cache(page_name, text)
-      links = ToHTML.new(@config, self).extract_links(text)
-      cachedir = @config.revlink_cachedir
-      lock(cachedir) {
+    def links(page_name)
+      File.readlines(link_cache(page_name)).map {|s| s.strip }
+    rescue Errno::ENOENT
+      return []
+    end
+
+    def link_cache(page_name)
+      "#{@config.link_cachedir}/#{encode_filename(page_name)}"
+    end
+
+    def update_revlink_cache(page_name, links)
+      linktbl = {}
+      links.each do |page|
+        linktbl[page] = true
+      end
+      lock(@config.revlink_cachedir) {|cachedir|
         Dir.mkdir cachedir unless File.directory?(cachedir)
-        links.each do |link|
-          cachefile = "#{cachedir}/#{encode_filename(link)}"
-          if File.exist?(cachefile)
-            revlinks = File.readlines(cachefile).map {|line| line.strip }
-            revlinks.shift   # discard first line (number of lines)
+        foreach_file(cachedir) do |cachefile|
+          if linktbl.delete(decode_filename(File.basename(cachefile)))
+            add_revlink_cache_entry cachefile, page_name
           else
-            revlinks = []
+            remove_revlink_cache_entry cachefile, page_name
           end
-          revlinks = (revlinks + [page_name]).uniq.sort
-          File.open("#{cachefile},tmp", 'w') {|f|
-            f.puts revlinks.size
-            revlinks.each do |rev|
-              f.puts rev
-            end
-          }
-          File.rename "#{cachefile},tmp", cachefile
+        end
+        linktbl.each_key do |link|
+          add_revlink_cache_entry revlink_cache(link), page_name
         end
       }
     end
 
-    RETRY_MAX = 5
+    def add_revlink_cache_entry(path, page_name)
+      revlinks = read_revlink_cache(path)
+      write_revlink_cache path, (revlinks + [page_name]).uniq.sort
+    end
 
+    def remove_revlink_cache_entry(path, page_name)
+      revlinks = read_revlink_cache(path)
+      write_revlink_cache path, (revlinks - [page_name]).uniq.sort
+    end
+
+    def read_revlink_cache(path)
+      File.readlines(path).map {|line| line.strip }
+    rescue Errno::ENOENT
+      return []
+    end
+
+    def write_revlink_cache(path, revlinks)
+      File.open("#{path},tmp", 'w') {|f|
+        revlinks.each do |rev|
+          f.puts rev
+        end
+      }
+      File.rename "#{path},tmp", path
+    end
+
+    def revlink_cache(page_name)
+      "#{@config.revlink_cachedir}/#{encode_filename(page_name)}"
+    end
+
+    def foreach_file(dir, &block)
+      Dir.entries(dir).map {|ent| "#{dir}/#{ent}" }\
+          .select {|path| File.file?(path) }.each(&block)
+    end
+
+    # This method locks write access.
+    # Read only access is always allowed.
     def lock(path)
-      failed = 0
+      n_retry = 5
       lock = path + ',wikitik,lock'
       begin
         Dir.mkdir(lock)
         begin
-          yield
+          yield path
         ensure
           Dir.rmdir(lock)
         end
       rescue Errno::EEXIST
-        if File.directory?(lock) and too_old?(ctime(lock))
-          begin
-            Dir.rmdir lock
-          rescue Errno::ENOENT
-            ;
-          end
+        if n_retry > 0
+          sleep 3
+          n_retry -= 1
           retry
         end
-        failed += 1
-        raise LockFailed, "cannot get lock for #{File.basename(path)}" \
-            if failed > RETRY_MAX
-        sleep 3
-        retry
+        raise LockFailed, "cannot get lock for #{File.basename(path)}"
       end
     end
-
-    def ctime(path)
-      File.ctime(path)
-    rescue Errno::ENOENT
-      ;
-    end
-
-    def too_old?(t)
-      Time.now.to_i - st.ctime > 15 * 60   # 15min
-    end
-
-    #
-    # open3
-    #
 
     def popen3(*cmd)
       pw = IO.pipe
@@ -289,6 +315,15 @@ LOG %Q[exec: "#{cmd.join('", "')}"]
           f.close unless f.closed?
         end
       end
+    end
+
+    def encode_filename(name)
+      # encode [A-Z] ?  (There are case-insensitive filesystems)
+      name.gsub(/[^a-z\d]/in) {|c| sprintf('%%%02x', c[0]) }
+    end
+
+    def decode_filename(name)
+      name.gsub(/%([\da-h]{2})/i) { $1.hex.chr }
     end
 
   end

@@ -35,7 +35,6 @@ module Wikitik
 
       # cache
       @revlinks = nil
-      @nrev_cache ||= {}
     end
 
     def html
@@ -78,12 +77,12 @@ module Wikitik
       @revlinks ||= @repository.reverse_links(@page_name)
     end
 
-    def reverse_links_in_nrevorder
-      reverse_links().sort_by {|page| -num_revlinks(page) }
+    def ordered_reverse_links
+      reverse_links().sort_by {|page| @repository.bytes_per_link(page) }
     end
 
-    def num_revlinks(page)
-      @nrev_cache[page] ||= @repository.num_revlinks(page)
+    def num_revlinks
+      @revlinks.size
     end
 
     def url(str)

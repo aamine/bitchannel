@@ -32,11 +32,11 @@ Diff
 <p>ReverseLinks:
 <%
     show_max = 10
-    reverse_links_in_nrevorder()[0, show_max].each do |page|
-%><a href="<%= cgi_url() %>?cmd=view;name=<%= url(page) %>"><%= escape_html(page) %>(<%= num_revlinks(page) %>)</a>
+    ordered_reverse_links()[0, show_max].each do |page|
+%><a href="<%= cgi_url() %>?cmd=view;name=<%= url(page) %>"><%= escape_html(page) %></a>
 <%
     end
-%><%= reverse_links().size > show_max ? '...' : '' %>
+%><%= num_revlinks() > show_max ? '...' : '' %>
 </p>
 </div>
 </div>
