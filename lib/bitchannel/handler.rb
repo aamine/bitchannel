@@ -282,10 +282,10 @@ module BitChannel
       end
       html << "</pre>\n</body></html>"
 
-      print cgi.header 'status' => '200 OK',
+      print cgi.header('status' => '200 OK',
                        'type' => 'text/html',
                        'charset' => 'us-ascii',
-                       'Content-Length' => html.length
+                       'Content-Length' => html.length)
       print html unless cgi.request_method.to_s.upcase == 'HEAD'
     end
 
