@@ -21,7 +21,6 @@ module Wikitik
     def initialize(config, repo)
       @config = config
       @repository = repo
-      @internal_links = nil
     end
 
     def compile(str)
@@ -327,7 +326,7 @@ module Wikitik
 
       def while_match(re)
         while line = gets()
-          unless re === line
+          unless re =~ line
             ungets line
             return
           end
@@ -338,7 +337,7 @@ module Wikitik
 
       def until_match(re)
         while line = gets()
-          if re === line
+          if re =~ line
             ungets line
             return
           end
@@ -349,7 +348,7 @@ module Wikitik
 
       def until_terminator(re)
         while line = gets()
-          return if re === line   # discard terminal line
+          return if re =~ line   # discard terminal line
           yield line
         end
         nil
@@ -371,16 +370,12 @@ EOS
     exit status
   end
 
-  def main
-    ok = getopts(nil, 'help')
-    usage(0) if $OPT_help
-    usage(1) unless ok
-    env = Object.new
-    def env.cgi_url() 'index.rb' end
-    def env.exist?(name) true end
-    c = Wikitik::ToHTML.new(env, env)
-    puts c.compile(ARGF.read)
-  end
-
-  main
+  ok = getopts(nil, 'help')
+  usage(0) if $OPT_help
+  usage(1) unless ok
+  env = Object.new
+  def env.cgi_url() 'index.rb' end
+  def env.exist?(name) true end
+  c = Wikitik::ToHTML.new(env, env)
+  puts c.compile(ARGF.read)
 end
