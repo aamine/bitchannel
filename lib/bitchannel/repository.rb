@@ -395,7 +395,7 @@ module BitChannel
     def cvs_diff_from(time)
       assert_chdir
       out, err = *cvs('diff', '-uN', "-D#{format_time_cvs(time)}")
-      ds = Diff.parse_diffs(@module_id, out)
+      ds = Diff.parse_diffs(@fs, @module_id, out)
       ds.each do |d|
         d.kill if @killlist[d.page_name].overlap?(d.revision_range)
       end
