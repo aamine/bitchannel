@@ -9,7 +9,6 @@
 #
 
 require 'bitchannel/textutils'
-require 'bitchannel/constants'
 require 'stringio'
 require 'uri'
 
@@ -274,6 +273,8 @@ module BitChannel
     def interwikiname_table
       @interwikinames ||= read_interwikiname_table()
     end
+
+    InterWikiName_LIST_PAGE = 'InterWikiName'
 
     def read_interwikiname_table()
       text = @repository[InterWikiName_LIST_PAGE] or return {}

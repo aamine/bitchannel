@@ -8,8 +8,6 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
-require 'bitchannel/constants'
-
 module BitChannel
 
   class Config
@@ -37,7 +35,7 @@ module BitChannel
     attr_reader :templatedir
 
     def index_page_name
-      @index_page || DEFAULT_INDEX_PAGE_NAME
+      @index_page || 'FrontPage'
     end
 
     def tmp_page_name
