@@ -1,3 +1,11 @@
+Sat Oct  9 04:10:49 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* misc/init.rb: new file.
+
+	* misc/template/htaccess.ja: new file.
+
+	* misc/template/bitchannelrc.ja: new file.
+
 Sat Oct  9 00:40:49 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* misc/page-updated.rb: new file.

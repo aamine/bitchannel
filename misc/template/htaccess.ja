@@ -1,0 +1,26 @@
+#
+# BitChannel .htaccess
+#
+
+Options +ExecCGI
+AddHandler cgi-script @%IFTYPE%%
+DirectoryIndex index.@%IFTYPE%%
+
+#%HTML_URL_P%%RewriteEngine on
+#%HTML_URL_P%%RewriteRule "([^/]+)\.html" @%CGI_URL%%/?cmd=view;name=$1
+
+<Files bitchannelrc>
+  deny from all
+</Files>
+<FilesMatch "^(CVS|Root|Repository|Entries)$">
+  deny from all
+</FilesMatch>
+<FilesMatch "^(lib|misc|template)$">
+  deny from all
+</FilesMatch>
+<Files *.rb>
+  deny from all
+</Files>
+<Files *.rhtml>
+  deny from all
+</Files>

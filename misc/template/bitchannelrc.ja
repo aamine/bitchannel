@@ -1,0 +1,30 @@
+#
+# BitChannel Config File
+#
+
+def setup_environment
+  $KCODE = 'EUC'
+  $LOAD_PATH.unshift '@%SRCDIR%%/lib'
+  require 'bitchannel'
+end
+
+def bitchannel_context
+  config = BitChannel::Config.new(
+    :locale       => BitChannel::Locale.get('ja_JP.eucJP'),
+    :cgi_url      => %%CGI_URL%%,
+    :use_html_url => %%HTML_URL_P%%,
+    :templatedir  => '@%SRCDIR%%/template',
+    :theme        => %%THEME%%,
+    :site_name    => %%SITE_NAME%%,
+    :logo_url     => %%LOGO_URL%%
+  )
+  vardir = %%VARDIR%%
+  repository = BitChannel::Repository.new(
+    :cmd_path  => %%CVSCMD%%,
+    :wc_read   => "#{vardir}/wc.read",
+    :wc_write  => "#{vardir}/wc.write",
+    :cachedir  => "#{vardir}/cache",
+    :logfile   => nil
+  )
+  BitChannel::WikiSpace.new(config, repository)
+end
