@@ -1,3 +1,7 @@
+Sun May  9 12:22:16 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/handler.rb: gdiff(org mode) did not work.
+
 Sun May  9 12:11:51 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/farm.rb: fix farm/node CSS path.

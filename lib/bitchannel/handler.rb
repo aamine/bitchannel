@@ -256,6 +256,10 @@ module BitChannel
     end
     private :getrev
 
+    def gdiff_origin_specified?
+      gdiff_origin_time() ? true : false
+    end
+
     def gdiff_origin_time
       parse_origin(get('org').to_s.strip)
     end
