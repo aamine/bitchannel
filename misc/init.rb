@@ -43,7 +43,7 @@ def main
     params[:lang] = lang
   }
   parser.on('--cgiurl=URLPATH', 'Base URL of CGI [REQUIRED]') {|path|
-    params[:cgi_url] = (path + '/').gsub(%r</+>, '/')
+    params[:cgi_url] = "#{path}/".gsub(%r</+\z>, '/')
   }
   parser.on('--vardir=PATH',
       'Location of working copies and caches [REQUIRED]') {|path|
@@ -106,6 +106,7 @@ def main
     $stderr.puts parser.help
     exit 1
   end
+  fail "missing --lang" unless params[:lang]
   fail "missing --vardir" unless vardir
   fail "missing --cgiurl" unless params[:cgi_url]
 
@@ -176,9 +177,8 @@ end
 
 def fill_template(id, params)
   File.read("#{params[:srcdir]}/misc/template/#{id}.#{params[:lang]}")\
-      .gsub(/%%(\w+)%%/) { params[$1.downcase.intern].inspect }\
-      .gsub(/^\#%(\w+)%%/) { params[$1.downcase.intern] ? '' : $& }\
-      .gsub(/@%(\w+)%%/) { params[$1.downcase.intern] }
+      .gsub(/%%(\w+)%%/) { params[$1.downcase.intern].to_s }\
+      .gsub(/^\#%(\w+)%%/) { params[$1.downcase.intern] ? '' : $& }
 end
 
 def check_tmp
