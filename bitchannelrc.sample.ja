@@ -13,12 +13,24 @@ def initialize_environment
   BitChannel.lang = 'ja'
 
   config = BitChannel::Config.new(
-    # :site_name    => 'My Site',   # shown on FrontPage
+    # :site_name    => 'My Site',
+	# The name of site.
+        # This string is shown on FrontPage.
+
     # :logo_url     => '/images/logo.png',
+        # Site logo.
+        # This image is shown on all pages.
+
     :templatedir  => "#{cgidir}/template",
-    :charset      => 'euc-jp',   # I have tested only euc-jp
+
+    :charset      => 'euc-jp',
+	# The charactor encoding of pages.
+        # I have tested only euc-jp.
+
     :css_url      => 'default.css',
+
     :use_html_url => false
+	# You MUST set up mod_rewrite before turning this flag on.
         # true: PageName.html
         # false: ?cmd=view;name=PageName
   )
