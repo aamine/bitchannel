@@ -15,9 +15,9 @@
 <h1>History: <%= page_name() %></h1>
 <ul><%
     logs().each do |rev, log|   %>
-<li><a href="<%= cgi_url() %>?cmd=view;rev=<%= rev %>;name=<%= page_name() %>"><%= log.sub(/:/, '</a>:') %></li>
-<%
+<li><a href="<%= cgi_url() %>?cmd=view;rev=<%= rev %>;name=<%= page_name() %>"><%= log.sub(/:/, '</a>:') %></li><%
     end
-%></ul>
+%>
+</ul>
 </body>
 </html>
