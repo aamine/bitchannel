@@ -132,9 +132,10 @@ module BitChannel
     end
 
     def ordered_revlinks
-      leaves, nodes = revlinks().partition {|page| num_links(page) < 2 }
-      nodes.sort_by {|page| @repository.size(page) / num_links(page) rescue 10000 } +
-          leaves.sort_by {|page| -@repository.size(page) rescue 0 }
+      leaves, nodes = revlinks().select {|page| @repository.exist?(page) }\
+                          .partition {|page| num_links(page) < 2 }
+      nodes.sort_by {|page| @repository.size(page) / num_links(page) } +
+          leaves.sort_by {|page| -@repository.size(page) }
     end
 
     def num_links(page)
