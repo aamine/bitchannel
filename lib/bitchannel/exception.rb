@@ -29,4 +29,6 @@ module AlphaWiki
 
     attr_reader :merged
   end
+
+  class UnknownRCSLogFormat < AlphaWikiError; end
 end

@@ -50,6 +50,10 @@ module AlphaWiki
 
   class ViewPage < Page
 
+    def last_modified
+      @repository.mtime(@page_name)
+    end
+
     private
 
     def template_id
@@ -59,9 +63,34 @@ module AlphaWiki
     def body
       ToHTML.compile(@repository[@page_name])
     end
+  
+  end
+
+
+  class ViewRevPage < Page
+
+    def initialize(config, repo, page_name, rev)
+      super config, repo, page_name
+      @revision = rev
+      @mtime = nil
+    end
 
     def last_modified
-      @repository.mtime(@page_name)
+      @mtime ||= @repository.mtime(@page_name, @revision)
+    end
+
+    private
+
+    def template_id
+      'viewrev'
+    end
+
+    def revision
+      @revision
+    end
+
+    def body
+      ToHTML.compile(@repository[@page_name, @revision])
     end
   
   end

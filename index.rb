@@ -89,9 +89,18 @@ def view(repo, config, cgi, page_name)
     edit repo, config, cgi, page_name
     return
   end
-  send cgi,
-       AlphaWiki::ViewPage.new(config, repo, page_name).html,
-       repo.mtime(page_name)
+  rev = cgi.get_param('rev')
+  if rev and rev.to_i > 0
+    viewrev repo, config, cgi, page_name, rev.to_i
+    return
+  end
+  page = AlphaWiki::ViewPage.new(config, repo, page_name)
+  send cgi, page.html, page.last_modified
+end
+
+def viewrev(repo, config, cgi, page_name, rev)
+  page = AlphaWiki::ViewRevPage.new(config, repo, page_name, rev)
+  send cgi, page.html, page.last_modified
 end
 
 def edit(repo, config, cgi, page_name)

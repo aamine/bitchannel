@@ -10,6 +10,7 @@
 
 require 'alphawiki/textutils'
 require 'alphawiki/exception'
+require 'time'
 
 module AlphaWiki
 
@@ -35,12 +36,31 @@ module AlphaWiki
           .map {|ent| decode_filename(ent) }
     end
 
-    def mtime(page_name)
-      File.mtime("#{@wc_read}/#{encode_filename(page_name)}")
+    def mtime(page_name, rev = nil)
+      unless rev
+        File.mtime("#{@wc_read}/#{encode_filename(page_name)}")
+      else
+        Dir.chdir(@wc_read) {
+          out, err = cvs('log', "-r1.#{rev}", encode_filename(page_name))
+          out.each do |line|
+            if /\Adate: / === line
+              return Time.parse(line.slice(/\Adate: (.*?);/, 1))
+            end
+          end
+        }
+        raise UnknownRCSLogFormat, "unknown RCS log format; given up"
+      end
     end
 
-    def [](page_name)
-      File.read("#{@wc_read}/#{encode_filename(page_name)}")
+    def [](page_name, rev = nil)
+      unless rev
+        File.read("#{@wc_read}/#{encode_filename(page_name)}")
+      else
+        Dir.chdir(@wc_read) {
+          out, err = cvs('up', '-p', "-r1.#{rev}", encode_filename(page_name))
+          return out
+        }
+      end
     end
 
     def revision(page_name)
