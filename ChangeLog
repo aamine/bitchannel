@@ -1,3 +1,7 @@
+Thu Feb 24 10:47:56 2005  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/fcgi.rb: supress IOError on httpd termination.
+
 Thu Feb 24 10:24:35 2005  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/fcgi.rb: add dirty kludge for ruby 1.9 or later.  Blocking

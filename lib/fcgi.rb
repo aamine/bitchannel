@@ -44,7 +44,12 @@ class FCGI
     f = default_connection()
     Server.new(f).each_request(&block)
   ensure
-    f.close if f
+    begin
+      f.close if f
+    rescue IOError
+      # It seems IO#closed? cannot detect passive close on httpd termination,
+      # so we must try to close and catch exception.
+    end
   end
 
   def FCGI.default_connection
