@@ -49,8 +49,8 @@ module BitChannel
 
     def get_template(tmpldir, tmplname)
       File.read("#{tmpldir}/#{tmplname}.rhtml").gsub(/^\.include (\w+)/) {
-        get_template(tmpldir, $1)
-      }
+        get_template(tmpldir, $1.untaint)
+      }.untaint
     end
 
     def charset

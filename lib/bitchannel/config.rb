@@ -16,23 +16,25 @@ module BitChannel
 
   class Config
     def initialize(args)
-      t = Hash.new {|h,k|
-        raise ConfigError, "Config Error: not set: config.#{k}"
-      }
-      t.update args
+      args = args.dup
+      def args.getopt(name)
+        raise ConfigError, "Config Error: not set: config.#{name}" \
+            unless key?(name)
+        delete(name).untaint
+      end
+      def args.fetchopt(name, default)
+        return default unless key?(name)
+        delete(name).untaint
+      end
 
-      # Required
-      @templatedir = t[:templatedir];  t.delete(:templatedir)
-      @charset     = t[:charset];      t.delete(:charset)
-      @css_url     = t[:css_url];      t.delete(:css_url)
-      @html_url_p  = t[:use_html_url]; t.delete(:use_html_url)
-
-      # Optional
-      @site_name   = t.fetch(:site_name, nil);  t.delete(:site_name)
-      @logo_url    = t.fetch(:logo_url, nil);   t.delete(:logo_url)
-
-      t.each do |k,v|
-        raise ConfigError, "Config Error: unknown key: config.#{k}"
+      @templatedir = args.getopt(:templatedir)
+      @charset     = args.getopt(:charset)
+      @css_url     = args.getopt(:css_url)
+      @html_url_p  = args.getopt(:use_html_url)
+      @site_name   = args.fetchopt(:site_name, nil)
+      @logo_url    = args.fetchopt(:logo_url, nil)
+      args.each do |key, val|
+        raise ConfigError, "Config Error: unknown key: config.#{key}"
       end
     end
 

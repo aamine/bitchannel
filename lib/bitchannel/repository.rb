@@ -18,11 +18,11 @@ module BitChannel
   module FilenameEncoding
     def encode_filename(name)
       # encode [A-Z] ?  (There are case-insensitive filesystems)
-      name.gsub(/[^a-z\d]/in) {|c| sprintf('%%%02x', c[0]) }
+      name.gsub(/[^a-z\d]/in) {|c| sprintf('%%%02x', c[0]) }.untaint
     end
 
     def decode_filename(name)
-      name.gsub(/%([\da-h]{2})/i) { $1.hex.chr }
+      name.gsub(/%([\da-h]{2})/i) { $1.hex.chr }.untaint
     end
   end
 
@@ -63,7 +63,7 @@ module BitChannel
       def args.getopt(name)
         raise ConfigError, "Config Error: not set: repository.#{name}" \
             unless key?(name)
-        delete(name)
+        delete(name).untaint
       end
       @cvs_cmd  = args.getopt(:cmd_path)
       @wc_read  = args.getopt(:wc_read)
