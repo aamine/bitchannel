@@ -1,3 +1,10 @@
+#
+# WEBrick servlet example (mounts on '/')
+#
+
+load './bitchannelrc'
+
+require 'bitchannel/webrickservlet'
 require 'webrick'
 
 httpd = WEBrick::HTTPServer.new(
@@ -9,15 +16,9 @@ httpd = WEBrick::HTTPServer.new(
     [ $stderr, WEBrick::AccessLog::REFERER_LOG_FORMAT ],
     [ $stderr, WEBrick::AccessLog::AGENT_LOG_FORMAT   ],
   ],
-  :CGIPathEnv   => ENV["PATH"]   # PATH environment variable for CGI.
+  :CGIPathEnv   => ENV["PATH"]
 )
-
-env = Object.new
-env.instance_eval(File.read('bitchannelrc'), 'bitchannelrc')
-config, repo = *env.initialize_environment
-require 'bitchannel/webrickservlet'
-BitChannel::WebrickServlet.set_environment config, repo
-httpd.mount '/', BitChannel::WebrickServlet
+httpd.mount '/', BitChannel::WebrickServlet, *initialize_environment()
 
 trap(:INT){ httpd.shutdown }
 httpd.start

@@ -10,25 +10,11 @@
 
 require 'bitchannel/page'
 require 'bitchannel/textutils'
-require 'cgi'
+require 'bitchannel/config'
+require 'webrick/cookie'
 require 'uri'
 require 'date'
-
-class CGI
-  def get_param(name)
-    a = params()[name]
-    return nil unless a
-    return nil unless a[0]
-    return nil if a[0].empty?
-    a[0]
-  end
-
-  def get_rev_param(name)
-    rev = get_param(name).to_i
-    return nil if rev < 1
-    rev
-  end
-end
+require 'time'
 
 unless DateTime.method_defined?(:to_i)
   class DateTime
@@ -40,42 +26,27 @@ end
 
 module BitChannel
 
-  #
-  # CGI request handler class.
-  # This object interprets a CGI request to the specific task.
-  #
   class Handler
     include TextUtils
-
-    def Handler.cgi_main(config, repo)
-      new(config, repo).service CGI.new
-    end
-
-    def Handler.fcgi_main(config, repo)
-      h = new(config, repo)
-      FCGI.each_cgi do |cgi|
-        h.service cgi
-      end
-    end
 
     def initialize(config, repo)
       @config = config
       @repository = repo
     end
 
-    def service(cgi)
+    def service(req, webrickres)
       begin
-        handle(cgi).exec cgi
+        handle(req).update_for webrickres
       rescue Exception => err
-        error_response(err, true).exec cgi
+        error_response(err, true).update_for webrickres
       end
     end
 
-    def handle(cgi)
-      handler = "handle_#{cgi.get_param('cmd').to_s.downcase}"
-      if respond_to?(handler, true)
-      then __send__(handler, cgi)
-      else view_page(cgi.get_param('name') || FRONT_PAGE_NAME)
+    def handle(req)
+      mid = "handle_#{req.cmd}"
+      if respond_to?(mid, true)
+      then __send__(mid, req)
+      else view_page(req.page_name || FRONT_PAGE_NAME)
       end
     rescue WrongPageName => err
       error_response(err, false)
@@ -100,16 +71,14 @@ module BitChannel
       end
       html << "</pre>\n</body></html>"
 
-      res = CGIResponse.new
-      res.set_content_type 'text/html', @config.charset
-      res.body = html
+      res = Response.new
+      res.set_content_body html, 'text/html', @config.charset
       res
     end
 
-    def handle_view(cgi)
-      page_name = (cgi.get_param('name') || FRONT_PAGE_NAME)
-      rev = cgi.get_rev_param('rev')
-      if rev
+    def handle_view(req)
+      page_name = (req.page_name || FRONT_PAGE_NAME)
+      if rev = req.rev
       then ViewRevPage.new(@config, @repository, page_name, rev).response
       else view_page(page_name)
       end
@@ -126,33 +95,28 @@ module BitChannel
       ViewPage.new(@config, @repository, FRONT_PAGE_NAME).response
     end
 
-    def handle_edit(cgi)
-      page_name = cgi.get_param('name') or return front_page()
+    def handle_edit(req)
+      page_name = req.page_name or return front_page()
       orgrev = @repository.revision(page_name)
-      srcrev = (cgi.get_rev_param('rev') || orgrev)
+      srcrev = (req.rev || orgrev)
       EditPage.new(@config, @repository, page_name,
                    @repository.fetch(page_name, srcrev) { '' },
                    orgrev).response
     end
 
-    def handle_preview(cgi)
-      page_name = cgi.get_param('name') or return front_page()
-      text = normalize_text(cgi.get_param('text').to_s)
-      orgrev = cgi.get_rev_param('origrev')
-      srcrev = (cgi.get_rev_param('rev') || orgrev)
-      PreviewPage.new(@config, @repository, page_name,
-                      text, orgrev).response
+    def handle_preview(req)
+      page_name = req.page_name or return front_page()
+      PreviewPage.new(@config, @repository,
+                      page_name, req.normalized_text, req.origrev).response
     end
 
-    def handle_save(cgi)
-      return handle_preview(cgi) if cgi.get_param('preview')
-      page_name = cgi.get_param('name') or
-          return reedit_response(cgi.get_param('text').to_s,
-                                 gettext(:save_without_name))
-      origrev = cgi.get_rev_param('origrev')
-      text = normalize_text(cgi.get_param('text').to_s)
+    def handle_save(req)
+      return handle_preview(req) if req.preview?
+      page_name = req.page_name or
+          return reedit_response(req.normalized_text, gettext(:save_without_name))
+      text = req.normalized_text
       begin
-        @repository.checkin page_name, origrev, text
+        @repository.checkin page_name, req.origrev, text
         return thanks_response(page_name)
       rescue EditConflict => err
         return EditPage.new(@config, @repository,
@@ -162,12 +126,6 @@ module BitChannel
       rescue WrongPageName => err
         return reedit(text, err.message)
       end
-    end
-
-    def normalize_text(text)
-      unify_encoding(text, @config.charset).map {|line|
-        detab(line).rstrip + "\r\n"
-      }.join('')
     end
 
     def reedit_response(text, msg)
@@ -180,11 +138,11 @@ module BitChannel
       ThanksPage.new(@config, name).response
     end
 
-    def handle_comment(cgi)
-      page_name = cgi.get_param('name')
+    def handle_comment(req)
+      page_name = req.page_name
       return front_page() if not page_name or not @repository.exist?(page_name)
-      uname = unify_encoding(cgi.get_param('uname').to_s.strip, @config.charset)
-      comment = unify_encoding(cgi.get_param('cmt').to_s.strip, @config.charset)
+      uname = req.cmtbox_username
+      comment = req.cmtbox_comment
       @repository.edit(page_name) {|text|
         insert_comment(@repository[page_name], uname, comment)
       }
@@ -200,38 +158,172 @@ module BitChannel
       text.sub(/\[\[\#comment(:.*?)?\]\]/n) { $& + "\n" + cmtline }
     end
 
-    def handle_diff(cgi)
-      page_name = cgi.get_param('name')
+    def handle_diff(req)
+      page_name = req.page_name
       return front_page() if not page_name or not @repository.exist?(page_name)
-      rev1 = cgi.get_rev_param('rev1')
-      rev2 = cgi.get_rev_param('rev2')
+      rev1 = req.rev1
+      rev2 = req.rev2
       return view_page(page_name) unless rev1 and rev2
       DiffPage.new(@config, @repository, page_name, rev1, rev2).response
     end
 
-    GDIFF_COOKIE_NAME = 'bclastvisit'
-
-    def handle_gdiff(cgi)
-      org = cgi.get_param('org').to_s.strip
-      reload = (cgi.get_param('reload').to_s.strip.downcase == 'on')
-      if org.downcase == 'cookie'
-        res = GlobalDiffPage.new(@config, @repository,
-                last_visited(cgi) || default_origin_time(), reload).response
-      else
-        res = GlobalDiffPage.new(@config, @repository,
-                parse_origin(org) || default_origin_time(), reload).response
-      end
-      now = Time.now
-      res.set_cookie({'name' => GDIFF_COOKIE_NAME,
-                      'value' => [now.strftime('%Y%m%d%H%M%S')],
-                      'path' => (File.dirname(cgi.script_name) + '/').sub(%r</+\z>, '/'),
-                      'expires' => now.getutc + 90*24*60*60})
+    def handle_gdiff(req)
+      org = case
+            when req.gdiff_whatsnew_mode?    then req.gdiff_last_visited
+            when req.gdiff_origin_specified? then req.gdiff_origin_time
+            else default_origin_time()
+            end
+      res = GlobalDiffPage.new(@config, @repository,
+                               org, req.gdiff_reload?).response
+      res.set_cookie req.new_gdiff_cookie
       res
     end
 
-    def last_visited(cgi)
-      c = cgi.cookies[GDIFF_COOKIE_NAME][0] or return nil
-      parse_origin(c)
+    def default_origin_time
+      DateTime.now - 3
+    end
+
+    def handle_history(req)
+      name = req.page_name
+      return front_page() if not name or not @repository.exist?(name)
+      HistoryPage.new(@config, @repository, name).response
+    end
+
+    def handle_annotate(req)
+      name = req.page_name
+      return front_page() if not name or not @repository.exist?(name)
+      AnnotatePage.new(@config, @repository, name, req.rev).response
+    end
+
+    def handle_src(req)
+      res = Response.new
+      name = (req.page_name || FRONT_PAGE_NAME)
+      begin
+        res.last_modified = @repository.mtime(name)
+      rescue Errno::ENOENT
+        ;
+      end
+      begin
+        res.set_content_body @repository[name], 'text/plain', @config.charset
+      rescue Errno::ENOENT
+        res.set_content_body '', 'text/plain', @config.charset
+      end
+      res
+    end
+
+    def handle_extent(req)
+      buf = ''
+      @repository.page_names.sort.each do |name|
+        buf << "= #{name}\r\n"
+        buf << "\r\n"
+        buf << @repository[name]
+        buf << "\r\n"
+      end
+      res = Response.new
+      res.last_modified = @repository.latest_mtime
+      res.set_content_body buf, 'text/plain', @config.charset
+      res
+    end
+
+    def handle_list(req)
+      ListPage.new(@config, @repository).response
+    end
+
+    def handle_recent(req)
+      RecentPage.new(@config, @repository).response
+    end
+
+    def handle_search(req)
+      begin
+        SearchResultPage.new(@config, @repository,
+                             req.search_query, req.search_regexps).response
+      rescue WrongQuery => err
+        return SearchErrorPage.new(@config, req.search_query, err).response
+      end
+    end
+  end
+
+
+  class Request
+    include TextUtils
+
+    def initialize(req, config, servlet_p)
+      @request = req
+      @config = config
+      @servlet_p = servlet_p
+    end
+
+    def cmd
+      get('cmd').to_s.downcase
+    end
+
+    def page_name
+      return get('name') unless @servlet_p
+      if @request.query['name']
+        get('name')
+      else
+        n = @request.path.split('/').last
+        return nil unless n
+        return nil if n.empty?
+        n.sub(/\.html\z/, '')
+      end
+    end
+
+    def normalized_text
+      normalize_text(get('text').to_s)
+    end
+
+    def cmtbox_username
+      unify_encoding(get('uname').to_s.strip, @config.charset)
+    end
+
+    def cmtbox_comment
+      normalize_text(get('cmt').to_s.strip)
+    end
+
+    def preview?
+      get('preview') ? true : false
+    end
+
+    def rev
+      getrev('rev')
+    end
+
+    def rev1
+      getrev('rev1')
+    end
+
+    def rev2
+      getrev('rev2')
+    end
+
+    def origrev
+      getrev('orgrev')
+    end
+
+    def getrev(name)
+      rev = get(name).to_i
+      return nil if rev < 1
+      rev
+    end
+    private :getrev
+
+    def gdiff_origin_time
+      parse_origin(get('org').to_s.strip)
+    end
+
+    def gdiff_reload?
+      get('reload').to_s.strip.downcase == 'on'
+    end
+
+    def gdiff_whatsnew_mode?
+      get('org').to_s.strip.downcase == 'cookie' and
+          not gdiff_last_visited().nil?
+    end
+
+    def gdiff_last_visited
+      c = gdiff_cookie() or return nil
+      parse_origin(c.value)
     end
 
     def parse_origin(org)
@@ -244,72 +336,28 @@ module BitChannel
         return nil
       end
     end
+    private :parse_origin
 
-    def default_origin_time
-      DateTime.now - 3
+    GDIFF_COOKIE_NAME = 'bclastvisit'
+
+    def gdiff_cookie
+      @request.cookies.detect {|c| c.name == GDIFF_COOKIE_NAME }
     end
 
-    def handle_history(cgi)
-      name = cgi.get_param('name')
-      return front_page() if not name or not @repository.exist?(name)
-      HistoryPage.new(@config, @repository, name).response
+    def new_gdiff_cookie
+      now = Time.now
+      c = WEBrick::Cookie.new(GDIFF_COOKIE_NAME, now.strftime('%Y%m%d%H%M%S'))
+      c.path = (File.dirname(@request.script_name) + '/').sub(%r</+\z>, '/')
+      c.expires = now.getutc + 90*24*60*60
+      c
     end
 
-    def handle_annotate(cgi)
-      name = cgi.get_param('name')
-      return front_page() if not name or not @repository.exist?(name)
-      rev = cgi.get_rev_param('rev')
-      AnnotatePage.new(@config, @repository, name, rev).response
+    def search_query
+      unify_encoding(get('q').to_s.strip, @config.charset)
     end
 
-    def handle_src(cgi)
-      res = CGIResponse.new
-      res.set_content_type 'text/plain', @config.charset
-      name = (cgi.get_param('name') || FRONT_PAGE_NAME)
-      begin
-        res.last_modified = @repository.mtime(name)
-      rescue Errno::ENOENT
-        ;
-      end
-      begin
-        res.body = @repository[name]
-      rescue Errno::ENOENT
-        res.body = ''
-      end
-      res
-    end
-
-    def handle_extent(cgi)
-      res = CGIResponse.new
-      res.set_content_type 'text/plain', @config.charset
-      res.last_modified = @repository.latest_mtime
-      buf = ''
-      @repository.page_names.sort.each do |name|
-        buf << "= #{name}\r\n"
-        buf << "\r\n"
-        buf << @repository[name]
-        buf << "\r\n"
-      end
-      res.body = buf
-      res
-    end
-
-    def handle_list(cgi)
-      ListPage.new(@config, @repository).response
-    end
-
-    def handle_recent(cgi)
-      RecentPage.new(@config, @repository).response
-    end
-
-    def handle_search(cgi)
-      begin
-        regs = setup_query(cgi.get_param('q'))
-        SearchResultPage.new(@config, @repository,
-                             cgi.get_param('q'), regs).response
-      rescue WrongQuery => err
-        return SearchErrorPage.new(@config, cgi.get_param('q'), err).response
-      end
+    def search_regexps
+      setup_query(search_query())
     end
 
     def setup_query(query)
@@ -322,6 +370,7 @@ module BitChannel
       raise WrongQuery, 'too many sub patterns' if patterns.length > 8
       patterns
     end
+    private :setup_query
 
     def check_pattern(pat)
       raise WrongQuery, 'no pattern' unless pat
@@ -329,35 +378,49 @@ module BitChannel
       raise WrongQuery, "pattern too short: #{pat}" if pat.length < 2
       raise WrongQuery, 'pattern too long' if pat.length > 128
     end
+    private :check_pattern
+
+    private
+
+    def normalize_text(text)
+      unify_encoding(text, @config.charset).map {|line|
+        detab(line).rstrip + "\r\n"
+      }.join('')
+    end
+
+    def get(name)
+      data = @request.query[name]
+      return nil unless data
+      return nil if data.empty?
+      data.to_s
+    end
   end
 
-  class CGIResponse
+
+  class Response
     def initialize
       @status = nil
       @header = {}
-      @body = nil
       @cookies = []
+      @body = nil
+      self.no_cache = true
     end
 
     attr_accessor :status
-    attr_accessor :body
+    attr_reader :body
 
-    def set_content_type(t, charset = nil)
-      @header['type'] = t
-      @header['charset'] = charset if charset
+    def set_content_body(body, type, charset)
+      @body = body
+      @header['Content-Type'] = "#{type}; charset=#{charset}"
     end
 
     def content_type
-      if @header['charset']
-        "#{@header['type']}; charset=#{@header['charset']}"
-      else
-        @header['type']
-      end
+      @header['Content-Type']
     end
 
     def last_modified=(tm)
       if tm
-        @header['Last-Modified'] = CGI.rfc1123_date(tm)
+        @header['Last-Modified'] = tm.httpdate
       else
         @header.delete 'Last-Modified'
       end
@@ -381,30 +444,26 @@ module BitChannel
       @header['Cache-Control'] ? true : false
     end
 
-    def set_cookie(spec)
-      @cookies.push spec
+    def set_cookie(c)
+      @cookies.push c
     end
 
-    def exec(cgi)
-      @header['status'] = @status if @status
-      @header['Content-Length'] = @body.length.to_s
-      @header['cookie'] = @cookies.map {|spec| CGI::Cookie.new(spec) }
-      print cgi.header(@header)
-      case cgi.request_method.to_s.upcase
-      when 'GET', 'POST', ''
-        print @body
+    def update_for(webrickres)
+      webrickres.status = @status if @status
+      @header.each do |k, v|
+        webrickres[k] = v
       end
-      STDOUT.flush
+      webrickres.cookies.replace @cookies
+      webrickres.body = @body
     end
   end
 
+
   class GenericPage   # redefine
     def response
-      res = CGIResponse.new
-      res.no_cache = true
+      res = Response.new
       res.last_modified = last_modified()
-      res.set_content_type 'text/html', charset()
-      res.body = html()
+      res.set_content_body html(), 'text/html', charset()
       res
     end
   end

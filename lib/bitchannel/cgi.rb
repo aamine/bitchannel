@@ -8,17 +8,19 @@
 # the GNU LGPL, Lesser General Public License version 2.1.
 #
 
-require 'webrick/httpservlet/abstract'
 require 'bitchannel/handler'
+require 'webrick/cgi'
 
 module BitChannel
 
-  class WebrickServlet < WEBrick::HTTPServlet::AbstractServlet
+  class CGI < WEBrick::CGI
+    def CGI.main(config, repo)
+      new({}, config, repo).start
+    end
+
     def do_GET(req, res)
       conf, repo = *@options
-      conf = conf.dup
-      conf.suggest_cgi_url File.dirname(req.path)
-      Handler.new(conf, repo).service Reqest.new(req, conf, true), res
+      Handler.new(conf, repo).service Request.new(req, conf, false), res
     end
 
     alias do_POST do_GET

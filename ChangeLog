@@ -1,3 +1,22 @@
+Mon Apr 26 23:20:41 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* index.cgi: the entry point is BitChannel::CGI.main.
+
+	* index.fcgi: the entry point is BitChannel::FCGI.main.
+
+	* lib/bitchannel/cgi.rb: new file.  BitChannel bridge for
+	  webrick/cgi.
+
+	* lib/bitchannel/fcgi.rb: new file.  BitChannel bridge for
+	  webrick/cgi and fcgi.
+
+	* lib/bitchannel/handler.rb: restructured using webrick/cgi.
+
+	* misc/webrick-sample.rb: WEBrick::HTTPServer#mount accept
+	  optional user arguments.
+
+	* lib/bitchannel/webrickservlet.rb: ditto.
+
 Mon Apr 26 19:34:46 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/repository.rb: automatically sync CVS/Entries
