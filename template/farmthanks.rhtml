@@ -10,10 +10,10 @@
 
 <h1>Node Created</h1>
 <p>
-Node `<%= node().id %>' created.
+Node `<%= id() %>' created.
 </p>
 <dl>
-<dt>ID</dt>    <dd><%= node().id %></dd>
+<dt>ID</dt>    <dd><%= id() %></dd>
 <dt>Name</dt>  <dd><%= node().name %></dd>
 <dt>Theme</dt> <dd><%= node().theme %></dd>
 </dl>
@@ -22,7 +22,7 @@ Node `<%= node().id %>' created.
 Click following hyperlink and construct your wiki site...
 </p>
 <ul>
-<li><a href="<%= node_url(node().id) %>"><%= node_url(node().id) %></a></li>
+<li><a href="<%= node_url(id()) %>"><%= node_url(id()) %></a></li>
 </ul>
 </ul>
 

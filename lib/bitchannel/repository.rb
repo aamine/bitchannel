@@ -72,7 +72,7 @@ module BitChannel
         cachedir  = conf.get_required(:cachedir)
         @link_cache = LinkCache.new("#{cachedir}/link", "#{cachedir}/revlink")
       }
-      @id = id
+      @module_id = id
       # per-request cache
       @Entries = nil
     end

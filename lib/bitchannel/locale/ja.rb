@@ -40,7 +40,7 @@ module BitChannel
           method = MIME_CHARSET_TO_UCONV[charset()] or return text
           Uconv.__send__(method, text)
         rescue Uconv::Error
-          unify_encoding_NKF(text, charset())
+          unify_encoding_NKF(text)
         end
       rescue LoadError
         require 'iconv'
@@ -63,7 +63,7 @@ module BitChannel
           dest = MIME_CHARSET_TO_ICONV[charset()] or return text
           Iconv.iconv(dest, 'UTF-8', text)
         rescue Iconv::Failure
-          unify_encoding_NKF(text, charset())
+          unify_encoding_NKF(text)
         end
       end
     rescue LoadError

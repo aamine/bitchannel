@@ -1,3 +1,19 @@
+Sun May  9 12:50:12 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/farm.rb: initialize request.cmd for view.
+
+	* lib/bitchannel/farm.rb: FarmThanksPage did not work.
+
+	* template/farmthanks.rhtml: ditto.
+
+	* lib/bitchannel/farm.rb: now id is not config entry of
+	  Repository.
+
+	* lib/bitchannel/repository.rb: fix typo.
+
+	* lib/bitchannel/locale/ja.rb: unify_encoding_NKF takes only 1
+	  arg.
+
 Sun May  9 12:22:16 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/handler.rb: gdiff(org mode) did not work.

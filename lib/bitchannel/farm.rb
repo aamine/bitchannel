@@ -40,6 +40,7 @@ module BitChannel
       case
       when req.cascade?
         return farm_index() unless @farm.exist?(req.node_id)
+        webrickreq.query['cmd'] ||= 'view'
         webrickreq.query['name'] ||= req.page_name
         wiki = @farm[req.node_id]
         Handler.new(wiki).handle(Request.new(webrickreq, wiki.locale, false))
@@ -193,8 +194,12 @@ module BitChannel
       'farmthanks'
     end
 
-    def node
+    def id
       @id
+    end
+
+    def node
+      @farm[@id]
     end
 
   end
@@ -268,9 +273,8 @@ module BitChannel
         :wc_read      => "#{tmpprefix}/wc.read",
         :wc_write     => "#{tmpprefix}/wc.write",
         :cachedir     => "#{tmpprefix}/cache",
-        :logfile      => @logfile,
-        :id           => id
-      })
+        :logfile      => @logfile
+      }, id)
       repo.setup_working_copy @repository
       Dir.glob("#{@skeleton}/*").select {|n| File.file?(n) }.each do |path|
         repo.checkin decode_filename(File.basename(path)), nil, File.read(path)
@@ -359,7 +363,7 @@ module BitChannel
     end
 
     def theme
-      getprop(:theme)
+      getprop(:theme) || 'default'   # FIXME
     end
 
     def logo
