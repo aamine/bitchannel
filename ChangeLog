@@ -1,3 +1,11 @@
+Mon Aug  9 04:43:28 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/fcgi.rb: make record buffers persisitent. (IMPORTANT FIX for
+	  multiplex)
+
+	* lib/fcgi.rb: #each_request_nosignal -> #session, it is no longer
+	  an iterator.
+
 Sat Jul 31 19:33:56 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/page.rb (EditPage#diff_base_revision): revision

@@ -88,6 +88,7 @@ class FCGI
 
     def initialize(server)
       @server = server
+      @buffers = {}
       @default_parameters = {
         "FCGI_MAX_CONNS" => 1,
         "FCGI_MAX_REQS"  => 1,
@@ -95,39 +96,35 @@ class FCGI
       }
     end
 
-    def each_request
-      graceful_exit = false
-      Signal.trap(:USR1) { graceful_exit = true }
+    def each_request(&block)
+      graceful = false
+      Signal.trap(:USR1) { graceful = true }
       Signal.trap(:TERM) { exit 0 }
       Signal.trap(:PIPE, 'IGNORE')   # We use Errno::EPIPE exception.
-      each_request_nosignal do |req|
-        yield req
-        graceful_exit
+      while true
+        begin
+          session(&block)
+        rescue Errno::EPIPE, EOFError
+          # HTTP request is canceled by the remote user
+        end
+        exit 0 if graceful
       end
-      exit 0
     end
 
-    def each_request_nosignal
-      graceful = false
-      until graceful
-        begin
-          sock, addr = *@server.accept
-          break unless sock
-          handle_socket(FastCGISocket.new(sock)) {|req|
-            graceful = yield(req)
-          }
-        rescue Errno::EPIPE, EOFError
-          ;
-        ensure
-          sock.close if sock and not sock.closed?
-        end
-      end
+    def session
+      sock, addr = *@server.accept
+      return unless sock
+      fsock = FastCGISocket.new(sock)
+      req = next_request(fsock)
+      yield req
+      respond_to req, fsock, FCGI_REQUEST_COMPLETE
+    ensure
+      sock.close if sock and not sock.closed?
     end
 
     private
 
-    def handle_socket(sock)
-      buffers = {}
+    def next_request(sock)
       while rec = sock.read_record
         if rec.management_record?
           case rec.type
@@ -139,18 +136,15 @@ class FCGI
         else
           case rec.type
           when FCGI_BEGIN_REQUEST
-            buffers[rec.request_id] = RecordBuffer.new(rec)
+            @buffers[rec.request_id] = RecordBuffer.new(rec)
           when FCGI_ABORT_REQUEST
             raise "got ABORT_REQUEST"   # FIXME
           else
-            buf = buffers[rec.request_id]   or next # inactive request
+            buf = @buffers[rec.request_id]   or next # inactive request
             buf.push rec
             if buf.ready?
-              buffers.delete rec.request_id
-              req = buf.new_request
-              yield req
-              respond_to req, sock, FCGI_REQUEST_COMPLETE
-              return
+              @buffers.delete rec.request_id
+              return buf.new_request
             end
           end
         end
@@ -167,10 +161,10 @@ class FCGI
     end
 
     def respond_to(req, sock, status)
-      split_stream(FCGI_STDOUT, req.id, req.out) do |rec|
+      split_data(FCGI_STDOUT, req.id, req.out) do |rec|
         sock.send_record rec
       end
-      split_stream(FCGI_STDERR, req.id, req.err) do |rec|
+      split_data(FCGI_STDERR, req.id, req.err) do |rec|
         sock.send_record rec
       end if req.err.length > 0
       sock.send_record EndRequestRecord.new(req.id, 0, status)
@@ -178,7 +172,7 @@ class FCGI
 
     DATA_UNIT = 16384
 
-    def split_stream(type, id, f)
+    def split_data(type, id, f)
       unless f.length == 0
         f.rewind
         while s = f.read(DATA_UNIT)
