@@ -39,7 +39,7 @@ def initialize_environment
     :wc_read   => "#{cgidir}/wc.read",
     :wc_write  => "#{cgidir}/wc.write",
     :cachedir  => "#{cgidir}/cache",
-    :sync_wc   => true
+    :logfile   => nil
   )
 
   return config, repo

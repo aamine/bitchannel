@@ -61,13 +61,13 @@ module BitChannel
     def initialize(args)
       args = args.dup
       def args.getopt(name)
-        delete(name) or
-            raise ConfigError, "Config Error: not set: repository.#{name}"
+        raise ConfigError, "Config Error: not set: repository.#{name}" \
+            unless key?(name)
+        delete(name)
       end
       @cvs_cmd  = args.getopt(:cmd_path)
       @wc_read  = args.getopt(:wc_read)
       @wc_write = args.getopt(:wc_write)
-      @sync_wc  = args.getopt(:sync_wc)
       @logfile  = args.getopt(:logfile)
       cachedir  = args.getopt(:cachedir)
       args.each do |k,v|
