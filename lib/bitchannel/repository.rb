@@ -75,6 +75,14 @@ module Wikitik
       end
     end
 
+    def fetch(page_name, rev = nil)
+      begin
+        self[page_name, rev]
+      rescue Errno::ENOENT
+        return yield
+      end
+    end
+
     def revision(page_name)
       re = %r<\A/#{Regexp.quote(encode_filename(page_name))}/1>
       line = File.readlines("#{@wc_read}/CVS/Entries").detect {|s| re =~ s }

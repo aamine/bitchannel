@@ -244,10 +244,10 @@ module Wikitik
 
 
   class EditPage < Page
-    def initialize(config, repo, page_name, rev = nil, text = nil, msg = nil)
+    def initialize(config, repo, page_name, text, origrev, msg = nil)
       super config, repo, page_name
-      @revision = rev || @repository.revision(@page_name)
       @text = text
+      @original_revision = origrev
       @opt_message = msg
     end
 
@@ -258,21 +258,15 @@ module Wikitik
     end
     
     def opt_message
-      return '' unless @opt_message
-      "<p>#{escape_html(@opt_message)}</p>"
+      @opt_message
     end
 
     def body
-      return @text if @text
-      begin
-        return escape_html(@repository[@page_name])
-      rescue Errno::ENOENT
-        return ''
-      end
+      @text
     end
 
-    def revision
-      @revision || 0
+    def original_revision
+      @original_revision
     end
   end
 

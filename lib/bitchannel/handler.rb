@@ -70,115 +70,73 @@ module Wikitik
 
     def wiki_main(cgi)
       case cgi.get_param('cmd').to_s.downcase
-      when 'view'
-        page_name = (cgi.get_param('name') || @config.index_page_name)
-        rev = cgi.get_rev_param('rev')
-        if rev
-          page = ViewRevPage.new(@config, @repository, page_name, rev)
-          send cgi, page.html, page.last_modified
-        else
-          view cgi, page_name
-        end
-      when 'edit'
-        page_name = cgi.get_param('name')
-        unless page_name
-          view cgi, @config.index_page_name
-          return
-        end
-        edit cgi, page_name
-      when 'save'
-        page_name = cgi.get_param('name')
-        unless page_name
-          send cgi, EditPage.new(@config, @repository,
-                                 @config.tmp_page_name, nil,
-                                 cgi.get_param('text').to_s,
-                                 gettext(:save_without_name)).html
-          return
-        end
-        begin
-          text = cgi.get_param('text').to_s.gsub(/\r\n|\n|\r/, "\r\n")
-          @repository.checkin page_name,
-                              cgi.get_rev_param('origrev'),
-                              text
-          thanks cgi, page_name
-        rescue EditConflict => err
-          send cgi, EditPage.new(@config, @repository,
-                                 page_name, nil,
-                                 merged, gettext(:edit_conflicted)).html
-        end
-      when 'diff'
-        page_name = cgi.get_param('name')
-        if not page_name or not @repository.exist?(page_name)
-          view cgi, @config.index_page_name
-          return
-        end
-        rev1 = cgi.get_rev_param('rev1')
-        rev2 = cgi.get_rev_param('rev2')
-        unless rev1 and rev2
-          view cgi, page_name
-          return
-        end
-        send cgi, DiffPage.new(@config, @repository, page_name, rev1, rev2).html
-      when 'history'
-        page_name = cgi.get_param('name')
-        if not page_name or not @repository.exist?(page_name)
-          view cgi, @config.index_page_name
-          return
-        end
-        send cgi, HistoryPage.new(@config, @repository, page_name).html
-      when 'annotate'
-        page_name = cgi.get_param('name')
-        if not page_name or not @repository.exist?(page_name)
-          view cgi, @config.index_page_name
-          return
-        end
-        rev = cgi.get_rev_param('rev')
-        send cgi, AnnotatePage.new(@config, @repository, page_name, rev).html
-      when 'src'
-        page_name = (cgi.get_param('name') || @config.index_page_name)
-        begin
-          body = @repository[page_name]
-        rescue Errno::ENOENT
-          body = ''
-        end
-        begin
-          mtime = @repository.mtime(page_name)
-        rescue Errno::ENOENT
-          mtime = nil
-        end
-        send_text cgi, body, mtime
-      when 'list'
-        send cgi, ListPage.new(@config, @repository).html
-      when 'recent'
-        send cgi, RecentPage.new(@config, @repository).html
-      when 'search'
-        begin
-          regs = setup_query(cgi.get_param('q'))
-          send cgi, SearchResultPage.new(@config, @repository, cgi.get_param('q'), regs).html
-        rescue WrongQuery => err
-          send cgi, SearchErrorPage.new(@config, @repository, cgi.get_param('q'), err).html
-        end
+      when 'view'     then handle_view cgi
+      when 'edit'     then handle_edit cgi
+      when 'save'     then handle_save cgi
+      when 'diff'     then handle_diff cgi
+      when 'history'  then handle_history cgi
+      when 'annotate' then handle_annotate cgi
+      when 'src'      then handle_src cgi
+      when 'list'     then handle_list cgi
+      when 'recent'   then handle_recent cgi
+      when 'search'   then handle_search cgi
       else
         view cgi, (cgi.get_param('name') || @config.index_page_name)
       end
     end
 
-    def view(cgi, page_name)
-raise ArgumentError, "view page=nil" unless page_name
-      unless @repository.exist?(page_name)
-        edit cgi, page_name
-        return
+    def handle_view(cgi)
+      page_name = (cgi.get_param('name') || @config.index_page_name)
+      rev = cgi.get_param('rev')
+      if rev
+        page = ViewRevPage.new(@config, @repository, page_name, rev)
+        send_html cgi, page.html, page.last_modified
+      else
+        view cgi, page_name
       end
-      page = ViewPage.new(@config, @repository, page_name)
-      send cgi, page.html, page.last_modified
     end
 
-    def edit(cgi, page_name)
-      send cgi, EditPage.new(@config, @repository, page_name).html
+    def handle_edit(cgi)
+      page_name = cgi.get_param('name')
+      unless page_name
+        view cgi, @config.index_page_name
+        return
+      end
+      orgrev = @repository.revision(page_name)
+      srcrev = (cgi.get_rev_param('rev') || orgrev)
+      send_html cgi, EditPage.new(@config, @repository,
+                                  page_name,
+                                  @repository.fetch(page_name, srcrev) { '' },
+                                  orgrev).html
+    end
+
+    def handle_save(cgi)
+      page_name = cgi.get_param('name')
+      unless page_name
+        send_html cgi, EditPage.new(@config, @repository,
+                                    @config.tmp_page_name,
+                                    cgi.get_param('text').to_s,
+                                    @repository.revision(@config.tmp_page_name),
+                                    gettext(:save_without_name)).html
+        return
+      end
+      begin
+        text = cgi.get_param('text').to_s.gsub(/\r\n|\n|\r/, "\r\n")
+        @repository.checkin page_name,
+                            cgi.get_rev_param('origrev'),
+                            text
+        thanks cgi, page_name
+      rescue EditConflict => err
+        send_html cgi, EditPage.new(@config, @repository,
+                                    page_name,
+                                    err.merged,
+                                    @repository.revision(page_name),
+                                    gettext(:edit_conflicted)).html
+      end
     end
 
     def thanks(cgi, page_name)
-      send cgi, <<-ThanksPage
+      send_html cgi, <<-ThanksPage
         <html>
         <head>
         <meta http-equiv="refresh" content="1;url=#{@config.cgi_url}?name=#{URI.encode(page_name)}">
@@ -190,6 +148,75 @@ raise ArgumentError, "view page=nil" unless page_name
         </body>
         </html>
       ThanksPage
+    end
+
+    def handle_diff(cgi)
+      page_name = cgi.get_param('name')
+      if not page_name or not @repository.exist?(page_name)
+        view cgi, @config.index_page_name
+        return
+      end
+      rev1 = cgi.get_rev_param('rev1')
+      rev2 = cgi.get_rev_param('rev2')
+      unless rev1 and rev2
+        view cgi, page_name
+        return
+      end
+      send_html cgi, DiffPage.new(@config, @repository,
+                                  page_name, rev1, rev2).html
+    end
+
+    def handle_history(cgi)
+      page_name = cgi.get_param('name')
+      if not page_name or not @repository.exist?(page_name)
+        view cgi, @config.index_page_name
+        return
+      end
+      send_html cgi, HistoryPage.new(@config, @repository, page_name).html
+    end
+
+    def handle_annotate(cgi)
+      page_name = cgi.get_param('name')
+      if not page_name or not @repository.exist?(page_name)
+        view cgi, @config.index_page_name
+        return
+      end
+      rev = cgi.get_rev_param('rev')
+      send_html cgi, AnnotatePage.new(@config, @repository, page_name, rev).html
+    end
+
+    def handle_src(cgi)
+      page_name = (cgi.get_param('name') || @config.index_page_name)
+      begin
+        body = @repository[page_name]
+      rescue Errno::ENOENT
+        body = ''
+      end
+      begin
+        mtime = @repository.mtime(page_name)
+      rescue Errno::ENOENT
+        mtime = nil
+      end
+      send_text cgi, body, mtime
+    end
+
+    def handle_list(cgi)
+      send_html cgi, ListPage.new(@config, @repository).html
+    end
+
+    def handle_recent(cgi)
+      send_html cgi, RecentPage.new(@config, @repository).html
+    end
+
+    def handle_search(cgi)
+      begin
+        regs = setup_query(cgi.get_param('q'))
+        send_html cgi, SearchResultPage.new(@config, @repository,
+                                            cgi.get_param('q'), regs).html
+      rescue WrongQuery => err
+        send_html cgi, SearchErrorPage.new(@config, @repository,
+                                           cgi.get_param('q'), err).html
+      end
     end
 
     def setup_query(query)
@@ -210,15 +237,26 @@ raise ArgumentError, "view page=nil" unless page_name
       raise WrongQuery, 'pattern too long' if pat.length > 128
     end
 
-    def send(cgi, html, mtime = nil)
-      send0 cgi, html, 'text/html', mtime
+    def view(cgi, page_name)
+raise ArgumentError, "view page=nil" unless page_name
+      unless @repository.exist?(page_name)
+        send_html cgi, EditPage.new(@config, @repository,
+                                    page_name, '', nil).html
+        return
+      end
+      page = ViewPage.new(@config, @repository, page_name)
+      send_html cgi, page.html, page.last_modified
+    end
+
+    def send_html(cgi, html, mtime = nil)
+      send_page cgi, html, 'text/html', mtime
     end
 
     def send_text(cgi, text, mtime = nil)
-      send0 cgi, text, 'text/plain', mtime
+      send_page cgi, text, 'text/plain', mtime
     end
 
-    def send0(cgi, content, type, mtime)
+    def send_page(cgi, content, type, mtime)
       header = {'status' => '200 OK',
                 'type' => type,
                 'charset' => @config.charset,
