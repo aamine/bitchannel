@@ -1,3 +1,7 @@
+Mon Aug 30 12:08:28 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* version 0.3.0 released.
+
 Mon Aug 30 12:06:18 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/syntax.rb (do_compile): should escape line.
