@@ -346,12 +346,12 @@ LOG %Q[exec: "#{cmd.join('", "')}"]
     end
 
     def add_linkcache_entry(path, page_name)
-      links = read_cache(path)
+      links = (read_cache(path) || [])
       write_cache path, (links + [page_name]).uniq.sort
     end
 
     def remove_linkcache_entry(path, page_name)
-      links = read_cache(path)
+      links = (read_cache(path) || [])
       write_cache path, (links - [page_name]).uniq.sort
     end
 
