@@ -15,12 +15,12 @@
 </div>
 
 <h1>Recent Edit</h1>
-<ul><%
+<ol><%
    page_list().each do |page, mtime| %>
 <li><%= format_time(mtime) %>: <a href="<%= cgi_url() %>?cmd=view;name=<%= page %>"><%= page %></a></li><%
    end
 %>
-</ul>
+</ol>
 
 </body>
 </html>
