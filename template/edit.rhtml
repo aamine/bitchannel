@@ -7,9 +7,11 @@
   <title>Edit: <%= title() %></title>
 </head>
 <body>
+
 <div class="menu">
-<a href="<%= cgi_url() %>?cmd=help">Help</a>
+<a href="<%= cgi_url() %>?cmd=view;name=HelpPage">Help</a>
 </div>
+
 <h1>Edit: <%= page_name() %></h1>
 <%= opt_message() %>
 <form method="POST" action="<%= cgi_url() %>">
@@ -20,5 +22,6 @@
 <%= body() %></textarea>
 <input type="submit" id="okbutton" value="Save">
 </form>
+
 </body>
 </html>

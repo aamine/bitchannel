@@ -7,18 +7,20 @@
   <title>List</title>
 </head>
 <body>
+
 <div class="menu">
 <a href="<%= cgi_url() %>?cmd=recent">Recent</a>
 <a href="<%= cgi_url() %>?cmd=view;name=IndexPage">Top</a>
 <a href="<%= cgi_url() %>?cmd=view;name=HelpPage">Help</a>
 </div>
+
 <h1>List of All Pages</h1>
 <ul>
 <%
     page_list().each do |page|
 %><li><a href="<%= cgi_url() %>?cmd=view;name=<%= page %>"><%= page %></a></li>
-<%
-    end
+<%  end
 %></ul>
+
 </body>
 </html>

@@ -7,11 +7,13 @@
   <title>Recent</title>
 </head>
 <body>
+
 <div class="menu">
 <a href="<%= cgi_url() %>?cmd=list">List</a>
 <a href="<%= cgi_url() %>?cmd=view;name=IndexPage">Top</a>
 <a href="<%= cgi_url() %>?cmd=view;name=HelpPage">Help</a>
 </div>
+
 <h1>Recent Edit</h1>
 <ul><%
    page_list().each do |page, mtime| %>
@@ -19,5 +21,6 @@
    end
 %>
 </ul>
+
 </body>
 </html>

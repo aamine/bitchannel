@@ -7,15 +7,18 @@
   <title><%= title() %> rev 1.<%= revision() %></title>
 </head>
 <body>
+
 <div class="menu">
-<a href="<%= cgi_url() %>?cmd=view;name=<%= page_name() %>">HEAD</a>
+<a href="<%= cgi_url() %>?cmd=view;name=<%= page_url() %>">HEAD</a>
 <a href="<%= cgi_url() %>?cmd=recent">Recent</a>
 <a href="<%= cgi_url() %>?cmd=list">List</a>
-<a href="<%= cgi_url() %>?cmd=history;name=<%= page_name() %>">History</a>
+<a href="<%= cgi_url() %>?cmd=history;name=<%= page_url() %>">History</a>
 <a href="<%= cgi_url() %>?cmd=view;name=HelpPage">Help</a>
 </div>
+
 <h1><%= page_name() %> rev 1.<%= revision() %></h1>
 <p><span class="lastmodified">Last Modified: <%= format_time(last_modified()) %></span></p>
 <%= body() %>
+
 </body>
 </html>
