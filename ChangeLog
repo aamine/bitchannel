@@ -1,3 +1,10 @@
+Fri Apr  2 16:19:45 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/config.rb: rename method: cgi_url= ->
+	  suggest_cgi_url.
+
+	* lib/bitchannel/webrickservlet.rb: use #suggest_cgi_url.
+
 Fri Apr  2 12:21:18 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/handler.rb: new method Handler#handle_extent.

@@ -48,7 +48,10 @@ module BitChannel
       @html_url_p
     end
 
-    attr_writer :cgi_url
+    def suggest_cgi_url(url)
+      @cgi_url ||= url
+      @cgi_url
+    end
 
     def cgi_url
       return @cgi_url if @cgi_url

@@ -24,7 +24,7 @@ module BitChannel
 
     def do_GET(req, res)
       conf = @@config.dup
-      conf.cgi_url = File.dirname(req.path)
+      conf.suggest_cgi_url File.dirname(req.path)
       res0 = Handler.new(conf, @@repository).handle(WebrickRequestWrapper.new(req))
       res['content-type'] = res0.content_type
       res['last-modified'] = res0.last_modified if res0.last_modified
