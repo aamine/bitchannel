@@ -63,15 +63,14 @@ module BitChannel
     UL = /\A\s*\*|\A-/
     OL = /\A\s*\(\d+\)|\A\#/   # should not allow spaces before '#'
     DL = /\A:/
-    CITE = /\A""/
-    BAR_TABLE = /\A\|\|/
-    CSV_TABLE = /\A,/
+    CITE = /\A""|\A>/
+    TABLE = /\A,|\A\|\|/
     PRE = /\A\{\{\{/
     INDENTED = /\A\s+\S/
     BLOCKEXT = /\A\[\[\#(\w+)(:.*?)?\]\]$/
 
     PARAGRAPH_END = Regexp.union(CAPTION, UL, OL, DL,
-        CITE, BAR_TABLE, CSV_TABLE, PRE, INDENTED, BLOCKEXT)
+        CITE, TABLE, PRE, INDENTED, BLOCKEXT)
 
     def do_compile
       while @f.next?
@@ -81,8 +80,7 @@ module BitChannel
         when OL        then ol
         when DL        then dl
         when CITE      then cite
-        when BAR_TABLE then bar_table
-        when CSV_TABLE then csv_table
+        when TABLE     then table
         when PRE       then pre
         when INDENTED  then indented_pre   # must be placed after UL/OL
         when BLOCKEXT
@@ -223,12 +221,12 @@ module BitChannel
       print '<p>'
       nl = ''
       @f.while_match(CITE) do |line|
-        str = line.sub(/\A""/, '').strip
-        if str.empty?
+        content = line.sub(CITE, '').strip
+        if content.empty?
           print "</p>\n<p>"
           nl = ''
         else
-          print nl + escape_html(str)
+          print nl + escape_html(content)
           nl = "\n"
         end
       end
@@ -236,9 +234,18 @@ module BitChannel
       puts '</blockquote>'
     end
 
+    def table
+      case @f.peek
+      when /\A,/  then csv_table
+      when /\A\|/ then bar_table
+      else
+        raise 'must not happen'
+      end
+    end
+
     def bar_table
       buf = []
-      @f.while_match(BAR_TABLE) do |line|
+      @f.while_match(/\A\|\|/) do |line|
         cols = line.strip.split(/(\|\|\|?)/, -1)
         cols.shift   # discard first ""
         row = []
@@ -253,7 +260,7 @@ module BitChannel
 
     def csv_table
       buf = []
-      @f.while_match(CSV_TABLE) do |line|
+      @f.while_match(/\A,/) do |line|
         buf.push CSV.parse_line(line[1..-1]).map {|cell| [cell.to_s, false] }
       end
       output_table adjust_ncols(buf)
