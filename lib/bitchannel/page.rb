@@ -12,12 +12,14 @@ require 'alphawiki/repository'
 require 'alphawiki/tohtml'
 require 'alphawiki/textutils'
 require 'erb'
+require 'forwardable'
 
 module AlphaWiki
 
   class Page
 
     include TextUtils
+    extend Forwardable
 
     def initialize(config, repo, page)
       @config = config
@@ -31,20 +33,16 @@ module AlphaWiki
 
     private
 
+    def_delegator :@config, :charset
+    def_delegator :@config, :css_url
+    def_delegator :@config, :cgi_url
+
     def title
       page_name()
     end
 
     def page_name
       escape_html(@page_name)
-    end
-
-    def css_url
-      @config.css_url
-    end
-
-    def cgi_url
-      @config.cgi_url
     end
 
   end
@@ -69,7 +67,7 @@ module AlphaWiki
   end
 
 
-  class EditPage
+  class EditPage < Page
 
     def initialize(config, repo, page_name, rev = nil, text = nil, msg = nil)
       super config, repo, page_name
@@ -96,25 +94,6 @@ module AlphaWiki
 
     def page_revision
       @rev || 0
-    end
-
-    def opt_headers
-      ''
-    end
-
-  end
-
-
-  class SavePage
-
-    private
-
-    def template_id
-      'save'
-    end
-
-    def body
-      escape_html(@repository[@page_name])
     end
 
     def opt_headers

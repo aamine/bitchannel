@@ -70,7 +70,7 @@ def wiki_main(cgi)
                                         merged, err.message).html
     end
   else
-    view repo, cgi, config.index_page_name
+    view repo, config, cgi, config.index_page_name
   end
 end
 
@@ -85,7 +85,7 @@ end
 
 def edit(repo, config, cgi, page_name)
   unless page_name
-    view repo, config, cgi, page_name
+    view repo, config, cgi, config.index_page_name
     return
   end
   send cgi, AlphaWiki::EditPage.new(config, repo, page_name).html
