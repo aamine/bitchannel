@@ -75,7 +75,7 @@ module BitChannel
         html << escape_html(err.precise_message) << "\n" \
             if err.respond_to?(:precise_message)
       end
-      html << "</pre>\n</body></html>"
+      html << "</pre>\n</body></html>\n"
 
       res = Response.new
       res.set_content_body html, 'text/html', @wiki.locale.charset

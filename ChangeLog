@@ -1,3 +1,7 @@
+Thu Mar 17 14:48:49 2005  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/handler.rb (error_response): append final "\n".
+
 Thu Mar 17 07:33:40 2005  Minero Aoki  <aamine@loveruby.net>
 
 	* template/siterss.rdf: BitChannel source must be escaped twice,
