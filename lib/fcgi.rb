@@ -62,19 +62,19 @@ class FCGI
 
   FCGI_NULL_REQUEST_ID = 0
 
-  # Masks for flags component of FCGI_BEGIN_REQUEST
-  FCGI_KEEP_CONN = 1
-
-  # Values for role component of FCGI_BEGIN_REQUEST
+  # FCGI_BEGIN_REQUSET.role
   FCGI_RESPONDER = 1
   FCGI_AUTHORIZER = 2
   FCGI_FILTER = 3
 
-  # Values for protocolStatus component of FCGI_END_REQUEST
-  FCGI_REQUEST_COMPLETE = 0   # Request completed nicely
-  FCGI_CANT_MPX_CONN = 1      # This app can't multiplex
-  FCGI_OVERLOADED = 2         # New request rejected; too busy
-  FCGI_UNKNOWN_ROLE = 3       # Role value not known
+  # FCGI_BEGIN_REQUEST.flags
+  FCGI_KEEP_CONN = 1
+
+  # FCGI_END_REQUEST.protocolStatus
+  FCGI_REQUEST_COMPLETE = 0
+  FCGI_CANT_MPX_CONN = 1
+  FCGI_OVERLOADED = 2
+  FCGI_UNKNOWN_ROLE = 3
 
 
   class Server
@@ -171,12 +171,10 @@ class FCGI
       @socket = sock
     end
 
-    HEADER_LENGTH = 8
-
     def read_record
-      header = @socket.read(HEADER_LENGTH) or return nil
-      return nil unless header.size == HEADER_LENGTH
-      version, type, reqid, clen, padlen, reserved = *header.unpack('CCnnCC')
+      header = @socket.read(Record::HEADER_LENGTH) or return nil
+      return nil unless header.size == Record::HEADER_LENGTH
+      version, type, reqid, clen, padlen, reserved = *Record.parse_header(header)
       Record.class_for(type).parse(reqid, read_record_body(clen, padlen))
     end
 
@@ -282,6 +280,19 @@ class FCGI
 
 
   class Record
+    # uint8_t  protocol_version;
+    # uint8_t  record_type;
+    # uint16_t request_id;     (big endian)
+    # uint16_t content_length; (big endian)
+    # uint8_t  padding_length;
+    # uint8_t  reserved;
+    HEADER_FORMAT = 'CCnnCC'
+    HEADER_LENGTH = 8
+
+    def Record.parse_header(buf)
+      return *buf.unpack(HEADER_FORMAT)
+    end
+
     def Record.class_for(type)
       RECORD_CLASS[type]
     end
@@ -312,16 +323,19 @@ class FCGI
     private
 
     def make_header(clen, padlen)
-      [version(), @type, @request_id, clen, padlen, 0].pack('CCnnCC')
+      [version(), @type, @request_id, clen, padlen, 0].pack(HEADER_FORMAT)
     end
   end
 
   class BeginRequestRecord < Record
+    # uint16_t role; (big endian)
+    # uint8_t  flags;
+    # uint8_t  reserved[5];
+    BODY_FORMAT = 'nCC5'
+
     def BeginRequestRecord.parse(id, body)
-      # u16 role
-      # u8  flags
-      # u8  reserved[5]
-      new(id, *body.unpack('nC'))
+      role, flags, *reserved = *body.unpack(BODY_FORMAT)
+      new(id, role, flags)
     end
 
     def initialize(id, role, flags)
@@ -345,17 +359,20 @@ class FCGI
   end
 
   class EndRequestRecord < Record
+    # uint32_t appStatus; (big endian)
+    # uint8_t  protocolStatus;
+    # uint8_t  reserved[3];
+    BODY_FORMAT = 'NCC3'
+
     def EndRequestRecord.parse(id, body)
-      # u32 appStatus;
-      # u8  protocolStatus;
-      # u8  reserved[3];
-      new(id, *body.unpack('NC'))   # ignore "reserved" bytes (size=3)
+      appstatus, protostatus, *reserved = *body.unpack(BODY_FORMAT)
+      new(id, appstatus, protostatus)
     end
 
-    def initialize(id, app, proto)
+    def initialize(id, appstatus, protostatus)
       super FCGI_END_REQUEST, id
-      @application_status = app
-      @protocol_status = proto
+      @application_status = appstatus
+      @protocol_status = protostatus
     end
 
     attr_reader :application_status
@@ -364,15 +381,18 @@ class FCGI
     private
 
     def make_body
-      [@application_status, @protocol_status, 0, 0, 0].pack('NCC3')
+      [@application_status, @protocol_status, 0, 0, 0].pack(BODY_FORMAT)
     end
   end
 
   class UnknownTypeRecord < Record
+    # uint8_t type;
+    # uint8_t reserved[7];
+    BODY_FORMAT = 'CC7'
+
     def UnknownTypeRecord.parse(id, body)
-      # u8 type;
-      # u8 reserved[7];
-      new(id, *body.unpack('C'))
+      type, *reserved = *body.unpack(BODY_FORMAT)
+      new(id, type)
     end
 
     def initialize(id, t)
@@ -385,13 +405,39 @@ class FCGI
     private
 
     def make_body
-      [@unknown_type, 0, 0, 0, 0, 0, 0, 0].pack('C8')
+      [@unknown_type, 0, 0, 0, 0, 0, 0, 0].pack(BODY_FORMAT)
     end
   end
 
   class ValuesRecord < Record
     def ValuesRecord.parse(id, body)
-      new(id, ValuesParser.parse(body))
+      new(id, parse_values(body))
+    end
+
+    class << self
+      private
+
+      def parse_values(buf)
+        result = {}
+        until buf.empty?
+          name, value = *read_pair(buf)
+          result[name] = value
+        end
+        result
+      end
+
+      def read_pair(buf)
+        nlen = read_length(buf)
+        vlen = read_length(buf)
+        return buf.slice!(0, nlen), buf.slice!(0, vlen)
+      end
+
+      def read_length(buf)
+        if buf[0] >> 7 == 0
+        then buf.slice!(0,1)[0]
+        else buf.slice!(0,4).unpack('N')[0] & ((1<<31) - 1)
+        end
+      end
     end
 
     def initialize(type, id, values)
@@ -435,48 +481,6 @@ class FCGI
 
     def empty?
       @values.empty?
-    end
-  end
-
-  class ValuesParser
-    def ValuesParser.parse(buf)
-      result = {}
-      parser = new(buf)
-      until parser.eos?
-        name, value = *parser.next
-        result[name] = value
-      end
-      result
-    end
-
-    def initialize(buf)
-      @buf = buf
-      @pos = 0
-    end
-
-    def eos?
-      @pos >= @buf.length
-    end
-
-    def next
-      nlen = read_length()
-      vlen = read_length()
-      return read(nlen), read(vlen)
-    end
-
-    private
-
-    def read_length
-      if @buf[@pos] < 0x80
-      then read(1)[0]
-      else read(4).unpack('N')[0] & ((1<<31) - 1)
-      end
-    end
-
-    def read(len)
-      str = @buf[@pos, len]
-      @pos += len
-      str
     end
   end
 
