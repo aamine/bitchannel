@@ -13,12 +13,22 @@ body {
     line-height: 130%;
 }
 
+div.main {
+    clear: left;
+    float: left;
+    position: relative;
+    left: 0px;
+    top: 0px;
+    z-index: 1;
+}
+
 div.menu {
     clear: right;
     float: right;
     position: fixed;
     top: 0px;
     right: 0px;
+    z-index: 2;
     width: 5.5em;
     text-align: left;
     background-color: #eee;
@@ -62,7 +72,7 @@ address {
 h1 {
     font-size: 200%;
     border-bottom: 1px solid #33a;
-    text-aligh: left;
+    text-align: left;
 }
 
 img.sitelogo {
@@ -107,12 +117,14 @@ pre {
 
 blockquote {
     background-color: transparent;
+    /*
     border-style: solid;
     border-color: #33a;
     border-width: 4px 0px 4px 0px;
+    */
     padding: 4px;
     margin-left: 3em;
-    margin-right: 3em;
+    width: 30em;
     font-weight: normal;
 }
 
@@ -168,10 +180,6 @@ a:hover, a:focus, a:active {
 form {
     padding: 0px;
     margin: 0px;
-}
-
-div.searchform {
-    float: right;
 }
 
 hr {
