@@ -67,7 +67,7 @@ module BitChannel
     def DUMMY_REPOSITORY.exist?(name)
       true
     end
-    def DUMMY_PAGE_ENTITY.inspect
+    def DUMMY_REPOSITORY.inspect
       '#<dummy Repository object>'
     end
 
