@@ -8,7 +8,7 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
-require "alphawiki/rc/#{@lang}"
+require "alphawiki/rc/#{@LC_MESSAGES}"
 
 module AlphaWiki
   def AlphaWiki.gettext(key)

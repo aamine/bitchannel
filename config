@@ -21,8 +21,8 @@
 # Only tested environment is ja_JP.eucJP.
 $KCODE = 'EUC'
 @charset = 'euc-jp'
-@lang = 'ja'		# Affects only text resource.
-			# You can safely combine $KCODE=EUC with @lang=en.
+@LC_MESSAGES = 'ja'	# Affects only text resource.
+			# You can safely mix $KCODE=EUC with @LC_MESSAGES=en.
 
 # If you want to change:
 @cgi_url = 'index.rb'
