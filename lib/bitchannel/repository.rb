@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# Copyright (C) 2003,2004 Minero Aoki
+# Copyright (c) 2003-2005 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the terms of
@@ -9,12 +9,12 @@
 #
 
 require 'bitchannel/userconfig'
+require 'bitchannel/filesystem'
 require 'bitchannel/logger'
 require 'bitchannel/killlist'
 require 'bitchannel/textutils'
 require 'bitchannel/exception'
-require 'time'
-require 'fileutils'
+require 'forwardable'
 
 # "Wed Jun 23 15:39:58 2004" (UTC)
 def Time.rcsdate(t)
@@ -52,50 +52,8 @@ end
 
 module BitChannel
 
-  module FilenameEncoding
-    private
-
-    def encode_filename(name)
-      # encode [A-Z] ?  (There are case-insensitive filesystems)
-      name.gsub(/[^a-z\d]/in) {|c| sprintf('%%%02x', c[0]) }.untaint
-    end
-
-    def decode_filename(name)
-      name.gsub(/%([\da-h]{2})/i) { $1.hex.chr }.untaint
-    end
-  end
-
-
-  module LockUtils
-    private
-
-    # This method locks write access.
-    # Read only access is always allowed.
-    def lockpath(path)
-      n_retry = 5
-      lock = path + ',bitchannel,lock'
-      begin
-        Dir.mkdir(lock)
-        begin
-          yield path
-        ensure
-          Dir.rmdir(lock)
-        end
-      rescue Errno::EEXIST
-        if n_retry > 0
-          sleep 3
-          n_retry -= 1
-          retry
-        end
-        raise LockFailed, "cannot get lock for #{File.basename(path)}"
-      end
-    end
-  end
-
-
   class Repository
 
-    include FilenameEncoding
     include ThreadLocalCache
 
     def initialize(hash, id = nil)
@@ -107,10 +65,11 @@ module BitChannel
                  conf[:logger] ||
                  NullLogger.new
         cmd_path = conf.get_required(:cmd_path)
-        wc_read_dir = conf.get_required(:wc_read)
+        fs_class = (conf[:fs_class] || DefaultFileSystem)
+        wc_read_dir = fs_class.new(conf.get_required(:wc_read))
         unless read_only?
           conf.required! :wc_write
-          wc_write_dir = conf[:wc_write]
+          wc_write_dir = fs_class.new(conf[:wc_write])
         else
           conf.ignore :wc_write
           wc_write_dir = nil
@@ -123,8 +82,8 @@ module BitChannel
                                        logger, kill) unless read_only?
         @syntax = conf.get(:syntax_proc) {|pr| pr.call(self) }
         conf.required! :cachedir
-        @link_cache = LinkCache.new("#{conf[:cachedir]}/link".untaint)
-        @revlink_cache = LinkCache.new("#{conf[:cachedir]}/revlink".untaint)
+        @link_cache = LinkCache.new(fs_class.new("#{conf[:cachedir]}/link".untaint))
+        @revlink_cache = LinkCache.new(fs_class.new("#{conf[:cachedir]}/revlink".untaint))
         @notifier = conf[:notifier]
       }
     end
@@ -143,7 +102,7 @@ module BitChannel
     attr_writer :syntax   # FIXME: tmp
 
     def page_names
-      @wc_read.cvs_Entries.keys.map {|name| decode_filename(name) }
+      @wc_read.cvs_Entries.keys
     end
 
     def pages
@@ -269,45 +228,41 @@ module BitChannel
 
   class LinkCache
 
-    include FilenameEncoding
-    include LockUtils
-
-    def initialize(dir)
-      @dir = dir
-      Dir.mkdir(@dir) unless File.directory?(@dir)
+    def initialize(fs)
+      @fs = fs
+      @fs.mkdir '' unless @fs.directory?('')
       @locking = false
     end
 
     def clear
-      FileUtils.rm_rf @dir
-      Dir.mkdir @dir
+      @fs.rm_rf ''
+      @fs.mkdir ''
     end
 
     def entries
-      Dir.entries(@dir)\
+      @fs.entries('')\
           .reject {|ent| /\,tmp\z/ =~ ent }\
-          .select {|ent| File.file?("#{@dir}/#{ent.untaint}") }\
-          .map {|ent| decode_filename(ent) }
+          .select {|ent| @fs.file?(ent.untaint) }
     end
 
     def [](name)
-      read_cache(cache_path(name))
+      read_cache(name)
     end
 
     def []=(name, links)
       lock {
-        write_cache cache_path(name), links
+        write_cache name, links
       }
     end
 
     def add_link(name, lnk)
-      links = (read_cache(cache_path(name)) || [])
-      write_cache cache_path(name), (links + [lnk]).uniq.sort
+      links = (read_cache(name) || [])
+      write_cache name, (links + [lnk]).uniq.sort
     end
 
     def del_link(name, lnk)
-      links = (read_cache(cache_path(name)) || [])
-      write_cache cache_path(name), (links - [lnk]).uniq.sort
+      links = (read_cache(name) || [])
+      write_cache name, (links - [lnk]).uniq.sort
     end
 
     def updating
@@ -322,7 +277,7 @@ module BitChannel
       if @locking
         yield
       else
-        lockpath(@dir) {
+        @fs.lock('') {
           begin
             @locking = true
             yield
@@ -333,26 +288,18 @@ module BitChannel
       end
     end
 
-    def cache_path(name)
-      "#{@dir}/#{encode_filename(name)}"
-    end
-
     def read_cache(path)
-      File.readlines(path).map {|line| line.strip.untaint }
+      @fs.readlines(path).map {|line| line.chop.untaint }
     rescue Errno::ENOENT
       return nil
     end
 
     def write_cache(path, links)
-      tmp = "#{path},tmp"
-      File.open(tmp, 'w') {|f|
+      @fs.open_atomic_writer(path) {|f|
         links.each do |lnk|
           f.puts lnk
         end
       }
-      File.rename tmp, path
-    ensure
-      File.unlink tmp if File.exist?(tmp)
     end
 
   end   # class LinkCache
@@ -368,27 +315,27 @@ module BitChannel
 
   class CVSWorkingCopy
 
-    include FilenameEncoding
-    include LockUtils
     include ThreadLocalCache
 
-    def initialize(id, dir, cmd, logger, killlist)
+    def initialize(id, fs, cmd, logger, killlist)
       @module_id = id
-      @dir = dir
+      @fs = fs
       @cvs_cmd = cmd
       @logger = logger
       @killlist = killlist
       @in_chdir = false
     end
 
-    attr_reader :dir
+    def dir
+      @fs.prefix
+    end
 
     def last_modified
-      File.mtime(@dir)
+      @fs.mtime('')
     end
 
     def chdir
-      Dir.chdir(@dir) {
+      @fs.chdir('') {
         begin
           @in_chdir = true
           yield self
@@ -398,17 +345,9 @@ module BitChannel
       }
     end
 
-    def exist?(name)
-      File.exist?("#{@dir}/#{encode_filename(name)}")
-    end
+    extend Forwardable
 
-    def size(name)
-      File.size("#{@dir}/#{encode_filename(name)}")
-    end
-
-    def stat(name)
-      File.stat("#{@dir}/#{encode_filename(name)}")
-    end
+    def_delegators "@fs", :exist?, :size, :stat, :read, :write, :lock
 
     def revision(name)
       rev, mtime = *cvs_Entries()[name]
@@ -423,50 +362,32 @@ module BitChannel
     def cvs_Entries
       update_tlc_slot('bitchannel.request.cvsEntries') {
         table = {}
-        File.readlines("#{@dir}/CVS/Entries").each do |line|
+        @fs.readlines('CVS/Entries').each do |line|
           next if /\AD/ =~ line
           ent, rev, mtime = *line.split(%r</>).values_at(1, 2, 3)
-          table[decode_filename(ent.untaint)] =
+          table[@fs.decode(ent.untaint)] =
               [rev.split(%r<\.>).last.to_i, Time.rcsdate(mtime.untaint).getlocal]
         end
         table
       }
     end
 
-    def read(name)
-      File.open("#{@dir}/#{encode_filename(name)}", 'r') {|f|
-        return f.read
-      }
-    end
-
     def readrev(name, rev)
       return 'This revision is removed by administrator' if @killlist[name].include?(rev)
       chdir {
-        out, err = *cvs('up', '-p', "-r1.#{rev}", encode_filename(name))
+        out, err = *cvs('up', '-p', "-r1.#{rev}", @fs.encode(name))
         return out
       }
     end
 
-    def write(name, str)
-      assert_chdir
-      File.open(encode_filename(name), 'w') {|f|
-        f.write str
-      }
-    end
-
-    def lock(name, &block)
-      assert_chdir
-      lockpath(encode_filename(name), &block)
-    end
-
     def cvs_diff_all(rev2, name)
-      d = diff('-uN', '-D2000-01-01 00:00:00', "-r1.#{rev2}", encode_filename(name))
+      d = diff('-uN', '-D2000-01-01 00:00:00', "-r1.#{rev2}", @fs.encode(name))
       d.kill if @killlist[name].overlap?(d.revision_range)
       d
     end
 
     def cvs_diff(rev1, rev2, name)
-      d = diff('-u', "-r1.#{rev1}", "-r1.#{rev2}", encode_filename(name))
+      d = diff('-u', "-r1.#{rev1}", "-r1.#{rev2}", @fs.encode(name))
       d.kill if @killlist[name].overlap?(d.revision_range)
       d
     end
@@ -492,31 +413,30 @@ module BitChannel
     def diff(*options)
       assert_chdir
       out, err = *cvs('diff', *options)
-      Diff.parse(@module_id, out)
+      Diff.parse(@fs, @module_id, out)
     end
 
     class Diff
-      extend FilenameEncoding
       extend CVSRevision
 
-      def Diff.parse_diffs(mod, out)
+      def Diff.parse_diffs(fs, mod, out)
         chunks = out.split(/^Index: /)
         chunks.shift
-        chunks.map {|c| parse(mod, c) }
+        chunks.map {|c| parse(fs, mod, c) }
       end
 
-      def Diff.parse(mod, chunk)
+      def Diff.parse(fs, mod, chunk)
         meta = chunk.slice!(/\A.*?(?=^@@|\z)/m).to_s
         file = meta.slice(/\A(?:Index:)?\s*(\S+)/, 1).strip
         if /---/ !~ meta
           # empty new file.
           now = Time.now
-          return new(mod, decode_filename(file), 0, now, 1, now, chunk)
+          return new(mod, fs.decode(file), 0, now, 1, now, chunk)
         end
         _, stime, srev = *meta.slice(/^\-\-\- .*/).split("\t", 3)
         _, dtime, drev = *meta.slice(/^\+\+\+ .*/).split("\t", 3)
         new(mod,
-            decode_filename(file),
+            fs.decode(file),
             cvsrev_to_i(srev.to_s), Time.diffdate(stime).getlocal,
             cvsrev_to_i(drev), Time.diffdate(dtime).getlocal,
             chunk)
@@ -561,7 +481,7 @@ module BitChannel
 
     def cvs_log(name, rev)
       assert_chdir
-      out, err = *cvs('log', "-r1.#{rev}", encode_filename(name))
+      out, err = *cvs('log', "-r1.#{rev}", @fs.encode(name))
       log = Log.parse_logs(out)[0]
       log.kill if @killlist[name].include?(log.revision)
       log
@@ -569,7 +489,7 @@ module BitChannel
 
     def cvs_logs(name)
       assert_chdir
-      out, err = *cvs('log', encode_filename(name))
+      out, err = *cvs('log', @fs.encode(name))
       logs = Log.parse_logs(out)
       kill = @killlist[name]
       logs.each do |log|
@@ -625,13 +545,13 @@ module BitChannel
 
     def cvs_annotate(name)
       assert_chdir
-      out, err = *cvs('annotate', *[ann_F(), encode_filename(name)].compact)
+      out, err = *cvs('annotate', *[ann_F(), @fs.encode(name)].compact)
       parse_annotation(name, out)
     end
 
     def cvs_annotate_rev(name, rev)
       assert_chdir
-      out, err = *cvs('annotate', *[ann_F(), "-r1.#{rev}", encode_filename(name)].compact)
+      out, err = *cvs('annotate', *[ann_F(), "-r1.#{rev}", @fs.encode(name)].compact)
       parse_annotation(name, out)
     end
 
@@ -678,35 +598,35 @@ module BitChannel
 
     def merge(name, origrev, new_text)
       write name, new_text
-      out, err = *cvs('up', '-ko', "-j1.#{origrev}", '-jHEAD', encode_filename(name))
+      out, err = *cvs('up', '-ko', "-j1.#{origrev}", '-jHEAD', @fs.encode(name))
       if /conflicts during merge/ =~ err
         log "conflict: #{name}"
         merged = read(name)
         rev = revision(name)
-        File.unlink encode_filename(name)   # prevent next writer from conflict
-        cvs_update_A name
+        # prevent next writer from conflict
+        @fs.unlink name; cvs_update_A name
         raise EditConflict.new('conflict found', merged, rev)
       end
     end
 
     def cvs_add(name)
       assert_chdir
-      cvs 'add', '-kb', encode_filename(name)
+      cvs 'add', '-kb', @fs.encode(name)
     end
 
     def cvs_checkin(name, log)
       assert_chdir
-      cvs 'ci', '-m', log, encode_filename(name)
+      cvs 'ci', '-m', log, @fs.encode(name)
     end
 
     def cvs_update_A(name)
       assert_chdir
-      cvs 'up', '-A', encode_filename(name)
+      cvs 'up', '-A', @fs.encode(name)
     end
 
     def cvs_update(name)
       assert_chdir
-      cvs 'up', encode_filename(name)
+      cvs 'up', @fs.encode(name)
     end
 
     def cvs(*args)

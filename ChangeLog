@@ -1,3 +1,9 @@
+Thu Mar 17 05:24:06 2005  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb: objectify FileSystem class.
+
+	* lib/bitchannel/filesystem.rb: ditto. (new file)
+
 Sun Feb 27 08:13:16 2005  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/threadlocalcache.rb: new file.
