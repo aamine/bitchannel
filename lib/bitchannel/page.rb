@@ -31,7 +31,7 @@ module BitChannel
     end
 
     def html
-      erb = ERB.new(get_template(@config.templatedir, template_id()))
+      erb = ERB.new(get_template(@config.templatedir, template_id()), nil, 2)
       erb.filename = "#{template_id()}.rhtml"
       erb.result(binding())
     end

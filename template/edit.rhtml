@@ -11,16 +11,16 @@
 <div class="menu">
 Edit
 <a href="<%= cgi_url() %>?cmd=recent">Recent</a>
-<a href="<%= cgi_url() %>?cmd=list">List</a>
-<a href="<%= cgi_url() %>?cmd=history;name=<%= page_url() %>">History</a>
-<a href="<%= cgi_url() %>?cmd=annotate;name=<%= page_url() %>">Annotate</a>
 <%
-    if original_revision() and original_revision() > 1
-%><a href="<%= cgi_url() %>?cmd=diff;rev1=<%= original_revision() - 1 %>;rev2=<%= original_revision() %>;name=<%= page_url() %>">Diff</a><%
-    else
-%>Diff<%
-    end
+    if original_revision() and original_revision() > 1  %>
+<a href="<%= cgi_url() %>?cmd=diff;rev1=<%= original_revision() - 1 %>;rev2=<%= original_revision() %>;name=<%= page_url() %>">Diff</a>
+<%  else  %>
+Diff
+<%  end
 %>
+<a href="<%= cgi_url() %>?cmd=annotate;name=<%= page_url() %>">Annotate</a>
+<a href="<%= cgi_url() %>?cmd=history;name=<%= page_url() %>">History</a>
+<a href="<%= cgi_url() %>?cmd=list">List</a>
 <a href="<%= index_page_url() %>">Top</a>
 <a href="<%= help_page_url() %>">Help</a>
 .include search_form
@@ -28,9 +28,9 @@ Edit
 
 <h1><%= logo_url() %><%= page_name() %> : Edit</h1>
 <%
-    if opt_message()
-%><p><%= escape_html(opt_message()) %></p><%
-    end
+    if opt_message()  %>
+<p><%= escape_html(opt_message()) %></p>
+<%  end
 %>
 <p>
 Current revision: <%= original_revision() || '(new page)' %><br>
@@ -40,9 +40,9 @@ Edit started at: <%= format_time(Time.now) %>
 <input type="hidden" name="cmd" value="save">
 <input type="hidden" name="name" value="<%= page_name() %>">
 <%
-    if original_revision()
-%><input type="hidden" name="origrev" value="<%= original_revision() %>"><%
-    end
+    if original_revision()  %>
+<input type="hidden" name="origrev" value="<%= original_revision() %>">
+<%  end
 %>
 <textarea name="text" cols="70" rows="30"><%= body() %></textarea><br>
 <input type="submit" id="okbutton" value="Save">
