@@ -1,13 +1,13 @@
-#
-# WEBrick servlet example (mounts on '/')
-#
+#!/usr/bin/ruby
+# stand-alone server based on WEBrick
 
-load './bitchannelrc'
-
-require 'bitchannel/webrickservlet'
+rcpath = ARGV[0] || './bitchannelrc'
+load File.expand_path(rcpath)
+setup_environment
 require 'webrick'
+require 'bitchannel/webrickservlet'
 
-httpd = WEBrick::HTTPServer.new(
+server = WEBrick::HTTPServer.new(
   :DocumentRoot => File::dirname(__FILE__),
   :Port         => 10080,
   :Logger       => WEBrick::Log.new($stderr, WEBrick::Log::DEBUG),
@@ -18,7 +18,6 @@ httpd = WEBrick::HTTPServer.new(
   ],
   :CGIPathEnv   => ENV["PATH"]
 )
-httpd.mount '/', BitChannel::WebrickServlet, *initialize_environment()
-
-trap(:INT){ httpd.shutdown }
-httpd.start
+server.mount '/', BitChannel::WebrickServlet, *bitchannel_context()
+trap(:INT){ server.shutdown }
+server.start
