@@ -29,20 +29,22 @@ module BitChannel
   class Handler
     include TextUtils
 
-    def initialize(config, repo)
+    def initialize(config, repo, pathinfo_sensitive)
       @config = config
       @repository = repo
+      @pathinfo_sensitive = pathinfo_sensitive
     end
 
-    def service(req, webrickres)
+    def service(webrickreq, webrickres)
       begin
-        handle(req).update_for webrickres
+        handle(webrickreq).update_for webrickres
       rescue Exception => err
         error_response(err, true).update_for webrickres
       end
     end
 
-    def handle(req)
+    def handle(webrickreq)
+      req = Request.new(webrickreq, @config, @pathinfo_sensitive)
       mid = "handle_#{req.cmd}"
       if respond_to?(mid, true)
       then __send__(mid, req)
@@ -247,10 +249,10 @@ module BitChannel
   class Request
     include TextUtils
 
-    def initialize(req, config, servlet_p)
+    def initialize(req, config, pathinfo_sensitive)
       @request = req
       @config = config
-      @servlet_p = servlet_p
+      @pathinfo_sensitive = pathinfo_sensitive
     end
 
     def cmd
@@ -258,7 +260,7 @@ module BitChannel
     end
 
     def page_name
-      return get('name') unless @servlet_p
+      return get('name') unless @pathinfo_sensitive
       if @request.query['name']
         get('name')
       else

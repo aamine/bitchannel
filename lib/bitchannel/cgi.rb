@@ -14,13 +14,23 @@ require 'webrick/cgi'
 module BitChannel
 
   class CGI < WEBrick::CGI
-    def CGI.main(config, repo)
-      new({}, config, repo).start
+    def CGI.main(*context)
+      run new({}, *context)
+    end
+
+    def CGI.run(app)
+      each_request do |env, stdin, stdout|
+        app.start env, stdin, stdout
+      end
+    end
+
+    def CGI.each_request
+      yield ENV, $stdin, $stdout
     end
 
     def do_GET(req, res)
       conf, repo = *@options
-      Handler.new(conf, repo).service Request.new(req, conf, false), res
+      Handler.new(conf, repo, false).service req, res
     end
 
     alias do_POST do_GET
