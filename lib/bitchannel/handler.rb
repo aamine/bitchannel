@@ -202,7 +202,9 @@ module BitChannel
     end
 
     def cmd
-      get('cmd').to_s.downcase
+      cmd = get('cmd').to_s.downcase
+      return nil if cmd.empty?
+      cmd
     end
 
     def page_name
