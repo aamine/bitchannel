@@ -14,15 +14,16 @@ EOS
 end
 
 def main
-  load './wikitikrc'
   ok = getopts(nil, 'help')
   usage(0) if $OPT_help
   usage(1) unless ok
+
+  load './wikitikrc'
   config, repo = initialize_environment()
   FileUtils.rm_rf config.link_cachedir
   FileUtils.rm_rf config.revlink_cachedir
-  linkcache = Wikitik::LinkCachen.new(config.link_cachedir,
-                                      config.revlink_cachedir)
+  linkcache = Wikitik::LinkCache.new(config.link_cachedir,
+                                     config.revlink_cachedir)
   c = Wikitik::ToHTML.new(config, repo)
   repo.entries.each do |page_name|
     linkcache.update_cache_for page_name, c.extract_links(repo[page_name])

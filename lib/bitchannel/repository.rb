@@ -78,15 +78,22 @@ module Wikitik
                                   @config.revlink_cachedir)
     end
 
-    def entries
+    def page_names
       Dir.entries(@wc_read)\
           .select {|ent| File.file?("#{@wc_read}/#{ent}") }\
           .map {|ent| decode_filename(ent) }
     end
 
+    alias entries page_names
+
+    def orphan_pages
+      page_names().select {|name| revlinks(name).size == 0 }
+    end
+
     def exist?(page_name)
       raise 'page_name == nil' unless page_name
       raise 'page_name == ""' if page_name.empty?
+      raise WrongPageName, "do not use `CVS' for a page name" if /\ACVS\z/i =~ page_name
       File.exist?("#{@wc_read}/#{encode_filename(page_name)}")
     end
 
@@ -100,13 +107,11 @@ module Wikitik
       else
         Dir.chdir(@wc_read) {
           out, err = cvs('log', "-r1.#{rev}", encode_filename(page_name))
-          out.each do |line|
-            if /\Adate: / === line
-              return Time.parse(line.slice(/\Adate: (.*?);/, 1))
-            end
-          end
+          dateline = out.detect {|line| /\Adate: / =~ line }
+          raise UnknownRCSLogFormat, "unknown RCS log format; given up" \
+              unless dateline
+          return Time.parse(line.slice(/\Adate: (.*?);/, 1))
         }
-        raise UnknownRCSLogFormat, "unknown RCS log format; given up"
       end
     end
 
@@ -114,6 +119,8 @@ module Wikitik
       unless rev
         File.read("#{@wc_read}/#{encode_filename(page_name)}")
       else
+        # raise ENOENT if file does not exist.
+        File.open("#{@wc_read}/#{encode_filename(page_name)}", 'r') { }
         Dir.chdir(@wc_read) {
           out, err = cvs('up', '-p', "-r1.#{rev}", encode_filename(page_name))
           return out
@@ -176,11 +183,19 @@ module Wikitik
     end
 
     def links(page_name)
-      @link_cache.linkcache(page_name) || []
+      cache = @link_cache.linkcache(page_name)
+      return cache if cache
+      result = extract_links(self[page_name])
+      @link_cache.set_linkcache page_name, result
+      result
     end
 
-    def reverse_links(page_name)
-      @link_cache.revlinkcache(page_name) || []
+    def revlinks(page_name)
+      cache = @link_cache.revlinkcache(page_name)
+      return cache if cache
+      result = collect_revlinks(page_name)
+      @link_cache.set_revlinkcache page_name, result
+      result
     end
 
     def checkin(page_name, origrev, new_text)
@@ -232,13 +247,8 @@ module Wikitik
       execute(@cvs_cmd, '-f', '-q', *args)
     end
 
-def LOG(msg)
-  File.open('../log', 'a') {|f|
-    f.puts "#{Time.now.inspect}: #{msg}"
-  }
-end
     def execute(*cmd)
-LOG %Q[exec: "#{cmd.join('", "')}"]
+      log %Q[exec: "#{cmd.join('", "')}"]
       popen3(*cmd) {|stdin, stdout, stderr|
         stdin.close
         return stdout.read, stderr.read
@@ -282,6 +292,28 @@ LOG %Q[exec: "#{cmd.join('", "')}"]
       end
     end
 
+    def log(msg)
+      File.open('../log', 'a') {|f|
+        begin
+          f.flock(File::LOCK_EX)
+          f.puts "#{sprintf('%-5d', $$)}:#{Time.now.inspect}: #{msg}"
+          f.flush
+        ensure
+          f.flock(File::LOCK_UN)
+        end
+      }
+    end
+
+    def extract_links(page_text)
+      ToHTML.new(@config, self).extract_links(page_text)
+    end
+
+    def collect_revlinks(page_name)
+      page_names().select {|name|
+        ToHTML.new(@config, self).extract_links(self[name]).include?(page_name)
+      }
+    end
+
   end   # class Repository
 
 
@@ -304,20 +336,27 @@ LOG %Q[exec: "#{cmd.join('", "')}"]
     end
 
     def update_cache_for(page_name, links)
-      update_linkcache page_name, links
-      update_revlinkcache page_name, links
+      set_linkcache page_name, links
+      update_revlinkcache_for page_name, links
     end
 
-    private
-
-    def update_linkcache(page_name, links)
+    def set_linkcache(page_name, links)
       lock(@linkcachedir) {|cachedir|
         Dir.mkdir cachedir unless File.directory?(cachedir)
         write_cache linkcache_file(page_name), links
       }
     end
 
-    def update_revlinkcache(page_name, links)
+    def set_revlinkcache(page_name, links)
+      lock(@revlinkcachedir) {|cachedir|
+        Dir.mkdir cachedir unless File.directory?(cachedir)
+        write_cache revlinkcache_file(page_name), links
+      }
+    end
+
+    private
+
+    def update_revlinkcache_for(page_name, links)
       linktbl = {}
       links.each do |page|
         linktbl[page] = true

@@ -108,12 +108,12 @@ module Wikitik
       @links ||= @repository.links(@page_name)
     end
 
-    def reverse_links
-      @revlinks ||= (@repository.reverse_links(@page_name) - [@page_name])
+    def revlinks
+      @revlinks ||= (@repository.revlinks(@page_name) - [@page_name])
     end
 
-    def ordered_reverse_links
-      leaves, nodes = reverse_links().partition {|page| num_links(page) < 2 }
+    def ordered_revlinks
+      leaves, nodes = revlinks().partition {|page| num_links(page) < 2 }
       nodes.sort_by {|page| @repository.size(page) / num_links(page) } +
         leaves.sort_by {|page| -@repository.size(page) }
     end
@@ -123,7 +123,7 @@ module Wikitik
     end
 
     def num_revlinks
-      reverse_links().size
+      revlinks().size
     end
   end
 

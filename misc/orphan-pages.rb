@@ -7,7 +7,7 @@ require 'getopts'
 
 def usage(status)
   (status == 0 ? $stdout : $stderr).print(<<EOS)
-Usage: #{File.basename($0)} [file file...] > output.html
+Usage: #{File.basename($0)}
 EOS
   exit status
 end
@@ -19,9 +19,8 @@ def main
 
   load './wikitikrc'
   config, repo = initialize_environment()
-  c = Wikitik::ToHTML.new(config, repo)
-  ARGV.each do |page_name|
-    puts c.compile(repo[page_name], page_name)
+  repo.orphan_pages.each do |page_name|
+    puts page_name
   end
 end
 

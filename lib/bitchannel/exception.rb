@@ -14,6 +14,7 @@ module Wikitik
   class ResourceError < WikitikError; end
   class UnknownRCSLogFormat < WikitikError; end
   class WrongQuery < WikitikError; end
+  class WrongPageName < WikitikError; end
 
   class CommandFailed < WikitikError
     def initialize(msg, status)
