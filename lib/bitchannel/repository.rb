@@ -54,7 +54,6 @@ module BitChannel
 
 
   class Repository
-
     include FilenameEncoding
     include LockUtils
     include TextUtils
@@ -68,6 +67,7 @@ module BitChannel
       @wc_read  = t[:wc_read];  t.delete(:wc_read)
       @wc_write = t[:wc_write]; t.delete(:wc_write)
       @sync_wc  = t[:sync_wc];  t.delete(:sync_wc)
+      @logfile  = t[:logfile];  t.delete(:logfile)
       cachedir  = t[:cachedir]; t.delete(:cachedir)
       t.each do |k,v|
         raise ConfigError, "Config Error: unknown key: repository.#{k}"
@@ -315,13 +315,14 @@ module BitChannel
     end
 
     def log(msg)
-      File.open('../cvslog', 'a') {|f|
+      return unless @logfile
+      File.open(@logfile, 'a') {|f|
         begin
-          f.flock(File::LOCK_EX)
+          f.flock File::LOCK_EX
           f.puts "#{format_time(Time.now)};#{$$}; #{msg}"
           f.flush
         ensure
-          f.flock(File::LOCK_UN)
+          f.flock File::LOCK_UN
         end
       }
     end
