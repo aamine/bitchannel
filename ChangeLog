@@ -1,3 +1,13 @@
+Thu Sep  2 14:56:45 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/farm.rb: now CVSWC.new takes KillList.
+
+	* lib/bitchannel/repository.rb: make #cvs public again for
+	  wikifarm.
+
+	* lib/bitchannel/userconfig.rb (get): yield value for only value
+	  is a true.
+
 Thu Sep  2 14:31:11 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/repository.rb (cvs_diff_from): fix typo.

@@ -32,7 +32,7 @@ module BitChannel
     def get(key)
       @refered.push key
       return nil unless @config.key?(key)
-      if block_given?
+      if block_given? and @config[key]
       then yield(@config[key])
       else @config[key]
       end

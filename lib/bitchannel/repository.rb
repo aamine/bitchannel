@@ -678,6 +678,10 @@ module BitChannel
       cvs 'up', '-A', encode_filename(name)
     end
 
+    def cvs(*args)
+      execute(ignore_status_p(args[0]), @cvs_cmd, '-f', '-q', *args)
+    end
+
     private
 
     def cvs_version
@@ -690,10 +694,6 @@ module BitChannel
       out, err = *cvs('--version')
       verdigits = out.slice(/\d+\.\d+\.\d+/).split(/\./).map {|n| n.to_i }
       sprintf((['%03d'] * verdigits.length).join('.'), *verdigits)
-    end
-
-    def cvs(*args)
-      execute(ignore_status_p(args[0]), @cvs_cmd, '-f', '-q', *args)
     end
 
     def ignore_status_p(cmd)

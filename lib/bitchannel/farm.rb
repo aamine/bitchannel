@@ -306,7 +306,7 @@ module BitChannel
     end
 
     def initialize_working_copy(tmpprefix, id)
-      wc = CVSWorkingCopy.new(id, "#{tmpprefix}/tmp", @cmd_path, @logger)
+      wc = CVSWorkingCopy.new(id, "#{tmpprefix}/tmp", @cmd_path, @logger, KillList.new)
       Dir.mkdir wc.dir
       wc.chdir {
         log = 'BitChannelFarm auto import'
