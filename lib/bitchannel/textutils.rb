@@ -42,11 +42,11 @@ module AlphaWiki
     end
 
     def encode_filename(name)
-      str.gsub(/[^a-z\d]/in) {|c| sprintf('%%%02x', c[0]) }
+      name.gsub(/[^a-z\d]/in) {|c| sprintf('%%%02x', c[0]) }
     end
 
     def decode_filename(name)
-      str.gsub(/%([\da-h]{2})/i) { $1.hex.chr }
+      name.gsub(/%([\da-h]{2})/i) { $1.hex.chr }
     end
 
     def format_time(time)
