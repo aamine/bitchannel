@@ -473,10 +473,11 @@ module BitChannel
         else
           "[#{escape_html(link)}]"
         end
-      when SeemsURL      then %[<a href="#{escape_html(link)}">#{escape_html(link)}</a>]
-      when /\A[\w\-]+:/n then interwiki(*link.split(/:/, 2))
-      when /\A\w+\z/n    then internal_link(link)
-      else                    escape_html(link)
+      when SeemsURL
+        %[<a href="#{escape_html(link)}">#{escape_html(link)}</a>]
+      when /\A[\w\-]+:/n  then interwiki(*link.split(/:/, 2))
+      when /\A[\w\.]+\z/n then internal_link(link)
+      else                     escape_html(link)
       end
     end
 
