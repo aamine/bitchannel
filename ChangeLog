@@ -1,3 +1,9 @@
+Mon May 10 01:25:32 2004  Minero Aoki  <aamine@loveruby.net>
+
+	lib/bitchannel/fcgi.rb: require 'bitchannel/cgi'.
+
+	lib/bitchannel/webrick_fcgi.rb: remove_method is private.
+
 Mon May 10 01:15:57 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/repository.rb: remove alias #entries.

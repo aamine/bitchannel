@@ -27,7 +27,9 @@ module WEBrick
       Signal.trap(:PIPE, 'DEFAULT')
     end
 
-    CGI.remove_method :each_request
+    class << CGI
+      remove_method :each_request
+    end
     def CGI.each_request(&block)
       if FCGI.is_cgi?
         each_cgi_request(&block)

@@ -8,6 +8,7 @@
 # the GNU LGPL, Lesser General Public License version 2.1.
 #
 
+require 'bitchannel/cgi'
 require 'bitchannel/webrick_fcgi'
 
 module BitChannel
