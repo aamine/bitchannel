@@ -54,15 +54,11 @@ module BitChannel
     # Block
     #
 
-    BlankLine = Object.new
-    def BlankLine.===(str)
-      str.strip.empty?
-    end
-
     CAPTION = /\A[=!]{2,6}/
     UL = /\A\s*\*/
     OL = /\A\s*\#|\A\s*\(\d+\)/
     DL = /\A\s*:/
+    CITE = /\A""/
     TABLE = /\A\|\|/
     PRE = /\A\{\{\{/
 
@@ -73,12 +69,15 @@ module BitChannel
         when UL       then ul
         when OL       then ol
         when DL       then dl
+        when CITE     then cite
         when TABLE    then table
         when PRE      then pre
-        when BlankLine
-          @f.gets
         else
-          paragraph
+          if line.strip.empty?
+            @f.gets
+          else
+            paragraph
+          end
         end
       end
     end
@@ -91,7 +90,7 @@ module BitChannel
 
     def paragraph
       print '<p>'
-      @f.until_match(/#{CAPTION}|#{UL}|#{OL}|#{DL}|#{TABLE}|#{PRE}/o) do |line|
+      @f.until_match(/#{CAPTION}|#{UL}|#{OL}|#{DL}|#{CITE}|#{TABLE}|#{PRE}/o) do |line|
         break if line.strip.empty?
         puts text(line.strip)
       end
@@ -147,16 +146,24 @@ module BitChannel
       puts '</dl>'
     end
 
+    def cite
+      puts '<blockquote>'
+      @f.while_match(CITE) do |line|
+        puts line.sub(/\A""/).strip
+      end
+      puts '</blockquote>'
+    end
+
     def table
       buf = []
       @f.while_match(TABLE) do |line|
         cols = line.strip.split(/(\|\|\|?)/)
         cols.shift   # discard first ""
-        cols.pop     # discard last "||"
+        cols.pop if (cols.last == '||') or (cols.size % 2 == 1)
         tmp = []
         until cols.empty?
-          headp = (cols.shift == '|||')
-          tmp.push [cols.shift, headp]
+          th = (cols.shift == '|||')
+          tmp.push [cols.shift, th]
         end
         buf.push tmp
       end
@@ -165,8 +172,8 @@ module BitChannel
       buf.each do |cols|
         cols.concat [['',false]] * (n_maxcols - cols.size)
         puts '<tr>' +
-             cols.map {|col, headp|
-               if headp
+             cols.map {|col, th|
+               if th
                then "<th>#{text(col.strip)}</th>"
                else "<td>#{text(col.strip)}</td>"
                end
