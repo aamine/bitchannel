@@ -5,3 +5,5 @@
 $KCODE = 'EUC'
 @libdir = File.dirname(File.expand_path(__FILE__)) + '/lib'
 @datadir = File.dirname(File.expand_path(__FILE__)) + '/pages'
+@templatedir = File.dirname(File.expand_path(__FILE__)) + '/template'
+@css_url = 'default.css'

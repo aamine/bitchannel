@@ -14,13 +14,19 @@ module AlphaWiki
 
   class ToHTML
 
+    def ToHTML.compile(str)
+      new().compile(str)
+    end
+
     def initialize
       @indent_stack = [[0,'top']]
     end
 
-    def html( str )
+    def compile(str)
       convert StringIO.new(str)
     end
+
+    private
 
     def convert( input, output = nil )
       @f = LineInput.new(input)
@@ -30,8 +36,6 @@ module AlphaWiki
       end
       output ? nil : @output.string
     end
-
-    private
 
     BlankLine = Object.new
     def BlankLine.===(str)

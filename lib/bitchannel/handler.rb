@@ -8,38 +8,42 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
+require 'alphawiki/tohtml'
+require 'alphawiki/textutils'
 require 'erb'
 
 module AlphaWiki
 
   class View
 
-    def initialize( config, page )
+    include TextUtils
+
+    def initialize(config, page)
       @config = config
       @pagename = page
-      @body = nil
     end
 
     TEMPLATE = 'view.rhtml'
 
-    def tohtml
-      @body = ToHTML.compile(@config.read_page(page))
-      ERB.new(rhtml()).result(self)
+    def html
+      ERB.new(@config.read_rhtml(TEMPLATE)).result(binding())
     end
 
+    private
+
     def title
-      @pagename
+      beautify_wikiname(@pagename)
     end
 
     def body
-      @body
+      ToHTML.compile(@config.read_pagesrc(@pagename))
     end
 
     def css_url
       @config.css_url
     end
 
-    def additinal_headers
+    def opt_headers
       ''
     end
   
