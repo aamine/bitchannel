@@ -11,11 +11,11 @@
 require 'bitchannel/textutils'
 require 'bitchannel/exception'
 require 'time'
+require 'fileutils'
 
 module BitChannel
 
   module FilenameEncoding
-
     def encode_filename(name)
       # encode [A-Z] ?  (There are case-insensitive filesystems)
       name.gsub(/[^a-z\d]/in) {|c| sprintf('%%%02x', c[0]) }
@@ -24,12 +24,10 @@ module BitChannel
     def decode_filename(name)
       name.gsub(/%([\da-h]{2})/i) { $1.hex.chr }
     end
-
   end
 
 
   module LockUtils
-
     # This method locks write access.
     # Read only access is always allowed.
     def lock(path)
@@ -77,6 +75,11 @@ module BitChannel
       @link_cache = LinkCache.new("#{cachedir}/link", "#{cachedir}/revlink")
       # in-process cache
       @Entries = nil
+    end
+
+    # internal use only
+    def _link_cache
+      @link_cache
     end
 
     def page_names
@@ -359,18 +362,21 @@ module BitChannel
         ToHTML.extract_links(self[name], self).include?(page_name)
       }
     end
-
   end   # class Repository
 
 
   class LinkCache
-
     include FilenameEncoding
     include LockUtils
 
     def initialize(linkcachedir, revlinkcachedir)
       @linkcachedir = linkcachedir
       @revlinkcachedir = revlinkcachedir
+    end
+
+    def clear
+      FileUtils.rm_rf @linkcachedir
+      FileUtils.rm_rf @revlinkcachedir
     end
 
     def linkcache(page_name)
