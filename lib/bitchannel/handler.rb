@@ -213,7 +213,7 @@ module BitChannel
         SearchResultPage.new(@config, @repository,
                              cgi.get_param('q'), regs).response
       rescue WrongQuery => err
-        return SearchErrorPage.new(@config cgi.get_param('q'), err).response
+        return SearchErrorPage.new(@config, cgi.get_param('q'), err).response
       end
     end
 
