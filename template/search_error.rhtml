@@ -8,22 +8,15 @@
 </head>
 <body>
 
-<div class="menu">
-Edit
-<a href="<%= cgi_url() %>?cmd=recent">Recent</a>
-Diff
-Annotate
-History
-<a href="<%= cgi_url() %>?cmd=recent">List</a>
-<a href="<%= index_page_url() %>">Top</a>
-<a href="<%= help_page_url() %>">Help</a>
-</div>
+.include menu
 
+<div class="main">
 <h1><%= logo_url() %>Search Error</h1>
 <p>
 <%= error_message() %>
 </p>
 .include search_form
+</div>
 
 </body>
 </html>

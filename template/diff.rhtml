@@ -8,22 +8,9 @@
 </head>
 <body>
 
-<div class="menu">
-<a href="<%= cgi_url() %>?cmd=edit;name=<%= page_url() %>">Edit</a>
-<a href="<%= cgi_url() %>?cmd=recent">Recent</a>
-<%  if rev1() > 1  %>
-<a href="<%= cgi_url() %>?cmd=diff;rev1=<%= rev1() - 1 %>;rev2=<%= rev1() %>;name=<%= page_url() %>">Diff</a>
-<%  else  %>
-Diff
-<%  end  %>
-<a href="<%= cgi_url() %>?cmd=annotate;name=<%= page_url() %>">Annotate</a>
-<a href="<%= cgi_url() %>?cmd=history;name=<%= page_url() %>">History</a>
-<a href="<%= cgi_url() %>?cmd=list">List</a>
-<a href="<%= index_page_url() %>">Top</a>
-<a href="<%= help_page_url() %>">Help</a>
-.include search_form
-</div>
+.include menu
 
+<div class="main">
 <h1><%= logo_url() %><%= page_name() %> : Diff rev <%= rev1() %> &lt;=&gt; rev <%= rev2() %></h1>
 
 <p class="revnavi">
@@ -43,6 +30,7 @@ Diff
 <pre>
 <%= escape_html(diff()) %>
 </pre>
+</div>
 
 </body>
 </html>

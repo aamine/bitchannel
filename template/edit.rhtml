@@ -8,24 +8,9 @@
 </head>
 <body>
 
-<div class="menu">
-Edit
-<a href="<%= cgi_url() %>?cmd=recent">Recent</a>
-<%
-    if original_revision() and original_revision() > 1  %>
-<a href="<%= cgi_url() %>?cmd=diff;rev1=<%= original_revision() - 1 %>;rev2=<%= original_revision() %>;name=<%= page_url() %>">Diff</a>
-<%  else  %>
-Diff
-<%  end
-%>
-<a href="<%= cgi_url() %>?cmd=annotate;name=<%= page_url() %>">Annotate</a>
-<a href="<%= cgi_url() %>?cmd=history;name=<%= page_url() %>">History</a>
-<a href="<%= cgi_url() %>?cmd=list">List</a>
-<a href="<%= index_page_url() %>">Top</a>
-<a href="<%= help_page_url() %>">Help</a>
-.include search_form
-</div>
+.include menu
 
+<div class="main"
 <h1><%= logo_url() %><%= page_name() %> : Edit</h1>
 <%
     if opt_message()  %>
@@ -47,6 +32,7 @@ Edit started at: <%= format_time(Time.now) %>
 <textarea name="text" cols="70" rows="30"><%= body() %></textarea><br>
 <input type="submit" id="okbutton" value="Save">
 </form>
+</div>
 
 </body>
 </html>

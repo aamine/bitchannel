@@ -8,25 +8,16 @@
 </head>
 <body>
 
-<div class="menu">
-Edit
-<a href="<%= cgi_url() %>?cmd=recent">Recent</a>
-Diff
-Annotate
-History
-List
-<a href="<%= index_page_url() %>">Top</a>
-<a href="<%= help_page_url() %>">Help</a>
-.include search_form
-</div>
+.include menu
 
+<div class="main">
 <h1><%= logo_url() %>List of All Pages</h1>
 <ol>
-<%
-    page_list().each do |page|
-%><li><a href="<%= view_url(page) %>"><%= escape_html(page) %></a></li>
-<%  end
-%></ol>
+<%  page_list().each do |page|  %>
+<li><a href="<%= view_url(page) %>"><%= escape_html(page) %></a></li>
+<%  end  %>
+</ol>
+</div>
 
 </body>
 </html>

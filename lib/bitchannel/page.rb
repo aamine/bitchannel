@@ -46,6 +46,16 @@ module BitChannel
 
     private
 
+    def menuitem_diff_enabled?()     false end
+    def menuitem_annotate_enabled?() false end
+    def menuitem_history_enabled?()  false end
+    def menuitem_edit_enabled?()     false end
+    def menuitem_list_enabled?()     true end
+    def menuitem_recent_enabled?()   true end
+    def menuitem_top_enabled?()      true end
+    def menuitem_help_enabled?()     true end
+    def menuitem_search_enabled?()   true end
+
     def get_template(tmpldir, tmplname)
       File.read("#{tmpldir}/#{tmplname}.rhtml").gsub(/^\.include (\w+)/) {
         get_template(tmpldir, $1.untaint)
@@ -110,6 +120,11 @@ module BitChannel
     end
 
     private
+
+    def menuitem_edit_enabled?()     true end
+    def menuitem_diff_enabled?()     diff_base_revision() > 1 end
+    def menuitem_history_enabled?()  true end
+    def menuitem_annotate_enabled?() true end
 
     def compile_page(content)
       ToHTML.new(@config, @repository).compile(content, @page_name)
@@ -184,6 +199,18 @@ module BitChannel
       'view'
     end
 
+    def menuitem_top_enabled?()
+      page_name() != FRONT_PAGE_NAME
+    end
+
+    def menuitem_help_enabled?()
+      page_name() != HELP_PAGE_NAME
+    end
+
+    def diff_base_revision
+      revision()
+    end
+
     def revision
       @revision ||= @repository.revision(@page_name)
     end
@@ -210,6 +237,10 @@ module BitChannel
       'viewrev'
     end
 
+    def diff_base_revision
+      revision()
+    end
+
     def revision
       @revision
     end
@@ -231,6 +262,10 @@ module BitChannel
 
     def template_id
       'diff'
+    end
+
+    def diff_base_revision
+      rev1()
     end
 
     def rev1
@@ -259,6 +294,14 @@ module BitChannel
       'annotate'
     end
 
+    def menuitem_annotate_enabled?
+      false
+    end
+
+    def diff_base_revision
+      @revision || @repository.revision(@page_name)
+    end
+
     def revision
       @revision
     end
@@ -285,6 +328,14 @@ module BitChannel
       'history'
     end
 
+    def menuitem_history_enabled?
+      false
+    end
+
+    def diff_base_revision
+      revision() || 0
+    end
+
     def revision
       @revision ||= @repository.revision(@page_name)
     end
@@ -307,6 +358,14 @@ module BitChannel
 
     def template_id
       'edit'
+    end
+
+    def menuitem_edit_enabled?
+      false
+    end
+
+    def diff_base_revision
+      @original_revision || @repository.revision(@page_name) || 0
     end
     
     def opt_message
@@ -357,6 +416,10 @@ module BitChannel
       'list'
     end
 
+    def menuitem_list_enabled?
+      false
+    end
+
     def page_list
       @repository.entries.sort_by {|name| name.downcase }
     end
@@ -373,6 +436,10 @@ module BitChannel
 
     def template_id
       'recent'
+    end
+
+    def menuitem_recent_enabled?
+      false
     end
 
     def page_list
@@ -395,6 +462,10 @@ module BitChannel
 
     def template_id
       'search_result'
+    end
+
+    def menuitem_search_enabled?
+      false
     end
 
     def query_string
@@ -433,6 +504,10 @@ module BitChannel
 
     def template_id
       'search_error'
+    end
+
+    def menuitem_search_enabled?
+      false
     end
 
     def error_message

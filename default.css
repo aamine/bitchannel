@@ -1,7 +1,5 @@
 /*
-
     default.css
-
 */
 
 body {
@@ -16,8 +14,34 @@ body {
 }
 
 div.menu {
+    clear: right;
     float: right;
-    text-align: right;
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    width: 5.5em;
+    text-align: left;
+    background-color: #eee;
+    padding: 10px;
+}
+div.menu p {
+    /* force line break (1 item by 1 line) */
+    width: 1px;
+}
+div.menu a:link,
+div.menu a:visited {
+    width: 4em;
+    color: #33a;
+    background-color: transparent;
+    text-decoration: none;
+}
+div.menu a:active,
+div.menu a:focus,
+div.menu a:hover {
+    width: 4em;
+    color: #fff;
+    background-color: #33a;
+    text-decoration: none;
 }
 
 /*
@@ -66,12 +90,12 @@ h4, h5, h6 {
     background-color: red;
 }
 
-p {
+div.main p {
     line-height: 140%;
     margin-top: 1em;
     margin-bottom: 1em;
     margin-left: 0px;
-    width: 36em;
+    width: 40em;
 }
 
 pre {
@@ -98,11 +122,13 @@ ul {
 }
 
 li {
+    width: 40em;
     margin-left: 0px;
     padding-left: 0px;
 }
 
 dl {
+    width: 40em;
     margin-left: 0em;
 }
 
@@ -123,16 +149,19 @@ a {
 
 a:link {
     color: #33a;
+    background-color: transparent;
     text-decoration: none;
 }
 
 a:visited {
     color: #666666;
+    background-color: transparent;
     text-decoration: none;
 }
 
 a:hover, a:focus, a:active {
-    color: #666666;
+    color: #fff;
+    background-color: #33a;
     text-decoration: underline;
 }
 
