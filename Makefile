@@ -2,7 +2,7 @@
 # bitchannel Makefile
 #
 
-version = 0.2.0
+version = 0.2.1
 datadir = $(HOME)/share
 ardir   = $(HOME)/var/archive
 
