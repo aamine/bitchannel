@@ -14,8 +14,51 @@ require 'time'
 
 module Wikitik
 
+  module FilenameEncoding
+
+    def encode_filename(name)
+      # encode [A-Z] ?  (There are case-insensitive filesystems)
+      name.gsub(/[^a-z\d]/in) {|c| sprintf('%%%02x', c[0]) }
+    end
+
+    def decode_filename(name)
+      name.gsub(/%([\da-h]{2})/i) { $1.hex.chr }
+    end
+
+  end
+
+
+  module LockUtils
+
+    # This method locks write access.
+    # Read only access is always allowed.
+    def lock(path)
+      n_retry = 5
+      lock = path + ',wikitik,lock'
+      begin
+        Dir.mkdir(lock)
+        begin
+          yield path
+        ensure
+          Dir.rmdir(lock)
+        end
+      rescue Errno::EEXIST
+        if n_retry > 0
+          sleep 3
+          n_retry -= 1
+          retry
+        end
+        raise LockFailed, "cannot get lock for #{File.basename(path)}"
+      end
+    end
+
+  end
+
+
   class Repository
 
+    include FilenameEncoding
+    include LockUtils
     include TextUtils
 
     def initialize(config, args)
@@ -27,9 +70,12 @@ module Wikitik
       @cvs_cmd  = t[:cmd_path]; t.delete(:cmd_path)
       @wc_read  = t[:wc_read];  t.delete(:wc_read)
       @wc_write = t[:wc_write]; t.delete(:wc_write)
+      @sync_wc  = t[:sync_wc];  t.delete(:sync_wc)
       t.each do |k,v|
         raise ConfigError, "Config Error: unknown key set: #{k}"
       end
+      @link_cache = LinkCache.new(@config.link_cachedir,
+                                  @config.revlink_cachedir)
     end
 
     def entries
@@ -130,11 +176,11 @@ module Wikitik
     end
 
     def links(page_name)
-      read_linkcache(link_cache(page_name))
+      @link_cache.linkcache(page_name) || []
     end
 
     def reverse_links(page_name)
-      read_linkcache(revlink_cache(page_name))
+      @link_cache.revlinkcache(page_name) || []
     end
 
     def checkin(page_name, origrev, new_text)
@@ -150,10 +196,9 @@ module Wikitik
       }
       Dir.chdir(@wc_read) {
         cvs 'up', '-A', filename
-      }
-      links = ToHTML.new(@config, self).extract_links(new_text)
-      update_link_cache page_name, links
-      update_revlink_cache page_name, links
+      } if @sync_wc
+      @link_cache.update_cache_for page_name,
+          ToHTML.new(@config, self).extract_links(new_text)
     end
 
     private
@@ -200,97 +245,6 @@ LOG %Q[exec: "#{cmd.join('", "')}"]
       }
     end
 
-    def update_link_cache(page_name, links)
-      lock(@config.link_cachedir) {|cachedir|
-        Dir.mkdir cachedir unless File.directory?(cachedir)
-        File.open(link_cache(page_name) + ',tmp', 'w') {|f|
-          links.each do |lnk|
-            f.puts lnk
-          end
-        }
-      }
-    end
-
-    def link_cache(page_name)
-      "#{@config.link_cachedir}/#{encode_filename(page_name)}"
-    end
-
-    def update_revlink_cache(page_name, links)
-      linktbl = {}
-      links.each do |page|
-        linktbl[page] = true
-      end
-      lock(@config.revlink_cachedir) {|cachedir|
-        Dir.mkdir cachedir unless File.directory?(cachedir)
-        foreach_file(cachedir) do |cachefile|
-          if linktbl.delete(decode_filename(File.basename(cachefile)))
-            add_linkcache_entry cachefile, page_name
-          else
-            remove_linkcache_entry cachefile, page_name
-          end
-        end
-        linktbl.each_key do |link|
-          add_linkcache_entry revlink_cache(link), page_name
-        end
-      }
-    end
-
-    def revlink_cache(page_name)
-      "#{@config.revlink_cachedir}/#{encode_filename(page_name)}"
-    end
-
-    def add_linkcache_entry(path, page_name)
-      links = read_linkcache(path)
-      write_linkcache path, (links + [page_name]).uniq.sort
-    end
-
-    def remove_linkcache_entry(path, page_name)
-      links = read_linkcache(path)
-      write_linkcache path, (links - [page_name]).uniq.sort
-    end
-
-    def read_linkcache(path)
-      File.readlines(path).map {|line| line.strip }
-    rescue Errno::ENOENT
-      return []
-    end
-
-    def write_linkcache(path, links)
-      File.open("#{path},tmp", 'w') {|f|
-        links.each do |lnk|
-          f.puts lnk
-        end
-      }
-      File.rename "#{path},tmp", path
-    end
-
-    def foreach_file(dir, &block)
-      Dir.entries(dir).map {|ent| "#{dir}/#{ent}" }\
-          .select {|path| File.file?(path) }.each(&block)
-    end
-
-    # This method locks write access.
-    # Read only access is always allowed.
-    def lock(path)
-      n_retry = 5
-      lock = path + ',wikitik,lock'
-      begin
-        Dir.mkdir(lock)
-        begin
-          yield path
-        ensure
-          Dir.rmdir(lock)
-        end
-      rescue Errno::EEXIST
-        if n_retry > 0
-          sleep 3
-          n_retry -= 1
-          retry
-        end
-        raise LockFailed, "cannot get lock for #{File.basename(path)}"
-      end
-    end
-
     def popen3(*cmd)
       pw = IO.pipe
       pr = IO.pipe
@@ -328,15 +282,102 @@ LOG %Q[exec: "#{cmd.join('", "')}"]
       end
     end
 
-    def encode_filename(name)
-      # encode [A-Z] ?  (There are case-insensitive filesystems)
-      name.gsub(/[^a-z\d]/in) {|c| sprintf('%%%02x', c[0]) }
+  end   # class Repository
+
+
+  class LinkCache
+
+    include FilenameEncoding
+    include LockUtils
+
+    def initialize(linkcachedir, revlinkcachedir)
+      @linkcachedir = linkcachedir
+      @revlinkcachedir = revlinkcachedir
     end
 
-    def decode_filename(name)
-      name.gsub(/%([\da-h]{2})/i) { $1.hex.chr }
+    def linkcache(page_name)
+      read_cache(linkcache_file(page_name))
     end
 
-  end
+    def revlinkcache(page_name)
+      read_cache(revlinkcache_file(page_name))
+    end
+
+    def update_cache_for(page_name, links)
+      update_linkcache page_name, links
+      update_revlinkcache page_name, links
+    end
+
+    private
+
+    def update_linkcache(page_name, links)
+      lock(@linkcachedir) {|cachedir|
+        Dir.mkdir cachedir unless File.directory?(cachedir)
+        write_cache linkcache_file(page_name), links
+      }
+    end
+
+    def update_revlinkcache(page_name, links)
+      linktbl = {}
+      links.each do |page|
+        linktbl[page] = true
+      end
+      lock(@revlinkcachedir) {|cachedir|
+        Dir.mkdir cachedir unless File.directory?(cachedir)
+        foreach_file(cachedir) do |cachefile|
+          if linktbl.delete(decode_filename(File.basename(cachefile)))
+            add_linkcache_entry cachefile, page_name
+          else
+            remove_linkcache_entry cachefile, page_name
+          end
+        end
+        linktbl.each_key do |link|
+          add_linkcache_entry revlinkcache_file(link), page_name
+        end
+      }
+    end
+
+    def linkcache_file(page_name)
+      "#{@linkcachedir}/#{encode_filename(page_name)}"
+    end
+
+    def revlinkcache_file(page_name)
+      "#{@revlinkcachedir}/#{encode_filename(page_name)}"
+    end
+
+    def add_linkcache_entry(path, page_name)
+      links = read_cache(path)
+      write_cache path, (links + [page_name]).uniq.sort
+    end
+
+    def remove_linkcache_entry(path, page_name)
+      links = read_cache(path)
+      write_cache path, (links - [page_name]).uniq.sort
+    end
+
+    def read_cache(path)
+      File.readlines(path).map {|line| line.strip }
+    rescue Errno::ENOENT
+      return nil
+    end
+
+    def write_cache(path, links)
+      tmp = "#{path},tmp"
+      File.open(tmp, 'w') {|f|
+        links.each do |lnk|
+          f.puts lnk
+        end
+      }
+      File.rename tmp, path
+    ensure
+      File.unlink tmp if File.exist?(tmp)
+    end
+
+    def foreach_file(dir, &block)
+      Dir.entries(dir).map {|ent| "#{dir}/#{ent}" }\
+          .select {|path| File.file?(path) }.each(&block)
+    end
+
+  end   # class LinkCache
 
 end

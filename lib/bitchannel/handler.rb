@@ -30,8 +30,8 @@ end
 
 module Wikitik
 
-  def Wikitik.cgi_main(repo, config)
-    Handler.new(repo, config).handle_request(CGI.new)
+  def Wikitik.cgi_main(config, repo)
+    Handler.new(config, repo).handle_request(CGI.new)
   end
 
   #
@@ -42,9 +42,9 @@ module Wikitik
 
     include TextUtils
 
-    def initialize(repo, config)
-      @repository = repo
+    def initialize(config, repo)
       @config = config
+      @repository = repo
     end
 
     def handle_request(cgi)

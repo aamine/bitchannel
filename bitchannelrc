@@ -1,0 +1,31 @@
+#
+# Wikitik Config File
+#
+
+def initialize_environment
+  $KCODE = 'EUC'
+
+  cgidir = File.dirname(File.expand_path(__FILE__))
+
+  $:.unshift "#{cgidir}/lib"
+  require 'wikitik'
+
+  Wikitik.lang = 'ja'
+
+  config = Wikitik::Config.new(
+    :templatedir => "#{cgidir}/template",
+    :cachedir => "#{cgidir}/cache",
+    :charset => 'euc-jp',
+    :css_url => 'default.css',
+    :cgi_url => 'index.rb'
+  )
+  repo = Wikitik::Repository.new(config,
+    :cmd_path  => '/usr/bin/cvs',
+    # :cvsroot => '/var/cvs/jail/wiki',
+    :wc_read   => "#{cgidir}/wc.read",
+    :wc_write  => "#{cgidir}/wc.write",
+    :sync_wc   => true
+  )
+
+  return config, repo
+end
