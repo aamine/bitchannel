@@ -8,7 +8,6 @@
 # the GNU LGPL, Lesser General Public License version 2.1.
 #
 
-require 'bitchannel/tohtml'
 require 'bitchannel/erbutils'
 require 'bitchannel/textutils'
 
@@ -115,7 +114,7 @@ module BitChannel
     def menuitem_annotate_enabled?() true end
 
     def compile_page(content)
-      ToHTML.new(@config, @page.repository).compile(content, @page.name)
+      @page.repository.syntax(@config).compile(content, @page.name)
     end
 
     def page_name

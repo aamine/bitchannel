@@ -105,6 +105,7 @@ module BitChannel
           conf.get_optional(:wc_write, nil)   # discard
           @wc_write = nil
         end
+        @syntax = conf.get_optional(:syntax, nil)
         cachedir  = conf.get_required(:cachedir)
         @link_cache = LinkCache.new("#{cachedir}/link")
         @revlink_cache = LinkCache.new("#{cachedir}/revlink")
@@ -129,6 +130,9 @@ module BitChannel
     def read_only?
       @read_only_p
     end
+
+    attr_reader :syntax
+    attr_writer :syntax   # FIXME: tmp
 
     def page_names
       @wc_read.cvs_Entries.keys.map {|name| decode_filename(name) }
@@ -188,7 +192,7 @@ module BitChannel
     end
 
     def updated(name, new_rev, new_text)
-      update_linkcache name, ToHTML.extract_links(new_text)
+      update_linkcache name, @syntax.extract_links(new_text)
       notify name, new_rev
     end
 
@@ -759,7 +763,7 @@ module BitChannel
 
     def links
       @links ||=
-          (@repository.link_cache[@name] ||= ToHTML.extract_links(source()))
+          (@repository.link_cache[@name] ||= @repository.syntax.extract_links(source()))
     end
 
     def revlinks

@@ -15,7 +15,7 @@ require 'csv'
 
 module BitChannel
 
-  class ToHTML
+  class Syntax
 
     include TextUtils
 
@@ -71,11 +71,16 @@ module BitChannel
       '#<dummy Repository object>'
     end
 
-    def ToHTML.extract_links(str)
-      new(DUMMY_CONFIG, DUMMY_REPOSITORY).extract_links(str)
+    def Syntax.extract_links(str)
+      new(DUMMY_CONFIG, DUMMY_REPOSITORY)._extract_links(str)
     end
 
     def extract_links(str)
+      Syntax.extract_links(str)
+    end
+
+    # internal use only
+    def _extract_links(str)
       compile(str, ' (dummy) ')   # page name never includes ' ' in BitChannel
       @internal_links
     end

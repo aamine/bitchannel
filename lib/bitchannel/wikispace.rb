@@ -10,6 +10,7 @@
 
 require 'bitchannel/page'
 require 'bitchannel/textutils'
+require 'bitchannel/syntax'
 
 module BitChannel
 
@@ -20,6 +21,7 @@ module BitChannel
     def initialize(config, repo)
       @config = config
       @repository = repo
+      @repository.syntax ||= Syntax.new(config, repo)
     end
 
     # misc command use only

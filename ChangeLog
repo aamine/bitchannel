@@ -1,3 +1,16 @@
+Sat Aug 14 15:13:24 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/page.rb: multi-syntax support.
+
+	* lib/bitchannel/repository.rb: ditto.
+
+	* lib/bitchannel/wikispace.rb: set repository syntax (temporary
+	  fix).
+
+	* lib/bitchannel/tohtml.rb -> syntax.rb.
+
+	* lib/bitchannel/asissyntax.rb: new file.
+
 Sat Aug 14 14:16:53 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/handler.rb: reject edit/save/comment in read-only
