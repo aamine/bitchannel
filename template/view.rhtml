@@ -7,20 +7,39 @@
   <title><%= title() %></title>
 </head>
 <body>
+
 <div class="menu">
-<a href="<%= cgi_url() %>?cmd=edit;name=<%= page_name() %>">Edit</a>
+<a href="<%= cgi_url() %>?cmd=edit;name=<%= page_url() %>">Edit</a>
 <a href="<%= cgi_url() %>?cmd=recent">Recent</a>
 <a href="<%= cgi_url() %>?cmd=list">List</a>
-<a href="<%= cgi_url() %>?cmd=history;name=<%= page_name() %>">History</a>
+<a href="<%= cgi_url() %>?cmd=history;name=<%= page_url() %>">History</a>
 <% if revision() > 1 %>
-<a href="<%= cgi_url() %>?cmd=diff;rev1=<%= revision() - 1 %>;rev2=<%= revision() %>;name=<%= page_name() %>">Diff</a>
+<a href="<%= cgi_url() %>?cmd=diff;rev1=<%= revision() - 1 %>;rev2=<%= revision() %>;name=<%= page_url() %>">Diff</a>
 <% else %>
 Diff
 <% end %>
+<a href="<%= cgi_url() %>?cmd=view;name=IndexPage">Top</a>
 <a href="<%= cgi_url() %>?cmd=view;name=HelpPage">Help</a>
 </div>
+
 <h1><%= page_name() %></h1>
 <p><span class="lastmodified">Last Modified: <%= format_time(last_modified()) %></span></p>
 <%= body() %>
+
+<hr>
+<div class="footer">
+<div class="revlinks">
+<p>ReverseLinks:
+<%
+    show_max = 10
+    reverse_links_in_nrevorder()[0, show_max].each do |page|
+%><a href="<%= cgi_url() %>?cmd=view;name=<%= url(page) %>"><%= escape_html(page) %>(<%= num_revlinks(page) %>)</a>
+<%
+    end
+%><%= reverse_links().size > show_max ? '...' : '' %>
+</p>
+</div>
+</div>
+
 </body>
 </html>

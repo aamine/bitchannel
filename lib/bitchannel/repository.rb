@@ -18,7 +18,8 @@ module Wikitik
 
     include TextUtils
 
-    def initialize(args)
+    def initialize(config, args)
+      @config = config
       t = Hash.new {|h,k|
         raise ConfigError, "Config Error: not set: repository.#{k}"
       }
@@ -105,6 +106,20 @@ module Wikitik
       }
     end
 
+    def reverse_links(page_name)
+      File.readlines(revlink_cache(page_name)).map {|s| s.strip }[1..-1]
+    rescue Errno::ENOENT
+      return []
+    end
+
+    def num_revlinks(page_name)
+      File.open(revlink_cache(page_name)) {|f|
+        return f.gets.strip.to_i
+      }
+    rescue Errno::ENOENT
+      return 0
+    end
+
     def checkin(page_name, origrev, new_text)
       filename = encode_filename(page_name)
       Dir.chdir(@wc_write) {
@@ -119,6 +134,7 @@ module Wikitik
       Dir.chdir(@wc_read) {
         cvs 'up', '-A', filename
       }
+      update_revlink_cache page_name, new_text
     end
 
     private
@@ -162,6 +178,36 @@ LOG %Q[exec: "#{cmd.join('", "')}"]
       popen3(*cmd) {|stdin, stdout, stderr|
         stdin.close
         return stdout.read, stderr.read
+      }
+    end
+
+    def revlink_cache(page_name)
+      "#{@config.revlink_cachedir}/#{encode_filename(page_name)}"
+    end
+
+    # FIXME: cannot handle link-is-removed case
+    def update_revlink_cache(page_name, text)
+      links = ToHTML.new(@config, self).extract_links(text)
+      cachedir = @config.revlink_cachedir
+      lock(cachedir) {
+        Dir.mkdir cachedir unless File.directory?(cachedir)
+        links.each do |link|
+          cachefile = "#{cachedir}/#{encode_filename(link)}"
+          if File.exist?(cachefile)
+            revlinks = File.readlines(cachefile).map {|line| line.strip }
+            revlinks.shift   # discard first line (number of lines)
+          else
+            revlinks = []
+          end
+          revlinks = (revlinks + [page_name]).uniq.sort
+          File.open("#{cachefile},tmp", 'w') {|f|
+            f.puts revlinks.size
+            revlinks.each do |rev|
+              f.puts rev
+            end
+          }
+          File.rename "#{cachefile},tmp", cachefile
+        end
       }
     end
 

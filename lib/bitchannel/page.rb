@@ -12,30 +12,51 @@ require 'wikitik/repository'
 require 'wikitik/tohtml'
 require 'wikitik/textutils'
 require 'erb'
-require 'forwardable'
+
+class ERB   # tmp
+  attr_accessor :filename  unless method_defined?(:filename)
+
+  remove_method :result
+  def result(binding)
+    eval(@src, binding, @filename, 1)
+  end
+end
 
 module Wikitik
 
   class Page
 
     include TextUtils
-    extend Forwardable
 
     def initialize(config, repo, page)
       @config = config
       @repository = repo
       @page_name = page
+
+      # cache
+      @revlinks = nil
+      @nrev_cache ||= {}
     end
 
     def html
-      ERB.new(@config.read_rhtml(template_id())).result(binding())
+      erb = ERB.new(@config.read_rhtml(template_id()))
+      erb.filename = "#{template_id()}.rhtml"
+      erb.result(binding())
     end
 
     private
 
-    def_delegator :@config, :charset
-    def_delegator :@config, :css_url
-    def_delegator :@config, :cgi_url
+    def charset
+      url(@config.charset)
+    end
+
+    def css_url
+      url(@config.css_url)
+    end
+
+    def cgi_url
+      url(@config.cgi_url)
+    end
 
     def title
       page_name()
@@ -45,8 +66,28 @@ module Wikitik
       escape_html(@page_name)
     end
 
+    def page_url
+      url(@page_name)
+    end
+
     def compile_page(content)
       ToHTML.new(@config, @repository).compile(content)
+    end
+
+    def reverse_links
+      @revlinks ||= @repository.reverse_links(@page_name)
+    end
+
+    def reverse_links_in_nrevorder
+      reverse_links().sort_by {|page| -num_revlinks(page) }
+    end
+
+    def num_revlinks(page)
+      @nrev_cache[page] ||= @repository.num_revlinks(page)
+    end
+
+    def url(str)
+      escape_html(URI.escape(str))
     end
 
   end

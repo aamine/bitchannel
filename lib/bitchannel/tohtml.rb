@@ -209,7 +209,7 @@ module Wikitik
     #
 
     WikiName = /\b(?:[A-Z][a-z0-9]+){2,}\b/n   # /\b/ requires `n' option
-    ExplicitLink = /\[\[.*?\]\]/e
+    ExplicitLink = /\[\[\S+?\]\]/e
         # FIXME: `e' option does not effect in the final regexp.
     schemes = %w( http ftp )
     SeemsURL = /\b(?=#{Regexp.union(*schemes)}:)#{URI::PATTERN::X_ABS_URI}/xn

@@ -100,7 +100,6 @@ module Wikitik
           @repository.checkin page_name,
                               cgi.get_rev_param('origrev'),
                               text
-          update_revlink_cache page_name, text
           thanks cgi, page_name
         rescue EditConflict => err
           send cgi, EditPage.new(@config, @repository,
@@ -154,7 +153,7 @@ raise ArgumentError, "view page=nil" unless page_name
       send cgi, <<-ThanksPage
         <html>
         <head>
-        <meta http-equiv="refresh" content="1;url=#{@config.cgi_url}?cmd=view;name=#{URI.encode(page_name)}">
+        <meta http-equiv="refresh" content="1;url=#{@config.cgi_url}?name=#{URI.encode(page_name)}">
         <title>Moving...</title>
         </head>
         <body>
@@ -175,29 +174,7 @@ raise ArgumentError, "view page=nil" unless page_name
       header['Last-Modified'] = CGI.rfc1123_date(mtime) if mtime
       print cgi.header(header)
       print html unless cgi.request_method.to_s.upcase == 'HEAD'
-    end
-
-    def update_revlink_cache(page_name, text)
-      links = ToHTML.new(@config, @repository).extract_links(text)
-      @config.lock_revlink_cachedir {|dir|
-        links.each do |link|
-          cachefile = "#{dir}/#{encode_filename(link)}"
-          if File.exist?(cachefile)
-            revlinks = File.readlines(cachefile).map {|line| line.strip }
-            revlinks.shift   # discard first line (number of lines)
-          else
-            revlinks = []
-          end
-          revlinks = (revlinks + [page_name]).uniq.sort
-          File.open("#{cachefile},tmp", 'w') {|f|
-            f.puts revlinks.size
-            revlinks.each do |rev|
-              f.puts rev
-            end
-          }
-          File.rename "#{cachefile},tmp", cachefile
-        end
-      }
+      $stdout.flush
     end
 
   end
