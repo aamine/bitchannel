@@ -18,7 +18,7 @@ module BitChannel
       conf, repo = *@options
       conf = conf.dup
       conf.suggest_cgi_url File.dirname(req.path)
-      Handler.new(conf, repo).service Reqest.new(req, conf, true), res
+      Handler.new(conf, repo).service Request.new(req, conf, true), res
     end
 
     alias do_POST do_GET

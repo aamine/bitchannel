@@ -1,3 +1,7 @@
+Wed Apr 28 17:31:57 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/webrickservlet.rb: fix typo.
+
 Mon Apr 26 23:42:27 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/fcgi.rb (main): small refactoring.
