@@ -50,12 +50,12 @@ h2 {
     text-align: left;
     border-left: 10px solid #33a;
     padding-left: 0.5em;
-    margin-top: 1em;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
 }
 
 h3 {
-    font-size: 100%;
-    font-weight: bold;
+    font-size: 150%;
     text-align: left;
     margin-top: 0.5em;
     margin-bottom: 0.5em;
