@@ -14,7 +14,8 @@
 <h1><%= logo_url() %>List of All Pages</h1>
 <ol>
 <%  page_list().each do |page|  %>
-<li><a href="<%= view_url(page) %>"><%= escape_html(page) %></a></li>
+<li><a href="<%= view_url(page) %>"><%= escape_html(page) %></a>
+    <%  if orphan_page?(page)  %>[orphan]<%  end  %></li>
 <%  end  %>
 </ol>
 </div>

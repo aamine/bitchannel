@@ -423,6 +423,10 @@ module BitChannel
     def page_list
       @repository.entries.sort_by {|name| name.downcase }
     end
+
+    def orphan_page?(name)
+      @repository.orphan?(name)
+    end
   end
 
 

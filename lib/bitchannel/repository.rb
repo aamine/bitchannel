@@ -91,7 +91,11 @@ module BitChannel
     alias entries page_names
 
     def orphan_pages
-      page_names().select {|name| revlinks(name).size == 0 }
+      page_names().select {|name| orphan?(name) }
+    end
+
+    def orphan?(page_name)
+      revlinks(page_name).empty?
     end
 
     def exist?(page_name)
