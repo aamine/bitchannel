@@ -1,3 +1,8 @@
+Sun Nov  7 06:14:37 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/syntax.rb: make link for https: scheme.
+	  (/w/BitChannelComment:rev79)
+
 Sun Nov  7 06:13:05 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/repository.rb: new method Time.cvslogdate.

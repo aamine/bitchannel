@@ -414,7 +414,7 @@ module BitChannel
 
     WikiName = /\b(?:[A-Z][a-z0-9]+){2,}\b/n
     BracketLink = /\[\[[!-~]+?\]\]/n
-    SeemsURL = URI.regexp(%w(http ftp))
+    SeemsURL = URI.regexp(%w(http https ftp))
     NeedESC = /[&"<>]/
 
     def text(str)
