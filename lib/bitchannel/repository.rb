@@ -35,7 +35,7 @@ module AlphaWiki
 
     def revision(page_name)
       re = %r<\A/#{Regexp.quote(escape_html(page_name))}/1>
-      line = File.readlines("#{@wc_read}/CVS/Entries").detect(re)
+      line = File.readlines("#{@wc_read}/CVS/Entries").detect {|s| re =~ s }
       return nil unless line   # file not checked in
       line.split(%r</>)[2]
     end
