@@ -230,7 +230,7 @@ module Wikitik
     end
 
     def page_list
-      @repository.entries.sort.map {|name| escape_html(name) }
+      @repository.entries.sort_by {|n| n.downcase }.map {|n| escape_html(n) }
     end
 
   end
