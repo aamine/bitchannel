@@ -365,7 +365,9 @@ module BitChannel
     end
 
     def diff_base_revision
-      @original_revision || @repository.revision(@page_name) || 0
+      @original_revision || @repository.revision(@page_name)
+    rescue Errno::ENOENT
+      return 0
     end
     
     def opt_message
