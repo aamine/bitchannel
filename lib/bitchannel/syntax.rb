@@ -302,7 +302,6 @@ module BitChannel
       rows.each do |cols|
         while cols.last and cols.last[0].strip.empty?
           cols.pop
-          cols.pop
         end
       end
       n_maxcols = rows.map {|cols| cols.size }.max
