@@ -24,8 +24,9 @@ module Wikitik
       @interwikinames = nil
     end
 
-    def compile(str)
+    def compile(str, page_name)
       @f = LineInput.new(StringIO.new(str))
+      @page_name = page_name
       @result = ''
       @indent_stack = [0]
       @internal_links = []
@@ -34,7 +35,7 @@ module Wikitik
     end
 
     def extract_links(str)
-      compile(str)
+      compile(str, ' (dummy) ')   # page name never includes ' ' in Wikitik
       @internal_links
     end
 
@@ -218,50 +219,46 @@ module Wikitik
 
     def text(str)
       esctable = TextUtils::ESC
-      cgi_href = escape_html(@config.cgi_url)
       str.gsub(/(#{NeedESC})|(#{WikiName})|(#{ExplicitLink})|(#{SeemsURL})/on) {
-        if ch = $1
-          esctable[ch]
-        elsif wikiname = $2
-          @internal_links.push wikiname
-          href = escape_html(URI.escape(wikiname))
-          anchor = escape_html(wikiname)
-          q = (@repository.exist?(wikiname) ? '' : '?')
-          %Q[<a href="#{cgi_href}?cmd=view;name=#{href}">#{q}#{anchor}</a>]
-        elsif exlink = $3
-          exlink = exlink[2..-3]   # remove '[[' and ']]'
-          if /:/ === exlink
-            interwikiname, content = exlink.split(/:/, 2)
-            href = resolve_interwikiname(interwikiname, content)
-            anchor = escape_html("[#{exlink}]")
-            if href
-              %Q[<a href="#{escape_html(URI.escape(href))}">#{anchor}</a>]
-            else
-              '?' + anchor
-            end
-          else
-            @internal_links.push exlink
-            href = escape_html(URI.escape(exlink))
-            anchor = escape_html(exlink)
-            q = (@repository.exist?(exlink) ? '' : '?')
-            %Q[<a href="#{cgi_href}?cmd=view;name=#{href}">#{q}#{anchor}</a>]
+        if    ch  = $1 then esctable[ch]
+        elsif tok = $2 then wikiname(tok)
+        elsif tok = $3
+          if /:/ === tok
+          then interwikiname(tok[2..-3])
+          else explicit_link(tok[2..-3])
           end
-        elsif url = $4
-          if url[-1,1] == ')' and not balanced?(url)   # special case
-            url[-1,1] = ''
-            add = ')'
-          else
-            add = ''
-          end
-          if seems_image_url?(url)
-            %Q[<img src="#{escape_html(url)}">#{add}]
-          else
-            %Q[<a href="#{escape_html(url)}">#{escape_html(url)}</a>#{add}]
-          end
+        elsif tok = $4 then seems_url(tok)
         else
           raise 'must not happen'
         end
       }
+    end
+
+    def wikiname(name)
+      return escape_html(name) if name == @page_name
+      @internal_links.push name
+      href = escape_html(URI.escape(name))
+      anchor = escape_html(name)
+      q = (@repository.exist?(name) ? '' : '?')
+      %Q[<a href="#{cgi_href()}?cmd=view;name=#{href}">#{q}#{anchor}</a>]
+    end
+
+    def explicit_link(exlink)
+      @internal_links.push exlink
+      href = escape_html(URI.escape(exlink))
+      anchor = escape_html(exlink)
+      q = (@repository.exist?(exlink) ? '' : '?')
+      %Q[<a href="#{cgi_href()}?cmd=view;name=#{href}">#{q}#{anchor}</a>]
+    end
+
+    def interwikiname(name)
+      interwikiname, vary = name.split(/:/, 2)
+      href = resolve_interwikiname(interwikiname, vary)
+      anchor = escape_html("[#{name}]")
+      if href
+      then %Q[<a href="#{escape_html(URI.escape(href))}">#{anchor}</a>]
+      else '?' + anchor
+      end
     end
 
     def resolve_interwikiname(name, vary)
@@ -287,12 +284,29 @@ module Wikitik
       table
     end
 
+    def seems_url(url)
+      if url[-1,1] == ')' and not paren_balanced?(url)   # special case
+        url[-1,1] = ''
+        add = ')'
+      else
+        add = ''
+      end
+      if seems_image_url?(url)
+      then %Q[<img src="#{escape_html(url)}">#{add}]
+      else %Q[<a href="#{escape_html(url)}">#{escape_html(url)}</a>#{add}]
+      end
+    end
+
     def seems_image_url?(url)
       /\.(?:png|jpg|jpeg|gif|bmp|tiff|tif)\z/i =~ url
     end
 
-    def balanced?(str)
+    def paren_balanced?(str)
       str.count('(') == str.count(')')
+    end
+
+    def cgi_href
+      escape_html(@config.cgi_url)
     end
 
     #
@@ -415,5 +429,5 @@ EOS
     File.read("wc.read/#{name}")
   end
   c = Wikitik::ToHTML.new(env, env)
-  puts c.compile(ARGF.read)
+  puts c.compile(ARGF.read, 'argf')
 end

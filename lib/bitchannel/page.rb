@@ -70,7 +70,7 @@ module Wikitik
     end
 
     def compile_page(content)
-      ToHTML.new(@config, @repository).compile(content)
+      ToHTML.new(@config, @repository).compile(content, @page_name)
     end
 
     def reverse_links
