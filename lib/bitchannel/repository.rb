@@ -37,7 +37,7 @@ module AlphaWiki
       re = %r<\A/#{Regexp.quote(escape_html(page_name))}/1>
       line = File.readlines("#{@wc_read}/CVS/Entries").detect {|s| re =~ s }
       return nil unless line   # file not checked in
-      line.split(%r</>)[2]
+      line.split(%r</>)[2].split(%r<\.>).last.to_i
     end
 
     def checkin(page_name, origrev, new_text)
@@ -72,7 +72,7 @@ module AlphaWiki
           raise EditConflict.new('conflict found', merged)
         end
       end
-      cvs 'ci', filename
+      cvs 'ci', '-m', "auto checkin: origrev=#{origrev}", filename
     end
 
     def add_and_checkin(filename, new_text)
@@ -87,13 +87,23 @@ module AlphaWiki
       execute(@cvs_cmd, *args)
     end
 
+def LOG(msg)
+  File.open('log', 'a') {|f|
+    f.puts "#{Time.now.inspect}: #{msg}"
+  }
+end
     def execute(*cmd)
+LOG %Q[exec: "#{cmd.join('", "')}"]
       popen3(*cmd) {|stdin, stdout, stderr|
+        stdin.close
         return stdout.read, stderr.read
       }
     end
 
+    RETRY_MAX = 5
+
     def lock(path)
+      failed = 0
       lock = path + ',alphawiki,lock'
       begin
         Dir.mkdir(lock)
@@ -111,6 +121,9 @@ module AlphaWiki
           end
           retry
         end
+        failed += 1
+        raise LockFailed, "cannot get lock for #{File.basename(path)}" \
+            if failed > RETRY_MAX
         sleep 3
         retry
       end
@@ -134,36 +147,32 @@ module AlphaWiki
       pw = IO.pipe
       pr = IO.pipe
       pe = IO.pipe
-      pid = fork {
-        fork{
-          pw[1].close
-          STDIN.reopen(pw[0])
-          pw[0].close
+      pid = Process.fork {
+        pw[1].close
+        STDIN.reopen(pw[0])
+        pw[0].close
 
-          pr[0].close
-          STDOUT.reopen(pr[1])
-          pr[1].close
+        pr[0].close
+        STDOUT.reopen(pr[1])
+        pr[1].close
 
-          pe[0].close
-          STDERR.reopen(pe[1])
-          pe[1].close
+        pe[0].close
+        STDERR.reopen(pe[1])
+        pe[1].close
 
-          exec(*cmd)
-        }
-        exit!
+        exec(*cmd)
       }
       pw[0].close
       pr[1].close
       pe[1].close
       pipes = [pw[1], pr[0], pe[0]]
       pw[1].sync = true
-
-      dummy, status = Process.waitpid2(pid)
-      raise CommandFailed, "Command failed: #{cmd.join ' '}" \
-          unless status.exitstatus == 0
-
       begin
-        return yield(*pipes)
+        result = yield(*pipes)
+        dummy, status = Process.waitpid2(pid)
+        raise CommandFailed.new("Command failed: #{cmd.join ' '}", status) \
+            unless status.exitstatus == 0
+        return result
       ensure
         pipes.each do |f|
           f.close unless f.closed?
