@@ -5,7 +5,7 @@
 #
 # This program is free software.
 # You can distribute/modify this program under the terms of
-# the GNU LGPL, Lesser General Public License version 2.
+# the GNU LGPL, Lesser General Public License version 2.1.
 #
 
 require 'bitchannel/textutils'
