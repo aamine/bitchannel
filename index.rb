@@ -92,9 +92,9 @@ def edit(repo, config, cgi, page_name)
 end
 
 def send(cgi, html)
-  cgi.header('status' => '200 OK',
-             'type' => 'text/html', 'charset' => @charset,
-             'Content-Length' => html.length.to_s)
+  print cgi.header('status' => '200 OK',
+                   'type' => 'text/html', 'charset' => @charset,
+                   'Content-Length' => html.length.to_s)
   print html unless cgi.request_method.to_s.upcase == 'HEAD'
 end
 
