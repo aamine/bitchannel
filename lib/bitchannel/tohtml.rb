@@ -73,7 +73,7 @@ module BitChannel
         when TABLE    then table
         when PRE      then pre
         else
-          if line.strip.empty?
+          if @f.peek.strip.empty?
             @f.gets
           else
             paragraph
@@ -149,7 +149,7 @@ module BitChannel
     def cite
       puts '<blockquote>'
       @f.while_match(CITE) do |line|
-        puts line.sub(/\A""/).strip
+        puts line.sub(/\A""/, '').strip
       end
       puts '</blockquote>'
     end
