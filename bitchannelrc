@@ -16,12 +16,12 @@ def initialize_environment
     :templatedir => "#{cgidir}/template",
     :cachedir => "#{cgidir}/cache",
     :charset => 'euc-jp',
+    # :site_name => 'My Site',   # If you'd like
     :css_url => 'default.css',
     :cgi_url => 'index.rb'
   )
   repo = BitChannel::Repository.new(config,
     :cmd_path  => '/usr/bin/cvs',
-    # :cvsroot => '/var/cvs/jail/wiki',
     :wc_read   => "#{cgidir}/wc.read",
     :wc_write  => "#{cgidir}/wc.write",
     :sync_wc   => true

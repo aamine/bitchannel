@@ -23,6 +23,7 @@ module BitChannel
       @cgi_url     = t[:cgi_url];     t.delete(:cgi_url)
       @css_url     = t[:css_url];     t.delete(:css_url)
       @index_page = t.fetch(:index_page, nil); t.delete(:index_page)
+      @site_name = t.fetch(:site_name, nil); t.delete(:site_name)
       t.each do |k,v|
         raise ConfigError, "Config Error: unknown key: config.#{k}"
       end
@@ -33,6 +34,10 @@ module BitChannel
     attr_reader :css_url
     attr_reader :datadir
     attr_reader :templatedir
+
+    def site_name
+      @site_name || index_page_name()
+    end
 
     def index_page_name
       @index_page || 'FrontPage'

@@ -115,6 +115,14 @@ module BitChannel
       view_url(@page_name)
     end
 
+    def front_page?
+      @page_name == @config.index_page_name
+    end
+
+    def site_name
+      escape_html(@config.site_name)
+    end
+
     def size
       @size ||= @repository.size(@page_name)
     end

@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=<%= charset() %>">
   <meta http-equiv="Content-Language" content="ja-JP">
   <link rel="stylesheet" type="text/css" href="<%= css_url() %>">
-  <title><%= page_name() %></title>
+  <title><%= front_page?() ? site_name() : page_name() %></title>
 </head>
 <body>
 
@@ -26,7 +26,7 @@
 .include search_form
 </div>
 
-<h1><%= page_name() %></h1>
+<h1><%= front_page?() ? site_name() : page_name() %></h1>
 <p>r1.<%= revision() %>; <span class="lastmodified">Last Modified: <%= format_time(last_modified()) %></span> (<%= times_before(last_modified()) %>)</p>
 <%= body() %>
 
