@@ -10,6 +10,7 @@
 
 require 'wikitik/textutils'
 require 'stringio'
+require 'uri'
 
 module Wikitik
 
@@ -17,16 +18,13 @@ module Wikitik
 
     include TextUtils
 
-    def ToHTML.compile(str)
-      new().compile(str)
-    end
-
-    def initialize
+    def initialize(config)
+      @config = config
       @indent_stack = [[0,'top']]
     end
 
     def compile(str)
-      convert StringIO.new(str)
+      convert(StringIO.new(str))
     end
 
     private
@@ -39,6 +37,10 @@ module Wikitik
       end
       output ? nil : @output.string
     end
+
+    #
+    # Block
+    #
 
     BlankLine = Object.new
     def BlankLine.===(str)
@@ -62,7 +64,7 @@ module Wikitik
     def caption( line )
       level = line.slice(/\A(=+)\s/, 1).length
       str = line.sub(/\A=+/, '').strip
-      puts "<h#{level}>#{text(str)}</h#{level}>"
+      puts "<h#{level}>#{escape_html(str)}</h#{level}>"
     end
 
     def paragraph_cluster( toplevel_p )
@@ -101,10 +103,6 @@ module Wikitik
       end
     ensure
       puts '</p>'
-    end
-
-    def text( str )
-      escape_html(str)
     end
 
     def xlist( type )
@@ -188,7 +186,7 @@ module Wikitik
     end
 
     #
-    # indent
+    # Indent
     #
 
     def push_indent( n, label )
@@ -245,6 +243,45 @@ module Wikitik
 
     def function_line?( line )
       /\A=+\s|\A\s*(\*|\d+\.|:)\s/ === line
+    end
+
+    #
+    # Inline
+    #
+
+    WikiName = /\b(?:[A-Z][a-z0-9]+){2,}\b/n   # /\b/ requires `n' option
+    ExplicitLink = /\[\[.*?\]\]/e
+        # FIXME: `e' option does not effect in the final regexp.
+    schemes = %w( http ftp )
+    SeemsURL = /\b(?=#{Regexp.union(*schemes)}:)#{URI::PATTERN::X_ABS_URI}/xn
+        # from uri/common.rb:URI.extract
+    NeedESC = /[&"<>]/
+
+    def text(str)
+      esctable = TextUtils::ESC
+      cgi_href = escape_html(@config.cgi_url)
+      str.gsub(/(#{NeedESC})|(#{WikiName})|(#{ExplicitLink})|(#{SeemsURL})/on) {
+        if ch = $1
+          esctable[ch]
+        elsif wikiname = $2
+          href = escape_html(URI.escape(wikiname))
+          link = escape_html(wikiname)
+          %Q[<a href="#{cgi_href}?cmd=view;name=#{href}">#{link}</a>]
+        elsif exlink = $3
+          href = escape_html(URI.escape(exlink[2..-3]))
+          link = escape_html(exlink[2..-3])
+          %Q[<a href="#{cgi_href}?cmd=view;name=#{href}">#{link}</a>]
+        elsif url = $4
+          if url[-1,1] == ')'   # special case
+            url[-1,1] = ''
+            %Q[<a href="#{escape_html(url)}">#{escape_html(url)}</a>)]
+          else
+            %Q[<a href="#{escape_html(url)}">#{escape_html(url)}</a>]
+          end
+        else
+          raise 'must not happen'
+        end
+      }
     end
 
     #

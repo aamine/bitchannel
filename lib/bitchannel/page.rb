@@ -45,6 +45,10 @@ module Wikitik
       escape_html(@page_name)
     end
 
+    def compile_page(content)
+      ToHTML.new(@config).compile(content)
+    end
+
   end
 
 
@@ -71,7 +75,7 @@ module Wikitik
     end
 
     def body
-      ToHTML.compile(@repository[@page_name])
+      compile_page(@repository[@page_name])
     end
   
   end
@@ -100,7 +104,7 @@ module Wikitik
     end
 
     def body
-      ToHTML.compile(@repository[@page_name, @revision])
+      compile_page(@repository[@page_name, @revision])
     end
   
   end
