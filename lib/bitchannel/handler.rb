@@ -51,18 +51,7 @@ module BitChannel
       begin
         wiki_main cgi
       rescue Exception => err
-        print "Content-Type: text/plain\r\n"
-        print "Connection: close\r\n"
-        print "\r\n"
-        unless cgi.request_method.to_s.upcase == 'HEAD'
-          puts "#{err.message} (#{err.class})"
-          if true  #$DEBUG
-            puts err.precise_message if err.respond_to?(:precise_message)
-            err.backtrace.each do |i|
-              puts i
-            end
-          end
-        end
+        send_error cgi, err, true  #$DEBUG
       end
     end
 
@@ -83,6 +72,8 @@ module BitChannel
       else
         view cgi, (cgi.get_param('name') || @config.index_page_name)
       end
+    rescue WrongPageName => err
+      send_error cgi, err, false
     end
 
     def handle_view(cgi)
@@ -244,8 +235,7 @@ module BitChannel
     end
 
     def view(cgi, page_name)
-raise ArgumentError, "view page=nil" unless page_name
-      unless @repository.exist?(page_name)
+      if not @repository.exist?(page_name) and @repository.valid?(page_name)
         send_html cgi, EditPage.new(@config, @repository,
                                     page_name, '', nil).html
         return
@@ -273,6 +263,30 @@ raise ArgumentError, "view page=nil" unless page_name
       print cgi.header(header)
       print content unless cgi.request_method.to_s.upcase == 'HEAD'
       $stdout.flush
+    end
+
+    def send_error(cgi, err, debugp)
+      html = "<html><head><title>Error</title></head><body>\n" +
+             "<pre>BitChannel Error\n"
+      if debugp
+        html << escape_html("#{err.message} (#{err.class})\n")
+        html << escape_html(err.precise_message) << "\n" \
+            if err.respond_to?(:precise_message)
+        err.backtrace.each do |i|
+          html << escape_html(i) << "\n"
+        end
+      else
+        html << escape_html(err.message) << "\n"
+        html << escape_html(err.precise_message) << "\n" \
+            if err.respond_to?(:precise_message)
+      end
+      html << "</pre>\n</body></html>"
+
+      print cgi.header 'status' => '200 OK',
+                       'type' => 'text/html',
+                       'charset' => 'us-ascii',
+                       'Content-Length' => html.length
+      print html unless cgi.request_method.to_s.upcase == 'HEAD'
     end
 
   end

@@ -100,16 +100,22 @@ module BitChannel
 
     def invalid?(page_name)
       st = File.stat("#{@wc_read}/#{encode_filename(page_name)}")
-      not st.file?
+      not st.file? or not st.readable?
     rescue Errno::ENOENT
       return false
     end
 
+    def valid?(page_name)
+      not invalid?(page_name)
+    end
+
     def size(page_name)
+      page_must_valid page_name
       File.size("#{@wc_read}/#{encode_filename(page_name)}")
     end
 
     def mtime(page_name, rev = nil)
+      page_must_valid page_name
       page_must_exist page_name
       unless rev
         @Entries ||= read_Entries("#{@wc_read}/CVS/Entries")
@@ -126,6 +132,7 @@ module BitChannel
     end
 
     def revision(page_name)
+      page_must_valid page_name
       page_must_exist page_name
       @Entries ||= read_Entries("#{@wc_read}/CVS/Entries")
       rev, mtime = *@Entries[page_name]
@@ -133,7 +140,7 @@ module BitChannel
     end
 
     def [](page_name, rev = nil)
-      check_page_name page_name
+      page_must_valid page_name
       unless rev
         File.read("#{@wc_read}/#{encode_filename(page_name)}")
       else
@@ -146,15 +153,14 @@ module BitChannel
     end
 
     def fetch(page_name, rev = nil)
-      begin
-        self[page_name, rev]
-      rescue Errno::ENOENT
-        return yield
-      end
+      self[page_name, rev]
+    rescue Errno::ENOENT
+      return yield
     end
 
     # [[rev,logstr]]
     def getlog(page_name)
+      page_must_valid page_name
       page_must_exist page_name
       Dir.chdir(@wc_read) {
         out, err = cvs('log', encode_filename(page_name))
@@ -176,6 +182,7 @@ module BitChannel
     end
 
     def diff(page_name, rev1, rev2)
+      page_must_valid page_name
       page_must_exist page_name
       Dir.chdir(@wc_read) {
         out, err = cvs('diff', '-u', "-r1.#{rev1}", "-r1.#{rev2}", encode_filename(page_name))
@@ -184,6 +191,7 @@ module BitChannel
     end
 
     def annotate(page_name, rev = nil)
+      page_must_valid page_name
       page_must_exist page_name
       Dir.chdir(@wc_read) {
         if rev
@@ -212,7 +220,7 @@ module BitChannel
     end
 
     def checkin(page_name, origrev, new_text)
-      check_page_name page_name
+      page_must_valid page_name
       filename = encode_filename(page_name)
       Dir.chdir(@wc_write) {
         lock(filename) {
@@ -318,12 +326,12 @@ module BitChannel
       }
     end
 
-    def check_page_name(name)
+    def page_must_valid(name)
       raise WrongPageName, "wrong page name: #{name}" if invalid?(name)
     end
 
-    def page_must_exist(page_name)
-      File.open("#{@wc_read}/#{encode_filename(page_name)}", 'r') {
+    def page_must_exist(name)
+      File.open("#{@wc_read}/#{encode_filename(name)}", 'r') {
         ;
       }
     end
