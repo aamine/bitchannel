@@ -9,6 +9,7 @@
 #
 
 require 'cgi'
+require 'uri'
 
 class CGI
   def get_param(name)
@@ -95,7 +96,7 @@ module Wikitik
           @repository.checkin page_name,
                               cgi.get_rev_param('origrev'),
                               cgi.get_param('text').to_s
-          view cgi, page_name
+          thanks cgi, page_name
         rescue EditConflict => err
           send cgi, EditPage.new(@config, @repository,
                                  page_name, nil,
@@ -142,6 +143,21 @@ raise ArgumentError, "view page=nil" unless page_name
 
     def edit(cgi, page_name)
       send cgi, EditPage.new(@config, @repository, page_name).html
+    end
+
+    def thanks(cgi, page_name)
+      send cgi, <<-ThanksPage
+        <html>
+        <head>
+        <meta http-equiv="refresh" content="1;url=#{@config.cgi_url}?cmd=view;name=#{URI.encode(page_name)}">
+        <title>Moving...</title>
+        </head>
+        <body>
+        <p>Thank you for your edit.
+        Wait or <a href="#{@config.cgi_url}?cmd=view;name=#{URI.encode(page_name)}">click here</a> to return to the page.</p>
+        </body>
+        </html>
+      ThanksPage
     end
 
     def send(cgi, html, mtime = nil)
