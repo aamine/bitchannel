@@ -192,7 +192,7 @@ module BitChannel
     end
 
     def diff_base_revision
-      revision()
+      revision() || 0
     end
 
     def revision

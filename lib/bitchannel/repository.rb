@@ -210,7 +210,7 @@ module BitChannel
 
     def diff_from(org)
       Dir.chdir(@wc_read) {
-        out, err = cvs('diff', '-u', "-D#{format_time_cvs(org)}")
+        out, err = cvs('diff', '-uN', "-D#{format_time_cvs(org)}")
         return Diff.parse_diffs(out)
       }
     end
@@ -237,7 +237,7 @@ module BitChannel
         _, stime, srev = *meta.slice(/^\-\-\- .*/).split("\t", 3)
         _, dtime, drev = *meta.slice(/^\+\+\+ .*/).split("\t", 3)
         new(decode_filename(file),
-            srev.slice(/\A1\.(\d+)/, 1).to_i, Time.parse(stime + ' UTC').getlocal,
+            srev.to_s.slice(/\A1\.(\d+)/, 1).to_i, Time.parse(stime + ' UTC').getlocal,
             drev.slice(/\A1\.(\d+)/, 1).to_i, Time.parse(dtime + ' UTC').getlocal,
             chunk)
       end

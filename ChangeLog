@@ -1,3 +1,11 @@
+Sat May  8 20:59:52 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/page.rb (ViewPage#diff_base_revision):
+	  repo.revision might return nil.
+
+	* lib/bitchannel/repository.rb: pass -N flag to global diff to get
+	  new arrival pages.
+
 Sat May  8 20:08:13 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/config.rb: new config `theme_url'.
