@@ -14,13 +14,13 @@ require 'fcgi'
 module BitChannel
 
   class FCGI < CGI
-    def FCGI.main(config, repo)
-      handler = new({}, config, repo)
+    def FCGI.main(*args)
+      fcgiapp = new({}, *args)
       Signal.trap(:PIPE, 'IGNORE')
       got_sigusr1 = false
       Signal.trap(:USR1) { got_sigusr1 = true }
       ::FCGI.each do |req|
-        handler.start req.env, req.in, req.out
+        fcgiapp.start req.env, req.in, req.out
         req.finish
         raise SignalException, 'SIGUSR1' if got_sigusr1
       end
