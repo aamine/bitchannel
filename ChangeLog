@@ -1,3 +1,9 @@
+Sat Mar 27 01:12:13 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* template/diff.rhtml: add <span class="addedline">.
+
+	* template/diff.rhtml: add <span class="removedline">.
+
 Sat Mar 27 00:56:17 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* template/history.rhtml: add links to annotate.

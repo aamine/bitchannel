@@ -27,9 +27,18 @@
 <a href="<%= page_view_url() %>">&gt;&gt;HEAD</a>]
 </p>
 
-<pre>
-<%= escape_html(diff()) %>
-</pre>
+<pre><%=
+  diff().map {|line|
+    case line
+    when /\A-/
+      %Q[<span class="removedline">#{escape_html(line.rstrip)}</span>\n]
+    when /\A\+/
+      %Q[<span class="addedline">#{escape_html(line.rstrip)}</span>\n]
+    else
+      escape_html(line)
+    end
+  }.join('')
+%></pre>
 </div>
 
 </body>
