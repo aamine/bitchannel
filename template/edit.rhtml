@@ -9,6 +9,15 @@
 <body>
 
 <div class="menu">
+<a href="<%= cgi_url() %>?cmd=recent">Recent</a>
+<a href="<%= cgi_url() %>?cmd=list">List</a>
+<a href="<%= cgi_url() %>?cmd=history;name=<%= page_url() %>">History</a>
+<% if revision() > 1 %>
+<a href="<%= cgi_url() %>?cmd=diff;rev1=<%= revision() - 1 %>;rev2=<%= revision() %>;name=<%= page_url() %>">Diff</a>
+<% else %>
+Diff
+<% end %>
+<a href="<%= cgi_url() %>?cmd=view;name=IndexPage">Top</a>
 <a href="<%= cgi_url() %>?cmd=view;name=HelpPage">Help</a>
 </div>
 
