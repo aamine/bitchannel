@@ -23,7 +23,7 @@ Diff
 <h1><%= logo_url() %>Recent Edit</h1>
 <ol><%
    page_list().each do |page, mtime| %>
-<li><%= format_time(mtime) %>: <a href="<%= cgi_url() %>?cmd=view;name=<%= page %>"><%= page %></a></li><%
+<li><%= format_time(mtime) %>: <a href="<%= view_url(page) %>"><%= escape_html(page) %></a></li><%
    end
 %>
 </ol>

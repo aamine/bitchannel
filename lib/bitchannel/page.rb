@@ -359,7 +359,7 @@ module BitChannel
     end
 
     def page_list
-      @repository.entries.sort_by {|n| n.downcase }.map {|n| escape_html(n) }
+      @repository.entries.sort_by {|name| name.downcase }
     end
   end
 
@@ -378,7 +378,7 @@ module BitChannel
 
     def page_list
       @repository.entries\
-          .map {|name| [escape_html(name), @repository.mtime(name)] }\
+          .map {|name| [name, @repository.mtime(name)] }\
           .sort_by {|name, mtime| -(mtime.to_i) }
     end
   end
