@@ -142,4 +142,19 @@ module AlphaWiki
 
   end
 
+
+  class HistoryPage < Page
+
+    private
+
+    def template_id
+      'history'
+    end
+
+    def logs
+      @repository.getlog(@page_name)
+    end
+  
+  end
+
 end

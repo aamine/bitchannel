@@ -50,6 +50,27 @@ module AlphaWiki
       line.split(%r</>)[2].split(%r<\.>).last.to_i
     end
 
+    # [[rev,logstr]]
+    def getlog(page_name)
+      Dir.chdir(@wc_read) {
+        out, err = cvs('log', encode_filename(page_name))
+        result = []
+        curr = nil
+        out.each do |line|
+          case line
+          when /\Arevision 1\.(\d+)\s/
+            result.push(curr = [$1.to_i, line.strip])
+          when /\Adate:/
+            if curr
+              curr[1] << ": #{line.slice(/date: (.*?;)/, 1)} #{line.slice(/lines:.*/)}".gsub(/\s+/, ' ')
+              curr = nil
+            end
+          end
+        end
+        return result
+      }
+    end
+
     def checkin(page_name, origrev, new_text)
       filename = encode_filename(page_name)
       Dir.chdir(@wc_write) {

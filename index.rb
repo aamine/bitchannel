@@ -101,6 +101,11 @@ def edit(repo, config, cgi, page_name)
 end
 
 def history(repo, config, cgi, page_name)
+  if not page_name or not repo.exist?(page_name)
+    view repo, config, cgi, config.index_page_name
+    return
+  end
+  send cgi, AlphaWiki::HistoryPage.new(config, repo, page_name).html
 end
 
 def send(cgi, html)
