@@ -30,14 +30,14 @@ module Wikitik
     }
 
     def escape_html(str)
-      table = ESC
+      table = ESC   # optimize
       str.gsub(/[&"<>]/) {|s| table[s] }
     end
 
     ESCrev = ESC.invert
 
     def unescape_html(str)
-      table = ESCrev
+      table = ESCrev   # optimize
       str.gsub(/&\w+;/) {|s| table[s] }
     end
 
@@ -50,7 +50,8 @@ module Wikitik
     end
 
     def format_time(time)
-      # from tmail/textutils.rb
+      # strftime() is locale sensitive, we should not rely on strftime().
+      # From tmail/textutils.rb:
       gmt = Time.at(time.to_i)
       gmt.gmtime
       offset = time.to_i - Time.local(*gmt.to_a[0,6].reverse).to_i
