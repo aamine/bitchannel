@@ -21,6 +21,7 @@ module Wikitik
     def initialize(config, repo)
       @config = config
       @repository = repo
+      @interwikinames = nil
     end
 
     def compile(str)
@@ -224,16 +225,27 @@ module Wikitik
         elsif wikiname = $2
           @internal_links.push wikiname
           href = escape_html(URI.escape(wikiname))
-          link = escape_html(wikiname)
+          anchor = escape_html(wikiname)
           q = (@repository.exist?(wikiname) ? '' : '?')
-          %Q[<a href="#{cgi_href}?cmd=view;name=#{href}">#{q}#{link}</a>]
-        elsif linkname = $3
-          linkname = linkname[2..-3]   # remove '[[' and ']]'
-          @internal_links.push linkname
-          href = escape_html(URI.escape(linkname))
-          link = escape_html(linkname)
-          q = (@repository.exist?(linkname) ? '' : '?')
-          %Q[<a href="#{cgi_href}?cmd=view;name=#{href}">#{q}#{link}</a>]
+          %Q[<a href="#{cgi_href}?cmd=view;name=#{href}">#{q}#{anchor}</a>]
+        elsif exlink = $3
+          exlink = exlink[2..-3]   # remove '[[' and ']]'
+          if /:/ === exlink
+            interwikiname, content = exlink.split(/:/, 2)
+            href = resolve_interwikiname(interwikiname, content)
+            anchor = escape_html("[#{exlink}]")
+            if href
+              %Q[<a href="#{escape_html(URI.escape(href))}">#{anchor}</a>]
+            else
+              '?' + anchor
+            end
+          else
+            @internal_links.push exlink
+            href = escape_html(URI.escape(exlink))
+            anchor = escape_html(exlink)
+            q = (@repository.exist?(exlink) ? '' : '?')
+            %Q[<a href="#{cgi_href}?cmd=view;name=#{href}">#{q}#{anchor}</a>]
+          end
         elsif url = $4
           if url[-1,1] == ')' and not balanced?(url)   # special case
             url[-1,1] = ''
@@ -250,6 +262,29 @@ module Wikitik
           raise 'must not happen'
         end
       }
+    end
+
+    def resolve_interwikiname(name, vary)
+      table = interwikiname_table() or return nil
+      return nil unless table.key?(name)
+      table[name] + vary
+    end
+
+    def interwikiname_table
+      @interwikinames ||= read_interwikiname_table()
+    end
+
+    def read_interwikiname_table()
+      text = @repository['InterWikiName'] or return {}
+      table = {}
+      text.each do |line|
+        if /\A\s*\*\s*(\S+?):/ =~ line
+          interwikiname = $1
+          url = $'.strip
+          table[interwikiname.strip] = url.strip
+        end
+      end
+      table
     end
 
     def seems_image_url?(url)
@@ -376,6 +411,9 @@ EOS
   env = Object.new
   def env.cgi_url() 'index.rb' end
   def env.exist?(name) true end
+  def env.[](name)
+    File.read("wc.read/#{name}")
+  end
   c = Wikitik::ToHTML.new(env, env)
   puts c.compile(ARGF.read)
 end
