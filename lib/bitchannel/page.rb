@@ -111,12 +111,8 @@ module AlphaWiki
       'list'
     end
 
-    def body
-      "<ul>" +
-      @repository.entries.sort.map {|ent|
-        "<li>#{#{escape_html(ent)}</li>"
-      }.join("\n") +
-      "</ul>"
+    def page_list
+      @repository.entries.sort.map {|name| escape_html(name) }
     end
 
   end
@@ -134,13 +130,10 @@ module AlphaWiki
       'recent'
     end
 
-    def body
-      "<ul>" +
-      @repository.entries.map {|ent| [ent, @repository.mtime(ent)] }\
-      .sort_by {|ent, mtime| mtime }.map {|ent, mtime|
-        "<li>#{format_time(mtime)}: #{#{escape_html(ent)}</li>"
-      }.join("\n") +
-      "\n</ul>"
+    def page_list
+      @repository.entries\
+          .map {|name| [escape_html(name), @repository.mtime(name)] }\
+          .sort_by {|name, mtime| -(mtime.to_i) }
     end
 
   end

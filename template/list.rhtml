@@ -12,6 +12,12 @@
 <a href="<%= cgi_url() %>?cmd=view;name=HelpPage">Help</a>
 </div>
 <h1>List</h1>
-<%= body() %>
+<ul>
+<%
+    page_list().each do |page|
+%><li><a href="<%= cgi_url() %>?cmd=view;name=<%= page %>"><%= page %></a></li>
+<%
+    end
+%></ul>
 </body>
 </html>
