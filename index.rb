@@ -1,5 +1,5 @@
 #!/usr/bin/ruby
 
-load "#{File.dirname(__FILE__)}/wikitikrc"
+load "#{File.dirname(__FILE__)}/bitchannelrc"
 config, repo = initialize_environment()
-Wikitik.cgi_main config, repo
+BitChannel.cgi_main config, repo
