@@ -1,3 +1,9 @@
+Thu Feb 24 10:24:35 2005  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/fcgi.rb: add dirty kludge for ruby 1.9 or later.  Blocking
+	  I/O differs pure ruby signal handler in single thread environment,
+	  force multi threading.  See also: [ruby-dev:25755]
+
 Sat Dec 25 12:14:48 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/erdsyntax.rb: redefine FilenameEncoding here.

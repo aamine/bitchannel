@@ -3,7 +3,7 @@
 #
 # fastcgi.rb Copyright (C) 2001 Eli Green
 # fcgi.rb    Copyright (C) 2002-2003 MoonWolf <moonwolf@moonwolf.com>
-# fcgi.rb    Copyright (C) 2004 Minero Aoki
+# fcgi.rb    Copyright (C) 2004,2005 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the Ruby License.
@@ -12,6 +12,12 @@
 
 require 'socket'
 require 'stringio'
+
+# Dirty kludge for ruby 1.9 or later.
+# Blocking I/O differs pure ruby signal handler
+# in single thread environment, force multi threading.
+# See [ruby-dev:25755]
+Thread.fork { sleep }
 
 class FCGI
 
