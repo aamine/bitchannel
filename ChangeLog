@@ -1,3 +1,13 @@
+Mon Aug 30 12:06:18 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/syntax.rb (do_compile): should escape line.
+	  (reported on /w/BitChannelComment rev 58) [XSS CRITICAL]
+
+	* lib/bitchannel/syntax.rb (bracket_link): ditto. [XSS CRITICAL]
+
+	* lib/bitchannel/syntax.rb (view_url): URI.escape is not needed
+	  here because NAME contains only \w chars.
+
 Fri Aug 27 23:02:23 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/handler.rb: handle_request -> _handle, to avoid
