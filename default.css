@@ -13,41 +13,30 @@ body {
     line-height: 130%;
 }
 
-div.main {
-    clear: left;
-    float: left;
-    position: relative;
-    left: 0px;
-    top: 0px;
-    z-index: 1;
-}
-
-div.menu {
-    float: right;
-    position: fixed;
-    top: 0px;
-    right: 0px;
-    z-index: 2;
-    width: 5.5em;
-    text-align: left;
-    background-color: #eee;
-    padding: 10px;
-}
-div.menu p {
-    /* force line break (1 item by 1 line) */
-    width: 1px;
+span.menuitem {
+    width: 3.9em;
+    text-align: center;
+    padding: 0px 2px;
+    margin: 0px;
+    color: white;
+    background-color: #ddd;
+    margin-right: 2px;
 }
 div.menu a:link,
 div.menu a:visited {
-    width: 4em;
+    width: 3.9em;
+    padding: 0px 2px;
+    margin: 0px;
     color: #33a;
-    background-color: transparent;
+    background-color: #ddd;
     text-decoration: none;
 }
 div.menu a:active,
 div.menu a:focus,
 div.menu a:hover {
-    width: 4em;
+    width: 3.9em;
+    padding: 0px 2px;
+    margin: 0px;
     color: #fff;
     background-color: #33a;
     text-decoration: none;
@@ -70,8 +59,11 @@ address {
 
 h1 {
     font-size: 200%;
-    border-bottom: 1px solid #33a;
     text-align: left;
+    color: white;
+    background-color: #33a;
+    padding: 0.4em;
+    width: 40em;
 }
 
 img.sitelogo {
@@ -156,24 +148,19 @@ dd {
 
 a {
     font-weight: bold;
+    text-decoration: none;
 }
-
 a:link {
     color: #33a;
     background-color: transparent;
-    text-decoration: none;
 }
-
 a:visited {
     color: #666666;
     background-color: transparent;
-    text-decoration: none;
 }
-
 a:hover, a:focus, a:active {
     color: #fff;
     background-color: #33a;
-    text-decoration: underline;
 }
 
 form {
