@@ -1,6 +1,6 @@
-$:.unshift './lib'
-require 'bitchannel/killlist'
 require 'test/unit'
+$LOAD_PATH.unshift './lib'
+require 'bitchannel/killlist'
 
 class TestBitChannelKillList < Test::Unit::TestCase
 

@@ -9,6 +9,7 @@
 #
 
 require 'bitchannel/textutils'
+require 'bitchannel/threadlocalcache'
 require 'stringio'
 require 'uri'
 require 'csv'
@@ -18,11 +19,11 @@ module BitChannel
   class Syntax
 
     include TextUtils
+    include ThreadLocalCache
 
     def initialize(config, repo)
       @config = config
       @repository = repo
-      @interwikinames = nil
     end
 
     def compile(str, page_name)
@@ -502,7 +503,9 @@ module BitChannel
     InterWikiName_LIST_PAGE = 'InterWikiName'
 
     def interwikiname_table
-      @interwikinames ||= read_interwikiname_table(InterWikiName_LIST_PAGE)
+      update_tlc_slot('bitchannel.request.interwikiname_table') {
+        read_interwikiname_table(InterWikiName_LIST_PAGE)
+      }
     end
 
     def read_interwikiname_table(page_name)

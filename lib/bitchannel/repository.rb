@@ -96,51 +96,40 @@ module BitChannel
   class Repository
 
     include FilenameEncoding
+    include ThreadLocalCache
 
     def initialize(hash, id = nil)
       @module_id = id
       UserConfig.parse(hash, 'repository') {|conf|
         @read_only_p = (conf[:read_only] ? true : false)
         conf.exclusive! :logfile, :logger
-        @logger = conf.get(:logfile) {|path| FileLogger.new(path) } ||
-                  conf[:logger] ||
-                  NullLogger.new
-        @cmd_path = conf.get_required(:cmd_path)
-        @wc_read_dir = conf.get_required(:wc_read)
-        unless @read_only_p
+        logger = conf.get(:logfile) {|path| FileLogger.new(path) } ||
+                 conf[:logger] ||
+                 NullLogger.new
+        cmd_path = conf.get_required(:cmd_path)
+        wc_read_dir = conf.get_required(:wc_read)
+        unless read_only?
           conf.required! :wc_write
-          @wc_write_dir = conf[:wc_write]
+          wc_write_dir = conf[:wc_write]
         else
           conf.ignore :wc_write
-          @wc_write_dir = nil
+          wc_write_dir = nil
           @wc_write = nil
         end
-        update_wc
+        kill = KillList.load(DEFAULT_KILL_FILE)
+        @wc_read  = CVSWorkingCopy.new(@module_id, wc_read_dir, cmd_path,
+                                       logger, kill)
+        @wc_write = CVSWorkingCopy.new(@module_id, wc_write_dir, cmd_path,
+                                       logger, kill) unless read_only?
         @syntax = conf.get(:syntax_proc) {|pr| pr.call(self) }
         conf.required! :cachedir
         @link_cache = LinkCache.new("#{conf[:cachedir]}/link".untaint)
         @revlink_cache = LinkCache.new("#{conf[:cachedir]}/revlink".untaint)
         @notifier = conf[:notifier]
       }
-      # per-request cache
-      @pages = {}
     end
 
     attr_reader :module_id
-
-    def update_wc
-      kill = KillList.load(DEFAULT_KILL_FILE)
-      @wc_read  = CVSWorkingCopy.new(@module_id, @wc_read_dir, @cmd_path,
-                                     @logger, kill)
-      @wc_write = CVSWorkingCopy.new(@module_id, @wc_write_dir, @cmd_path,
-                                     @logger, kill) if @wc_write_dir
-    end
-    private :update_wc
-
-    def clear_per_request_cache
-      @pages.clear
-      update_wc
-    end
 
     # internal use only
     attr_reader :link_cache
@@ -239,7 +228,8 @@ module BitChannel
     private
 
     def new_page(name)
-      @pages[name] ||= PageEntity.new(self, name, @wc_read, @wc_write)
+      table = update_tlc_slot('bitchannel.request.pages') { Hash.new }
+      table[name] ||= PageEntity.new(self, name, @wc_read, @wc_write)
     end
 
     def update_linkcache(name, new_links)
@@ -380,6 +370,7 @@ module BitChannel
 
     include FilenameEncoding
     include LockUtils
+    include ThreadLocalCache
 
     def initialize(id, dir, cmd, logger, killlist)
       @module_id = id
@@ -388,9 +379,6 @@ module BitChannel
       @logger = logger
       @killlist = killlist
       @in_chdir = false
-      # cache
-      @cvs_version = nil
-      @cvs_Entries = nil
     end
 
     attr_reader :dir
@@ -433,7 +421,16 @@ module BitChannel
     end
 
     def cvs_Entries
-      @cvs_Entries ||= read_Entries("#{@dir}/CVS/Entries")
+      update_tlc_slot('bitchannel.request.cvsEntries') {
+        table = {}
+        File.readlines("#{@dir}/CVS/Entries").each do |line|
+          next if /\AD/ =~ line
+          ent, rev, mtime = *line.split(%r</>).values_at(1, 2, 3)
+          table[decode_filename(ent.untaint)] =
+              [rev.split(%r<\.>).last.to_i, Time.rcsdate(mtime.untaint).getlocal]
+        end
+        table
+      }
     end
 
     def read(name)
@@ -719,15 +716,13 @@ module BitChannel
     private
 
     def cvs_version
-      @cvs_version ||= read_cvs_version()
-    end
-
-    def read_cvs_version
-      assert_chdir
-      # sould handle "1.11.1p1" like version number??
-      out, err = *cvs('--version')
-      verdigits = out.slice(/\d+\.\d+\.\d+/).split(/\./).map {|n| n.to_i }
-      sprintf((['%03d'] * verdigits.length).join('.'), *verdigits)
+      update_tlc_slot('bitchannel.process.cvs_version') {
+        assert_chdir
+        # sould handle "1.11.1p1" like version number??
+        out, err = *cvs('--version')
+        verdigits = out.slice(/\d+\.\d+\.\d+/).split(/\./).map {|n| n.to_i }
+        sprintf((['%03d'] * verdigits.length).join('.'), *verdigits)
+      }
     end
 
     def ignore_status_p(cmd)
@@ -778,17 +773,6 @@ module BitChannel
 
     def assert_chdir
       raise "call in chdir" unless @in_chdir
-    end
-
-    def read_Entries(filename)
-      table = {}
-      File.readlines(filename).each do |line|
-        next if /\AD/ =~ line
-        ent, rev, mtime = *line.split(%r</>).values_at(1, 2, 3)
-        table[decode_filename(ent.untaint)] =
-            [rev.split(%r<\.>).last.to_i, Time.rcsdate(mtime.untaint).getlocal]
-      end
-      table
     end
 
   end

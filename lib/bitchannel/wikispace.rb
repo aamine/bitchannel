@@ -11,6 +11,7 @@
 require 'bitchannel/page'
 require 'bitchannel/textutils'
 require 'bitchannel/syntax'
+require 'bitchannel/threadlocalcache'
 
 module BitChannel
 
@@ -37,7 +38,7 @@ module BitChannel
       raise 'CGI url could not fixed; give up' unless @config.cgi_url
       return yield
     ensure
-      @repository.clear_per_request_cache
+      ThreadLocalCache.invalidate_slot_class 'bitchannel.request'
     end
 
     def read_only?
