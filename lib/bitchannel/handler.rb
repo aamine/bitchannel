@@ -136,7 +136,7 @@ module BitChannel
           return reedit_response(cgi.get_param('text').to_s,
                                  gettext(:save_without_name))
       origrev = cgi.get_rev_param('origrev')
-      text = cgi.get_param('text').to_s.gsub(/\r\n|\n|\r/, "\r\n")
+      text = normalize_text(cgi.get_param('text').to_s)
       begin
         @repository.checkin page_name, origrev, text
         thanks_response(page_name)
@@ -148,6 +148,10 @@ module BitChannel
       rescue WrongPageName => err
         return reedit(text, err.message)
       end
+    end
+
+    def normalize_text(text)
+      text.map {|line| detab(line).rstrip + "\r\n" }.join('')
     end
 
     def reedit_response(text, msg)
