@@ -1,3 +1,14 @@
+Fri Mar 26 23:11:11 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* template/edit.rhtml: wrong <input> type.
+
+	* template/preview.rhtml: compiled body is compiled_body().
+
+	* template/preview.rhtml: body source is body().
+
+	* lib/bitchannel/page.rb (PreviewPage): new method #body and
+	  #compiled_body.
+
 Fri Mar 26 22:56:48 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* implement preview.  This patch is contributed by FUJIMOTO Hisakuni.

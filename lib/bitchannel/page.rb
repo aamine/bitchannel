@@ -404,10 +404,6 @@ module BitChannel
       'preview'
     end
 
-    def menuitem_edit_enabled?
-      false
-    end
-
     def diff_base_revision
       @original_revision || @repository.revision(@page_name)
     rescue Errno::ENOENT
@@ -418,7 +414,11 @@ module BitChannel
       @original_revision
     end
 
-    def preview_body
+    def body
+      @text
+    end
+
+    def compiled_body
       compile_page(@text)
     end
   end
