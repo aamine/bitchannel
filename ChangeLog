@@ -1,3 +1,7 @@
+Thu Apr 29 04:36:44 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* index.cgi: fix typo.
+
 Wed Apr 28 21:10:43 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* index.cgi: call setup_environment only once even in mod_ruby
