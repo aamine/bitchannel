@@ -236,8 +236,11 @@ span.previewmark {
     div.menu {
         display: none;
     }
+    div.footer {
+        display: none;
+    }
     h1 {
-        color: #33a;
+        color: black;
         background-color: white;
         border-bottom: 10px solid #33a;
         padding-bottom: 0em;
