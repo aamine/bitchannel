@@ -27,7 +27,7 @@ Annotate
 .include search_form
 </div>
 
-<h1><%= logo_url() %><%= page_name() %> : Annotate<%= (revision() ? " r1.#{revision()}" : '') %></h1>
+<h1><%= logo_url() %><%= page_name() %> : Annotate<%= (revision() ? " rev #{revision()}" : '') %></h1>
 <pre>
 <%= escape_html(annotate()) %>
 </pre>
