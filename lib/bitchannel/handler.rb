@@ -34,12 +34,12 @@ module BitChannel
     end
 
     def handle(req)
-      handle_request(req) || @wiki.view(FRONT_PAGE_NAME).response
+      _handle(req) || @wiki.view(FRONT_PAGE_NAME).response
     rescue Exception => err
       error_response(err, true)
     end
 
-    def handle_request(req)
+    def _handle(req)
       mid = "handle_#{req.cmd || 'view'}"
       return nil unless respond_to?(mid, true)
       __send__(mid, req)
