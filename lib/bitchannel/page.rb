@@ -436,6 +436,10 @@ module BitChannel
       @repository = repo
     end
 
+    def last_modified
+      @repository.entries.map {|name| @repository.mtime(name) }.sort.last
+    end
+
     private
 
     def template_id
