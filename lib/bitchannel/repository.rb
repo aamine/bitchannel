@@ -59,16 +59,17 @@ module BitChannel
     include TextUtils
 
     def initialize(args)
-      t = Hash.new {|h,k|
-        raise ConfigError, "Config Error: not set: repository.#{k}"
-      }
-      t.update args
-      @cvs_cmd  = t[:cmd_path]; t.delete(:cmd_path)
-      @wc_read  = t[:wc_read];  t.delete(:wc_read)
-      @wc_write = t[:wc_write]; t.delete(:wc_write)
-      @sync_wc  = t[:sync_wc];  t.delete(:sync_wc)
-      @logfile  = t[:logfile];  t.delete(:logfile)
-      cachedir  = t[:cachedir]; t.delete(:cachedir)
+      args = args.dup
+      def args.getopt(name)
+        delete(name) or
+            raise ConfigError, "Config Error: not set: repository.#{name}"
+      end
+      @cvs_cmd  = args.getopt(:cmd_path)
+      @wc_read  = args.getopt(:wc_read)
+      @wc_write = args.getopt(:wc_write)
+      @sync_wc  = args.getopt(:sync_wc)
+      @logfile  = args.getopt(:logfile)
+      cachedir  = args.getopt(:cachedir)
       t.each do |k,v|
         raise ConfigError, "Config Error: unknown key: repository.#{k}"
       end
@@ -199,7 +200,9 @@ module BitChannel
         else
           out, err = cvs('ann', '-F', encode_filename(page_name))
         end
-        return out.map {|line| line.sub(/\s+\(\S+\s*/, ' (') }.join('').strip
+        return out.map {|line|
+          line.sub(/.*?:/) {|s| sprintf('%4s', s.slice(/\.(\d+), 1)) }
+        }.join('').strip
       }
     end
 
