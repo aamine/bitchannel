@@ -1,3 +1,8 @@
+Sun Mar 28 22:53:52 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/exception.rb (CommandFailed#initialize): should
+	  initialize message.
+
 Sun Mar 28 22:53:21 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/tohtml.rb (xlist): @f.peek may return nil.

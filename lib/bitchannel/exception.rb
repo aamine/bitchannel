@@ -18,6 +18,7 @@ module BitChannel
 
   class CommandFailed < BitChannelError
     def initialize(msg, status)
+      super msg
       @status = status
     end
 
