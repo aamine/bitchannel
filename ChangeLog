@@ -1,3 +1,8 @@
+Sun Mar 28 19:52:48 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/config.rb (cgi_url): $0 becomes false under
+	  mod_ruby.
+
 Sun Mar 28 18:34:05 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/tohtml.rb: new method DUMMY_CONFIG.inspect.
