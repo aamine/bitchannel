@@ -92,7 +92,7 @@ module BitChannel
     end
 
     def save(name, origrev, text)
-      @repository[name].checkin origrev, text
+      @repository.fetch(name).checkin origrev, text
       ThanksPage.new(@config, name)
     end
 

@@ -213,7 +213,7 @@ module BitChannel
     end
 
     def update_linkcache(name, new_links)
-      old_links = @link_cache[name]
+      old_links = (@link_cache[name] || [])
       @link_cache[name] = new_links
       @revlink_cache.updating {|cache|
         (new_links - old_links).each do |n|
