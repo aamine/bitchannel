@@ -5,16 +5,16 @@
 def initialize_environment
   $KCODE = 'EUC'
 
-  cgidir = File.dirname(File.expand_path(__FILE__))
+  cgidir = File.dirname(File.expand_path(__FILE__)).untaint
 
-  $:.unshift "#{cgidir}/lib".untaint
+  $:.unshift "#{cgidir}/lib"
   require 'bitchannel'
 
   BitChannel.lang = 'ja'
 
   config = BitChannel::Config.new(
     # :site_name    => 'My Site',
-	# The name of site.
+        # The name of site.
         # This string is shown on FrontPage.
 
     # :logo_url     => '/images/logo.png',
@@ -24,13 +24,13 @@ def initialize_environment
     :templatedir  => "#{cgidir}/template",
 
     :charset      => 'euc-jp',
-	# The charactor encoding of pages.
+        # The charactor encoding of pages.
         # I have tested only euc-jp.
 
     :css_url      => 'default.css',
 
     :use_html_url => false
-	# You MUST set up mod_rewrite before turning this flag on.
+        # You MUST set up mod_rewrite before turning this flag on.
         # true: PageName.html
         # false: ?cmd=view;name=PageName
   )

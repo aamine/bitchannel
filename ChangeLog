@@ -1,3 +1,7 @@
+Sat Mar 27 05:58:56 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* bitchannelrc.sample.ja: untaint cgidir.
+
 Sat Mar 27 01:22:16 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* template/*.rhtml: reject robots except VIEW page.
