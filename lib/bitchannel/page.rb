@@ -50,6 +50,11 @@ module Wikitik
 
   class ViewPage < Page
 
+    def initialize(*args)
+      super
+      @rev = nil
+    end
+
     def last_modified
       @repository.mtime(@page_name)
     end
@@ -58,6 +63,11 @@ module Wikitik
 
     def template_id
       'view'
+    end
+
+    def revision
+      # FIXME: `|| 0' needed?
+      @rev ||= (@repository.revision(@page_name) || 0)
     end
 
     def body
@@ -91,6 +101,35 @@ module Wikitik
 
     def body
       ToHTML.compile(@repository[@page_name, @revision])
+    end
+  
+  end
+
+
+  class DiffPage < Page
+
+    def initialize(config, repo, page_name, rev1, rev2)
+      super config, repo, page_name
+      @rev1 = rev1
+      @rev2 = rev2
+    end
+
+    private
+
+    def template_id
+      'diff'
+    end
+
+    def rev1
+      @rev1
+    end
+
+    def rev2
+      @rev2
+    end
+
+    def body
+      escape_html(@repository.diff(@page_name, @rev1, @rev2))
     end
   
   end

@@ -18,14 +18,24 @@ class CGI
     return nil if a[0].empty?
     a[0]
   end
+
+  def get_rev_param(name)
+    rev = get_param(name).to_i
+    return nil if rev < 1
+    rev
+  end
 end
 
 module Wikitik
 
-  def Wikitik.main(repo, config)
+  def Wikitik.cgi_main(repo, config)
     Handler.new(repo, config).handle_request(CGI.new)
   end
 
+  #
+  # CGI request handler class.
+  # This object interprets a CGI request to the specific task.
+  #
   class Handler
 
     def initialize(repo, config)
@@ -57,9 +67,21 @@ module Wikitik
     def wiki_main(cgi)
       case cgi.get_param('cmd').to_s.downcase
       when 'view'
-        view cgi, cgi.get_param('name')
+        page_name = (cgi.get_param('name') || @config.index_page_name)
+        rev = cgi.get_rev_param('rev')
+        if rev
+          page = ViewRevPage.new(@config, @repository, page_name, rev)
+          send cgi, page.html, page.last_modified
+        else
+          view cgi, page_name
+        end
       when 'edit'
-        edit cgi, cgi.get_param('name')
+        page_name = cgi.get_param('name')
+        unless page_name
+          view cgi, @config.index_page_name
+          return
+        end
+        edit cgi, page_name
       when 'save'
         page_name = cgi.get_param('name')
         unless page_name
@@ -69,61 +91,57 @@ module Wikitik
                                  gettext(:save_without_name)).html
           return
         end
-        origrev = cgi.get_param('origrev').to_i
-        origrev = nil if origrev == 0
         begin
-          @repository.checkin page_name, origrev, (cgi.get_param('text') || "")
+          @repository.checkin page_name,
+                              cgi.get_rev_param('origrev'),
+                              cgi.get_param('text').to_s
           view cgi, page_name
         rescue EditConflict => err
           send cgi, EditPage.new(@config, @repository,
                                  page_name, nil,
                                  merged, gettext(:conflict)).html
         end
+      when 'diff'
+        page_name = cgi.get_param('name')
+        if not page_name or not @repository.exist?(page_name)
+          view cgi, @config.index_page_name
+          return
+        end
+        rev1 = cgi.get_rev_param('rev1')
+        rev2 = cgi.get_rev_param('rev2')
+        unless rev1 and rev2
+          view cgi, page_name
+          return
+        end
+        send cgi, DiffPage.new(@config, @repository, page_name, rev1, rev2).html
       when 'history'
-        history cgi, cgi.get_param('name')
+        page_name = cgi.get_param('name')
+        if not page_name or not @repository.exist?(page_name)
+          view cgi, @config.index_page_name
+          return
+        end
+        send cgi, HistoryPage.new(@config, @repository, page_name).html
       when 'list'
         send cgi, ListPage.new(@config, @repository).html
       when 'recent'
         send cgi, RecentPage.new(@config, @repository).html
       else
-        view cgi, cgi.get_param('name')
+        view cgi, (cgi.get_param('name') || @config.index_page_name)
       end
     end
 
     def view(cgi, page_name)
-      page_name ||= @config.index_page_name
+raise ArgumentError, "view page=nil" unless page_name
       unless @repository.exist?(page_name)
         edit cgi, page_name
-        return
-      end
-      rev = cgi.get_param('rev')
-      if rev and rev.to_i > 0
-        viewrev cgi, page_name, rev.to_i
         return
       end
       page = ViewPage.new(@config, @repository, page_name)
       send cgi, page.html, page.last_modified
     end
 
-    def viewrev(cgi, page_name, rev)
-      page = ViewRevPage.new(@config, @repository, page_name, rev)
-      send cgi, page.html, page.last_modified
-    end
-
     def edit(cgi, page_name)
-      unless page_name
-        view cgi, @config.index_page_name
-        return
-      end
       send cgi, EditPage.new(@config, @repository, page_name).html
-    end
-
-    def history(cgi, page_name)
-      if not page_name or not @repository.exist?(page_name)
-        view cgi, @config.index_page_name
-        return
-      end
-      send cgi, HistoryPage.new(@config, @repository, page_name).html
     end
 
     def send(cgi, html, mtime = nil)

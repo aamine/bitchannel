@@ -23,4 +23,4 @@ config = Wikitik::Config.new(
   :css_url => 'default.css',
   :cgi_url => 'index.rb'
 )
-Wikitik.main repo, config
+Wikitik.cgi_main repo, config

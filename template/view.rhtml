@@ -12,10 +12,15 @@
 <a href="<%= cgi_url() %>?cmd=recent">Recent</a>
 <a href="<%= cgi_url() %>?cmd=list">List</a>
 <a href="<%= cgi_url() %>?cmd=history;name=<%= page_name() %>">History</a>
+<% if revision() > 1 %>
+<a href="<%= cgi_url() %>?cmd=diff;rev1=<%= revision() - 1 %>;rev2=<%= revision() %>;name=<%= page_name() %>">Diff</a>
+<% else %>
+Diff
+<% end %>
 <a href="<%= cgi_url() %>?cmd=view;name=HelpPage">Help</a>
 </div>
 <h1><%= page_name() %></h1>
-<p>Last Modified: <%= format_time(last_modified()) %></p>
+<p><span class="lastmodified">Last Modified: <%= format_time(last_modified()) %></span></p>
 <%= body() %>
 </body>
 </html>

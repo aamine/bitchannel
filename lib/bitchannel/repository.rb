@@ -98,6 +98,13 @@ module Wikitik
       }
     end
 
+    def diff(page_name, rev1, rev2)
+      Dir.chdir(@wc_read) {
+        out, err = cvs('diff', '-u', "-r1.#{rev1}", "-r1.#{rev2}", encode_filename(page_name))
+        return out.sub(/\A.*^diff .*?\n/m, '')
+      }
+    end
+
     def checkin(page_name, origrev, new_text)
       filename = encode_filename(page_name)
       Dir.chdir(@wc_write) {
@@ -142,7 +149,7 @@ module Wikitik
     end
 
     def cvs(*args)
-      execute(@cvs_cmd, *args)
+      execute(@cvs_cmd, '-f', '-q', *args)
     end
 
 def LOG(msg)
