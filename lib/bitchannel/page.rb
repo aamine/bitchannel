@@ -391,6 +391,39 @@ module BitChannel
   end
 
 
+  class PreviewPage < Page
+    def initialize(config, repo, page_name, text, origrev)
+      super config, repo, page_name
+      @text = text
+      @original_revision = origrev
+    end
+
+    private
+
+    def template_id
+      'preview'
+    end
+
+    def menuitem_edit_enabled?
+      false
+    end
+
+    def diff_base_revision
+      @original_revision || @repository.revision(@page_name)
+    rescue Errno::ENOENT
+      return 0
+    end
+
+    def original_revision
+      @original_revision
+    end
+
+    def preview_body
+      compile_page(@text)
+    end
+  end
+
+
   class ThanksPage < GenericPage
     def initialize(config, page_name)
       super config

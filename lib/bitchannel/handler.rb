@@ -131,7 +131,17 @@ module BitChannel
                    orgrev).response
     end
 
+    def handle_preview(cgi)
+      page_name = cgi.get_param('name') or return front_page()
+      text = normalize_text(cgi.get_param('text').to_s)
+      orgrev = cgi.get_rev_param('origrev')
+      srcrev = (cgi.get_rev_param('rev') || orgrev)
+      PreviewPage.new(@config, @repository, page_name,
+                      text, orgrev).response
+    end
+
     def handle_save(cgi)
+      return handle_preview(cgi) if cgi.get_param('preview')
       page_name = cgi.get_param('name') or
           return reedit_response(cgi.get_param('text').to_s,
                                  gettext(:save_without_name))

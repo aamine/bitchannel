@@ -4,23 +4,22 @@
   <meta http-equiv="Content-Type" content="text/html; charset=<%= page_charset() %>">
   <meta http-equiv="Content-Language" content="ja-JP">
   <link rel="stylesheet" type="text/css" href="<%= css_url() %>">
-  <title><%= page_name() %> : Edit</title>
+  <title><%= page_name() %> : Preview</title>
 </head>
 <body>
 
 .include menu
 
-<div class="main">
-<h1><%= logo_url() %><%= page_name() %> : Edit</h1>
-<%
-    if opt_message()  %>
-<p><%= escape_html(opt_message()) %></p>
-<%  end
-%>
 <p>
-Current revision: <%= original_revision() || '(new page)' %><br>
-Edit started at: <%= format_time(Time.now) %>
+<span class="previewmark">Preview</span>
 </p>
+
+<div class="main">
+<h1><%= logo_url() %><%= page_name() %></h1>
+
+<%= preview_body() %>
+
+<hr>
 <form method="POST" action="<%= cgi_url() %>">
 <input type="hidden" name="cmd" value="save">
 <input type="hidden" name="name" value="<%= page_name() %>">
@@ -30,7 +29,7 @@ Edit started at: <%= format_time(Time.now) %>
 <%  end
 %>
 <textarea name="text" cols="70" rows="30"><%= body() %></textarea><br>
-<input type="preview" name="preview" value="Preview">
+<input type="submit" name="preview" value="Preview">
 <input type="submit" id="okbutton" value="Save">
 </form>
 </div>
