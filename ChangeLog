@@ -1,3 +1,7 @@
+Sun Mar 28 22:53:21 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/tohtml.rb (xlist): @f.peek may return nil.
+
 Sun Mar 28 19:52:48 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/config.rb (cgi_url): $0 becomes false under

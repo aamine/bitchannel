@@ -159,7 +159,7 @@ module BitChannel
           @f.while_match(LI_CONTINUE[type]) do |line|
             buf << "\n" + line.strip
           end
-          if next_line_is_nested_list?(mark_re)
+          if @f.next? and next_line_is_nested_list?(mark_re)
             puts "<li>#{text(buf)}"
           else
             puts "<li>#{text(buf)}</li>"
