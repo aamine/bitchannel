@@ -178,7 +178,7 @@ module BitChannel
         else
           out, err = cvs('ann', '-F', encode_filename(page_name))
         end
-        return out.map {|line| line.sub(/\(\S+\s*/, '(') }.join('').strip
+        return out.map {|line| line.sub(/\s+\(\S+\s*/, ' (') }.join('').strip
       }
     end
 
