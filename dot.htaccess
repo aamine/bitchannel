@@ -1,0 +1,34 @@
+#
+# BitChannel default .htaccess
+#
+
+Options +ExecCGI
+AddHandler cgi-script .cgi
+DirectoryIndex index.cgi
+
+# If you want to use PageName.html style URL, comment out
+# following lines and set config.use_html_url=true in bitchannelrc.
+#RewriteEngine on
+#RewriteRule "(.*)\.html" ./?cmd=view;name=$1
+
+<Files bitchannelrc>
+  deny from all
+</Files>
+<Files CVS>
+  deny from all
+</Files>
+<Files lib>
+  deny from all
+</Files>
+<Files misc>
+  deny from all
+</Files>
+<Files *.rb>
+  deny from all
+</Files>
+<Files template>
+  deny from all
+</Files>
+<Files *.rhtml>
+  deny from all
+</Files>
