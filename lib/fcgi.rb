@@ -94,8 +94,14 @@ class FCGI
           sock, addr = *@server.accept
           break unless sock
           handle_socket FastCGISocket.new(sock), &block
+        rescue Errno::EPIPE
+          ;
         ensure
-          sock.close if sock
+          begin
+            sock.close if sock
+          rescue SystemCallError
+            ;
+          end
         end
       end
     end
