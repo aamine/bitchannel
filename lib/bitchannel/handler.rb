@@ -211,17 +211,43 @@ module BitChannel
       DiffPage.new(@config, @repository, page_name, rev1, rev2).response
     end
 
+    GDIFF_COOKIE_NAME = 'bclastvisit'
+
     def handle_gdiff(cgi)
-      org = cgi.get_param('org').sub(/[\s\-:T]+/, '').sub(/\+.*/, '')
-      GlobalDiffPage.new(@config, @repository, parse_origin(org)).response
+      org = cgi.get_param('org').to_s.strip
+      if org.downcase == 'cookie'
+        res = GlobalDiffPage.new(@config, @repository,
+                last_visited(cgi) || default_origin_time()).response
+      else
+        res = GlobalDiffPage.new(@config, @repository,
+                parse_origin(org) || default_origin_time()).response
+      end
+      now = Time.now
+      res.set_cookie({'name' => GDIFF_COOKIE_NAME,
+                      'value' => [now.strftime('%Y%m%d%H%M%S')],
+                      'path' => (File.dirname(cgi.script_name) + '/').sub(%r</+\z>, '/'),
+                      'expires' => now.getutc + 90*24*60*60})
+      res
+    end
+
+    def last_visited(cgi)
+      c = cgi.cookies[GDIFF_COOKIE_NAME][0] or return nil
+      parse_origin(c)
     end
 
     def parse_origin(org)
-      if m = /\A(\d\d\d\d)(\d\d)(?:(\d\d)(?:(\d\d)(?:(\d\d)(\d\d)?)?)?)?\z/.match(org)
-        DateTime.new(*m.captures.map {|s| s.to_i })
-      else
-        DateTime.now - 1
+      re = /\A(\d\d\d\d)(\d\d)(?:(\d\d)(?:(\d\d)(?:(\d\d)(\d\d)?)?)?)?\z/
+      m = re.match(org.sub(/[\s\-:T]+/, '').sub(/\+.*/, '')) or return nil
+      begin
+        # we should use Time, to avoid CVS error.
+        return Time.local(*m.captures.map {|s| s.to_i })
+      rescue ArgumentError   # time out of range
+        return nil
       end
+    end
+
+    def default_origin_time
+      DateTime.now - 3
     end
 
     def handle_history(cgi)
@@ -311,6 +337,7 @@ module BitChannel
       @status = nil
       @header = {}
       @body = nil
+      @cookies = []
     end
 
     attr_accessor :status
@@ -355,9 +382,14 @@ module BitChannel
       @header['Cache-Control'] ? true : false
     end
 
+    def set_cookie(spec)
+      @cookies.push spec
+    end
+
     def exec(cgi)
       @header['status'] = @status if @status
       @header['Content-Length'] = @body.length.to_s
+      @header['cookie'] = @cookies.map {|spec| CGI::Cookie.new(spec) }
       print cgi.header(@header)
       case cgi.request_method.to_s.upcase
       when 'GET', 'POST', ''
