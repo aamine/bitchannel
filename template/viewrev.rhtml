@@ -1,0 +1,21 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="ja-JP">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=<%= charset() %>">
+  <meta http-equiv="Content-Language" content="ja-JP">
+  <link rel="stylesheet" type="text/css" href="<%= css_url() %>">
+  <title><%= title() %> rev 1.<%= revision() %></title>
+</head>
+<body>
+<div class="menu">
+<a href="<%= cgi_url() %>?cmd=view;name=<%= page_name() %>">HEAD</a>
+<a href="<%= cgi_url() %>?cmd=recent">Recent</a>
+<a href="<%= cgi_url() %>?cmd=list">List</a>
+<a href="<%= cgi_url() %>?cmd=history;name=<%= page_name() %>">History</a>
+<a href="<%= cgi_url() %>?cmd=view;name=HelpPage">Help</a>
+</div>
+<h1><%= page_name() %> rev 1.<%= revision() %></h1>
+<p><%= text(:last_modified) %>: <%= format_time(last_modified()) %></p>
+<%= body() %>
+</body>
+</html>
