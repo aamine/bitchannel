@@ -72,8 +72,14 @@ def wiki_main(cgi)
                                         page_name, nil,
                                         merged, text(:conflict)).html
     end
+  when 'history'
+    history repo, config, cgi, cgi.get_param('name')
+  when 'list'
+    list repo, config, cgi
+  when 'recent'
+    recent repo, config, cgi
   else
-    view repo, config, cgi, config.index_page_name
+    view repo, config, cgi, cgi.get_param('name')
   end
 end
 
@@ -92,6 +98,17 @@ def edit(repo, config, cgi, page_name)
     return
   end
   send cgi, AlphaWiki::EditPage.new(config, repo, page_name).html
+end
+
+def list(repo, config, cgi)
+  send cgi, AlphaWiki::ListPage.new(config, repo).html
+end
+
+def recent(repo, config, cgi, page_name)
+  send cgi, AlphaWiki::RecentPage.new(config, repo).html
+end
+
+def history(repo, config, cgi, page_name)
 end
 
 def send(cgi, html)

@@ -26,22 +26,32 @@ module AlphaWiki
     def exist?(page_name)
       raise 'page_name == nil' unless page_name
       raise 'page_name == ""' if page_name.empty?
-      File.exist?("#{@wc_read}/#{escape_html(page_name)}")
+      File.exist?("#{@wc_read}/#{encode_filename(page_name)}")
+    end
+
+    def entries
+      Dir.entries(@wc_read)\
+          .select {|ent| File.file?("#{@wc_read}/#{ent}") }\
+          .map {|ent| decode_filename(page_name) }
+    end
+
+    def mtime(page_name)
+      File.mtime("#{@wc_read}/#{encode_filename(page_name)}")
     end
 
     def [](page_name)
-      File.read("#{@wc_read}/#{escape_html(page_name)}")
+      File.read("#{@wc_read}/#{encode_filename(page_name)}")
     end
 
     def revision(page_name)
-      re = %r<\A/#{Regexp.quote(escape_html(page_name))}/1>
+      re = %r<\A/#{Regexp.quote(encode_filename(page_name))}/1>
       line = File.readlines("#{@wc_read}/CVS/Entries").detect {|s| re =~ s }
       return nil unless line   # file not checked in
       line.split(%r</>)[2].split(%r<\.>).last.to_i
     end
 
     def checkin(page_name, origrev, new_text)
-      filename = escape_html(page_name)
+      filename = encode_filename(page_name)
       Dir.chdir(@wc_write) {
         lock(filename) {
           if File.exist?(filename)
