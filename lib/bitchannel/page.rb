@@ -59,10 +59,6 @@ module AlphaWiki
     def body
       ToHTML.compile(@repository[@page_name])
     end
-
-    def opt_headers
-      ''
-    end
   
   end
 
@@ -73,7 +69,7 @@ module AlphaWiki
       super config, repo, page_name
       @rev = rev
       @text = text
-      @message = msg
+      @opt_message = msg
     end
 
     private
@@ -82,22 +78,22 @@ module AlphaWiki
       'edit'
     end
     
-    def message
-      return '' unless @message
-      '<p>' + escape_html(@message) + '</p>'
+    def opt_message
+      return '' unless @opt_message
+      "<p>#{escape_html(@opt_message)}</p>"
     end
 
     def body
       return @text if @text
-      escape_html(@repository[@page_name])
+      begin
+        return escape_html(@repository[@page_name])
+      rescue Errno::ENOENT
+        return ''
+      end
     end
 
     def page_revision
       @rev || 0
-    end
-
-    def opt_headers
-      ''
     end
 
   end

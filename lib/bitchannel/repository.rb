@@ -24,7 +24,8 @@ module AlphaWiki
     end
 
     def exist?(page_name)
-      return false unless page_name
+      raise 'page_name == nil' unless page_name
+      raise 'page_name == ""' if page_name.empty?
       File.exist?("#{@wc_read}/#{escape_html(page_name)}")
     end
 

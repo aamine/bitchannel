@@ -56,18 +56,18 @@ def wiki_main(cgi)
       send cgi, AlphaWiki::EditPage.new(config, repo,
                                         config.tmp_page_name, nil,
                                         cgi.get_param('text').to_s,
-                                        'Text saved without page name; make sure.').html
+                                        text(:save_without_name)).html
       return
     end
     origrev = cgi.get_param('origrev').to_i
     origrev = nil if origrev == 0
     begin
       repo.checkin page_name, origrev, (cgi.get_param('text') || "")
-      view repo, config, cgi, cgi.get_param('name')
+      view repo, config, cgi, page_name
     rescue AlphaWiki::EditConflict => err
       send cgi, AlphaWiki::EditPage.new(config, repo,
                                         page_name, nil,
-                                        merged, err.message).html
+                                        merged, text(:conflict)).html
     end
   else
     view repo, config, cgi, config.index_page_name
@@ -75,11 +75,11 @@ def wiki_main(cgi)
 end
 
 def view(repo, config, cgi, page_name)
+  page_name ||= config.index_page_name
   unless repo.exist?(page_name)
     edit repo, config, cgi, page_name
     return
   end
-  page_name ||= config.index_page_name
   send cgi, AlphaWiki::ViewPage.new(config, repo, page_name).html
 end
 
@@ -96,6 +96,10 @@ def send(cgi, html)
              'type' => 'text/html', 'charset' => @charset,
              'Content-Length' => html.length.to_s)
   print html unless cgi.request_method.to_s.upcase == 'HEAD'
+end
+
+def text(key)
+  AlphaWiki.gettext(key)
 end
 
 main

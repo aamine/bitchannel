@@ -13,6 +13,6 @@
 @cvswc_read = File.dirname(File.expand_path(__FILE__)) + '/wc.read'
 @cvswc_write = File.dirname(File.expand_path(__FILE__)) + '/wc.write'
 
-# DO NOT CHANGE
 $KCODE = 'EUC'
 @charset = 'euc-jp'
+@lang = 'ja'

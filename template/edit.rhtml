@@ -3,12 +3,12 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=<%= charset() %>">
   <meta http-equiv="Content-Language" content="ja-JP">
-  <%= opt_headers() %>
   <link rel="stylesheet" type="text/css" href="<%= css_url() %>">
   <title>Edit: <%= title() %></title>
 </head>
 <body>
 <h1>Edit: <%= page_name() %></h1>
+<%= opt_message() %>
 <form method="POST" action="<%= cgi_url() %>">
 <input type="hidden" name="page" value="<%= page_name() %>">
 <input type="hidden" name="origrev" value="<%= page_revision() %>">
