@@ -17,7 +17,7 @@
     <link><%= escape_xml(item.url) %></link>
     <dc:date><%= escape_xml(item.dc_date) %></dc:date>
     <title><%= escape_xml(item.page_name) %> : Diff rev <%= item.rev1 %> &lt;=%gt; <%= item.rev2 %></title>
-    <content:encoded><![CDATA[<%= item.content_cdata %>]]></content:encoded>
+    <content:encoded><![CDATA[<pre><%= escape_cdata(escape_html(item.diff)) %></pre>]]></content:encoded>
 </item>
 <% end %>
 </rdf:RDF>

@@ -46,7 +46,7 @@ module BitChannel
     alias unescape_xml unescape_html
 
     def escape_cdata(str)
-      str   # FIXME: tmp
+      str.gsub(']]>', ']]&gt;')
     end
 
     def format_time(time)

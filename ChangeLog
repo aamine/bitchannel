@@ -1,3 +1,10 @@
+Thu Mar 17 07:33:40 2005  Minero Aoki  <aamine@loveruby.net>
+
+	* template/siterss.rdf: BitChannel source must be escaped twice,
+	  by HTML and by XML CDATA.
+
+	* lib/bitchannel/textutils.rb: implement #escape_cdata.
+
 Thu Mar 17 07:23:45 2005  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/handler.rb: pass `fmt' argument to gdiff.
