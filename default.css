@@ -174,6 +174,9 @@ span.removedline {
 }
 pre.diff {
     background-color: transparent;
+    line-height: 140%
+    padding: 0px;
+    font-weight: normal;
 }
 
 /*

@@ -1,3 +1,7 @@
+Fri Apr  9 22:25:14 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* default.css: adjust parameters with <p>.
+
 Fri Apr  9 22:18:47 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* template/gdiff.rhtml: extract page name to <h2>.
