@@ -17,7 +17,9 @@ require 'stringio'
 # Blocking I/O differs pure ruby signal handler
 # in single thread environment, force multi threading.
 # See [ruby-dev:25755]
-Thread.fork { sleep }
+Thread.fork {
+  loop { sleep 3 }
+}
 
 class FCGI
 
