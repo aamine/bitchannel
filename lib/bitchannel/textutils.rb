@@ -53,6 +53,15 @@ module BitChannel
               *(offset / 60).divmod(60))
     end
 
+    def times_before(time)
+      diff = (Time.now - time).to_i
+      case
+      when diff < 60 * 60      then "#{diff / 60}m"
+      when diff < 60 * 60 * 24 then "#{diff / 60 / 60}h"
+      else                          "#{diff / 60 / 60 / 24}d"
+      end
+    end
+
     def detab(str, ts = 8)
       add = 0
       str.gsub(/\t/) {

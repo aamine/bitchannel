@@ -27,7 +27,7 @@
 </div>
 
 <h1><%= page_name() %></h1>
-<p><span class="lastmodified">Last Modified: <%= format_time(last_modified()) %></span></p>
+<p>r1.<%= revision() %>; <span class="lastmodified">Last Modified: <%= format_time(last_modified()) %></span> (<%= times_before(last_modified()) %>)</p>
 <%= body() %>
 
 <hr>
