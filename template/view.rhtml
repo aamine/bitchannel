@@ -7,6 +7,13 @@
   <title><%= title() %></title>
 </head>
 <body>
+<div class="menu">
+<a href="<%= cgi_url() %>?cmd=edit;name=<%= page_name() %>">Edit</a>
+<a href="<%= cgi_url() %>?cmd=recent">Recent</a>
+<a href="<%= cgi_url() %>?cmd=list">List</a>
+<a href="<%= cgi_url() %>?cmd=history;name=<%= page_name() %>">History</a>
+<a href="<%= cgi_url() %>?cmd=help">Help</a>
+</div>
 <h1><%= page_name() %></h1>
 <%= body() %>
 </body>

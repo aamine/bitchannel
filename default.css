@@ -3,3 +3,125 @@
     default.css
 
 */
+
+body {
+    background-color: white;
+    color: black;
+    font-family: osaka,'MS PGothic',sans-serif;
+    text-align: left;
+    margin-top: 20px;
+    margin-left: 2%;
+    margin-right: 2%;
+    line-height: 150%;
+}
+
+div.menu {
+    float: right;
+    text-align: right;
+    font-size: x-small;
+}
+
+div.footer {
+    text-align: right;
+    font-size: x-small;
+}
+
+h1 {
+    font-size: 150%;
+    border-left: 25px solid #3366CC;
+    margin: 0px;
+    padding-left: 0.5em;
+    padding-top: 0em;
+}
+
+h2 {
+    font-size: 150%;
+    border-bottom: 1px solid #3366CC;
+    text-align: right;
+    margin: 0px;
+    padding: 0px;
+}
+
+h3 {
+    font-size: 150%;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+p {
+    margin-top: 0px;
+    margin-bottom: 1em;
+    margin-left: 0px;
+    line-height: 150%;
+    width: 36em;
+}
+
+pre {
+    border-style: solid;
+    border-width: 1px 1px 1px 1px;
+    border-color: #AAAAAA;
+    padding: 8px;
+    font-weight: normal;
+    line-height: 110%;
+}
+
+blockquote {
+    background-color: transparent;
+    border-style: solid;
+    border-color: #000;
+    border-width: 4px 0px 4px 0px;
+    padding: 4px;
+    margin-left: 3em;
+    margin-right: 3em;
+    font-weight: normal;
+}
+
+li {
+    margin-left: 2em;
+}
+
+dl {
+    margin-left: 0em;
+}
+
+dt {
+    border-style: solid;
+    border-color: #000;
+    border-width: 0px 0px 1px 0px;
+    margin-top: 0.7em;
+}
+
+dd {
+    margin-top: 0.3em;
+    margin-bottom: 0.5em;
+    margin-left: 2em;
+}
+
+a:link {
+    color: #3366CC;
+    text-decoration: none;
+}
+
+a:visited {
+    color: #666666;
+    text-decoration: none;
+}
+
+a:hover, a:focus, a:active {
+    color: #666666;
+    text-decoration: underline;
+}
+
+form {
+    margin-top: 3em;
+    margin-bottom: 5em;
+    border-left: 25px solid #3366CC;
+    border-top: 1px solid #3366CC;
+    padding-left: 1em;
+    padding-top: 0px;
+}
+
+hr {
+    color: #3366CC;
+    height: 1px;
+}
