@@ -1,3 +1,8 @@
+Wed May  5 01:20:29 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* template/revlinks.rhtml: Revlinks represents "Related Pages",
+	  not "Reverse Links".
+
 Thu Apr 29 04:40:47 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/cgi.rb: parameterize CGI request iterator.
