@@ -211,7 +211,7 @@ module Wikitik
     #
 
     WikiName = /\b(?:[A-Z][a-z0-9]+){2,}\b/n   # /\b/ requires `n' option
-    ExplicitLink = /\[\[\S+?\]\]/e
+    BlacketLink = /\[\[\S+?\]\]/e
         # FIXME: `e' option does not effect in the final regexp.
     schemes = %w( http ftp )
     SeemsURL = /\b(?=#{Regexp.union(*schemes)}:)#{URI::PATTERN::X_ABS_URI}/xn
@@ -220,13 +220,14 @@ module Wikitik
 
     def text(str)
       esctable = TextUtils::ESC
-      str.gsub(/(#{NeedESC})|(#{WikiName})|(#{ExplicitLink})|(#{SeemsURL})/on) {
+      str.gsub(/(#{NeedESC})|(#{WikiName})|(#{BlacketLink})|(#{SeemsURL})/on) {
         if    ch  = $1 then esctable[ch]
         elsif tok = $2 then wikiname(tok)
         elsif tok = $3
-          if /:/ === tok
-          then interwikiname(tok[2..-3])
-          else explicit_link(tok[2..-3])
+          case link = tok[2..-3]
+          when /\A[\w\-]+:/n then interwikiname(link)
+          when /\A\w+\z/n    then explicit_link(link)
+          else                    tok
           end
         elsif tok = $4 then seems_url(tok)
         else
@@ -320,7 +321,7 @@ module Wikitik
 
     def puts(str)
       @result << str
-      @result << "\n" unless /\n\z/ === str
+      @result << "\n" unless /\n\z/ =~ str
     end
 
     class LineInput
