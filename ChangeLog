@@ -1,3 +1,7 @@
+Fri Mar 26 23:21:28 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/*.rb: update copyright year.
+
 Fri Mar 26 23:11:11 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* template/edit.rhtml: wrong <input> type.

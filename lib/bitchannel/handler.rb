@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# Copyright (C) 2003 Minero Aoki
+# Copyright (C) 2003,2004 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the terms of
@@ -149,7 +149,7 @@ module BitChannel
       text = normalize_text(cgi.get_param('text').to_s)
       begin
         @repository.checkin page_name, origrev, text
-        thanks_response(page_name)
+        return thanks_response(page_name)
       rescue EditConflict => err
         return EditPage.new(@config, @repository,
                             page_name, err.merged,
