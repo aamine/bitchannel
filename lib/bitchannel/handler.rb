@@ -113,7 +113,7 @@ module BitChannel
     def handle_save(req)
       return handle_preview(req) if req.preview?
       page_name = req.page_name or
-          return reedit_response(req.normalized_text, gettext(:save_without_name))
+          return reedit_response(req.normalized_text, @config.text(:save_without_name))
       text = req.normalized_text
       begin
         @repository.checkin page_name, req.origrev, text
@@ -122,7 +122,7 @@ module BitChannel
         return EditPage.new(@config, @repository,
                             page_name, err.merged,
                             @repository.revision(page_name),
-                            gettext(:edit_conflicted)).response
+                            @config.text(:edit_conflicted)).response
       rescue WrongPageName => err
         return reedit(text, err.message)
       end

@@ -27,8 +27,8 @@ module BitChannel
         delete(name).untaint
       end
 
+      @locale      = args.getopt(:locale)
       @templatedir = args.getopt(:templatedir)
-      @charset     = args.getopt(:charset)
       @css_url     = args.getopt(:css_url)
       @html_url_p  = args.getopt(:use_html_url)
       @site_name   = args.fetchopt(:site_name, nil)
@@ -40,9 +40,16 @@ module BitChannel
     end
 
     attr_reader :templatedir
-    attr_reader :charset
     attr_reader :css_url
     attr_reader :logo_url
+
+    def charset
+      @locale.charset
+    end
+
+    def text(key)
+      @locale.text(key)
+    end
 
     def html_url?
       @html_url_p

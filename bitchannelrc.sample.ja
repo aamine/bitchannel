@@ -33,9 +33,9 @@ def bitchannel_context
 
     :templatedir  => "#{cgidir}/template",
 
-    :charset      => 'euc-jp',
-        # The charactor encoding of pages.
-        # I have tested only euc-jp.
+    :locale       => BitChannel::Locale.get('ja_JP.eucJP'),
+        # The locale.
+        # I have tested only ja_JP.eucJP.
 
     # :cgi_url      => nil,       # auto detect
     # :cgi_url      => '/wiki/',  # static
