@@ -1,5 +1,8 @@
 #!/usr/bin/ruby
 # $Id$
+#
+# BitChannel entry point for FastCGI environment.
+#
 
 load './bitchannelrc'
 setup_environment

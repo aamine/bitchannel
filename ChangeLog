@@ -1,3 +1,11 @@
+Tue Nov 23 20:21:30 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* index.cgi: add header.
+
+	* index.fcgi: ditto.
+
+	* index.rbx: ditto.
+
 Tue Nov 23 20:09:00 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/syntax.rb (adjust_ncols): cell was removed too
