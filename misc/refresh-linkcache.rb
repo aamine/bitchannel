@@ -19,11 +19,11 @@ def main
 
   load './bitchannelrc'
   config, repo = initialize_environment()
-  linkcache = repo._link_cache
-  linkcache.clear
+  cache = repo.link_cache
+  cache.clear
   c = BitChannel::ToHTML.new(config, repo)
   repo.entries.each do |page_name|
-    linkcache.update_cache_for page_name, c.extract_links(repo[page_name])
+    cache.update_cache_for page_name, c.extract_links(repo[page_name])
   end
 end
 

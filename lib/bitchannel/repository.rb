@@ -78,9 +78,7 @@ module BitChannel
     end
 
     # internal use only
-    def _link_cache
-      @link_cache
-    end
+    attr_reader :link_cache
 
     def page_names
       Dir.entries(@wc_read)\
