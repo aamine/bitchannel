@@ -215,12 +215,13 @@ module BitChannel
 
     def handle_gdiff(cgi)
       org = cgi.get_param('org').to_s.strip
+      reload = (cgi.get_param('reload').to_s.strip.downcase == 'on')
       if org.downcase == 'cookie'
         res = GlobalDiffPage.new(@config, @repository,
-                last_visited(cgi) || default_origin_time()).response
+                last_visited(cgi) || default_origin_time(), reload).response
       else
         res = GlobalDiffPage.new(@config, @repository,
-                parse_origin(org) || default_origin_time()).response
+                parse_origin(org) || default_origin_time(), reload).response
       end
       now = Time.now
       res.set_cookie({'name' => GDIFF_COOKIE_NAME,

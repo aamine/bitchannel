@@ -3,6 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=<%= page_charset() %>">
   <meta http-equiv="Content-Language" content="ja-JP">
+  <% if auto_reload? %><meta http-equiv="refresh" content="3600; url=<%= cgi_url() %>?cmd=gdiff&amp;org=cookie&amp;reload=on"><% end %>
   <meta name="robots" content="noindex,nofollow">
   <link rel="stylesheet" type="text/css" href="<%= css_url() %>">
   <title>Diff from <%= format_time(origin_time()) %></title>
@@ -17,7 +18,6 @@
 <p><a href="<%= cgi_url() %>?cmd=gdiff;org=cookie">[Diff from my last visit]</a></p>
 
 <% diffs().each do |log| %>
-<div>
 <h2><a href="<%= view_url(log.page_name) %>"><%= escape_html(log.page_name) %></a></h2>
 <p class="minimenu">
 <a href="<%= cgi_url() %>?cmd=edit;name=<%= escape_html(log.page_name) %>">[edit]</a>
@@ -30,7 +30,6 @@
 <a href="<%= cgi_url() %>?cmd=history;name=<%= escape_html(log.page_name) %>">[hist]</a>
 </p>
 <p>
-</div>
 <span class="removedline">--- rev<%= log.rev1 %>  <%= format_time(log.time1) %></span><br>
 <span class="addedline">+++ rev<%= log.rev2 %>  <%= format_time(log.time2) %></span>
 </p>
@@ -46,6 +45,9 @@
     end
   }.join('')
 %></pre>
+<% end %>
+<% unless auto_reload? %>
+<p><a href="<%= cgi_url() %>?cmd=gdiff;org=cookie;reload=on">[Turn on auto reload]</a></p>
 <% end %>
 </div>
 

@@ -283,10 +283,11 @@ module BitChannel
 
 
   class GlobalDiffPage < GenericPage
-    def initialize(config, repo, org)
+    def initialize(config, repo, org, reload)
       super config
       @repository = repo
       @origin = org
+      @reload = reload
     end
 
     private
@@ -297,6 +298,10 @@ module BitChannel
 
     def origin_time
       @origin
+    end
+
+    def auto_reload?
+      @reload
     end
 
     def diffs

@@ -1,3 +1,12 @@
+Sat Apr 10 01:27:34 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* template/gdiff.rhtml: add refresh meta element.
+
+	* lib/bitchannel/handler.rb: implement `reload' parameter for
+	  gdiff.
+
+	* lib/bitchannel/page.rb: new method GlobalDiffPage#auto_reload?.
+
 Sat Apr 10 00:34:51 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* template/recent.rhtml: turn off gdiff link.
