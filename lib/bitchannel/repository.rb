@@ -360,12 +360,11 @@ module BitChannel
     end
 
     def update_and_checkin(filename, origrev, new_text)
-      cvs 'up', (origrev ? "-r1.#{origrev}" : '-A'), filename
       File.open(filename, 'w') {|f|
         f.write new_text
       }
       if origrev
-        out, err = *cvs('up', '-A', filename)
+        out, err = *cvs('up', '-ko', "-j1.#{origrev}", '-jHEAD', filename)
         if /conflicts during merge/ =~ err
           log "conflict: #{filename}"
           merged = File.read(filename)
