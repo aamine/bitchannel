@@ -1,3 +1,8 @@
+Thu Apr  1 15:42:04 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb: don't cache CVS/Entries, it causes
+	  data mismatch when a repository is used between multiple requests.
+
 Mon Mar 29 00:03:59 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* index.cgi: define initialize_environment on anonymous object,

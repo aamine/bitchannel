@@ -74,8 +74,6 @@ module BitChannel
         raise ConfigError, "Config Error: unknown key: repository.#{k}"
       end
       @link_cache = LinkCache.new("#{cachedir}/link", "#{cachedir}/revlink")
-      # in-process cache
-      @Entries = nil
     end
 
     # internal use only
@@ -124,8 +122,7 @@ module BitChannel
       page_must_valid page_name
       page_must_exist page_name
       unless rev
-        @Entries ||= read_Entries("#{@wc_read}/CVS/Entries")
-        rev, mtime = *@Entries[page_name]
+        rev, mtime = *cvs_Entries()[page_name]
         mtime
       else
         Dir.chdir(@wc_read) {
@@ -140,8 +137,7 @@ module BitChannel
     def revision(page_name)
       page_must_valid page_name
       page_must_exist page_name
-      @Entries ||= read_Entries("#{@wc_read}/CVS/Entries")
-      rev, mtime = *@Entries[page_name]
+      rev, mtime = *cvs_Entries()[page_name]
       rev
     end
 
@@ -387,6 +383,10 @@ module BitChannel
       File.open("#{@wc_read}/#{encode_filename(name)}", 'r') {
         ;
       }
+    end
+
+    def cvs_Entries
+      read_Entries("#{@wc_read}/CVS/Entries")
     end
 
     def read_Entries(filename)
