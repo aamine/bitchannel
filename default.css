@@ -27,48 +27,50 @@ div.footer {
 }
 
 h1 {
-    font-size: 150%;
-    border-left: 25px solid #3366CC;
-    margin: 0px;
-    padding-left: 0.5em;
-    padding-top: 0em;
+    font-size: 200%;
+    border-bottom: 1px solid #33a;
+    text-aligh: left;
 }
 
 h2 {
     font-size: 150%;
-    border-bottom: 1px solid #3366CC;
-    text-align: right;
-    margin: 0px;
-    padding: 0px;
+    text-align: left;
+    border-left: 10px solid #33a;
+    padding-left: 0.5em;
+    margin-top: 1em;
 }
 
 h3 {
-    font-size: 150%;
+    font-size: 100%;
+    font-weight: bold;
+    text-align: left;
     margin-top: 0.5em;
     margin-bottom: 0.5em;
 }
 
+/* never use */
+h4, h5, h6 {
+    background-color: red;
+}
+
 p {
-    margin-top: 0px;
-    margin-bottom: 1em;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
     margin-left: 0px;
-    line-height: 150%;
     width: 36em;
 }
 
 pre {
-    border-style: solid;
-    border-width: 1px 1px 1px 1px;
-    border-color: #AAAAAA;
-    padding: 8px;
-    font-weight: normal;
     line-height: 110%;
+    background-color: #eee;
+    padding: 10px;
+    font-weight: normal;
 }
 
 blockquote {
     background-color: transparent;
     border-style: solid;
-    border-color: #000;
+    border-color: #33a;
     border-width: 4px 0px 4px 0px;
     padding: 4px;
     margin-left: 3em;
@@ -82,11 +84,12 @@ li {
 
 dl {
     margin-left: 0em;
+    width: 80%;
 }
 
 dt {
     border-style: solid;
-    border-color: #000;
+    border-color: #33a;
     border-width: 0px 0px 1px 0px;
     margin-top: 0.7em;
 }
@@ -98,7 +101,7 @@ dd {
 }
 
 a:link {
-    color: #3366CC;
+    color: #33a;
     text-decoration: none;
 }
 
@@ -112,16 +115,15 @@ a:hover, a:focus, a:active {
     text-decoration: underline;
 }
 
+a.notexist {
+    color: red;
+}
+
 form {
-    margin-top: 3em;
-    margin-bottom: 5em;
-    border-left: 25px solid #3366CC;
-    border-top: 1px solid #3366CC;
-    padding-left: 1em;
-    padding-top: 0px;
+    padding: 0px;
 }
 
 hr {
-    color: #3366CC;
+    color: #33a;
     height: 1px;
 }
