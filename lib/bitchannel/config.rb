@@ -34,6 +34,7 @@ module Wikitik
     attr_reader :cgi_url
     attr_reader :css_url
     attr_reader :datadir
+    attr_reader :templatedir
 
     def index_page_name
       @index_page || DEFAULT_INDEX_PAGE_NAME
@@ -41,10 +42,6 @@ module Wikitik
 
     def tmp_page_name
       'SandBox'
-    end
-
-    def read_rhtml(name)
-      File.read("#{@templatedir}/#{name}.rhtml")
     end
 
     def link_cachedir

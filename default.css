@@ -139,6 +139,10 @@ form {
     padding: 0px;
 }
 
+div.searchform {
+    float: right;
+}
+
 hr {
     color: #33a;
     height: 1px;

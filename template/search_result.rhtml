@@ -1,0 +1,33 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="ja-JP">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=<%= charset() %>">
+  <meta http-equiv="Content-Language" content="ja-JP">
+  <link rel="stylesheet" type="text/css" href="<%= css_url() %>">
+  <title>Search Result</title>
+</head>
+<body>
+
+<div class="menu">
+<a href="<%= cgi_url() %>?cmd=recent">Recent</a>
+<a href="<%= cgi_url() %>?cmd=recent">List</a>
+<a href="<%= cgi_url() %>?cmd=view;name=IndexPage">Top</a>
+<a href="<%= cgi_url() %>?cmd=view;name=HelpPage">Help</a>
+</div>
+
+<h1>Search Result</h1>
+.include search_form
+<ol>
+<%
+    n_hits = 0
+    matched_pages do |page, content|
+%><li><a href="<%= cgi_url() %>?cmd=view;name=<%= url(page) %>"><%= escape_html(page) %></a> <%= shorten(content) %></li>
+<%
+      n_hits += 1
+    end
+%></ol>
+<p><%= n_hits %> hits.</p>
+.include search_form
+
+</body>
+</html>

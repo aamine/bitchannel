@@ -143,6 +143,13 @@ module Wikitik
         send cgi, ListPage.new(@config, @repository).html
       when 'recent'
         send cgi, RecentPage.new(@config, @repository).html
+      when 'search'
+        begin
+          regs = setup_query(cgi.get_param('q'))
+          send cgi, SearchResultPage.new(@config, @repository, cgi.get_param('q'), regs).html
+        rescue WrongQuery => err
+          send cgi, SearchErrorPage.new(@config, @repository, cgi.get_param('q'), err).html
+        end
       else
         view cgi, (cgi.get_param('name') || @config.index_page_name)
       end
@@ -175,6 +182,24 @@ raise ArgumentError, "view page=nil" unless page_name
         </body>
         </html>
       ThanksPage
+    end
+
+    def setup_query(query)
+      raise WrongQuery, 'no pattern' unless query
+      patterns = jsplit(query).map {|pat|
+        check_pattern pat
+        /#{Regexp.quote(pat)}/ie
+      }
+      raise WrongQuery, 'no pattern' if patterns.empty?
+      raise WrongQuery, 'too many sub patterns' if patterns.length > 8
+      patterns
+    end
+
+    def check_pattern(pat)
+      raise WrongQuery, 'no pattern' unless pat
+      raise WrongQuery, 'empty pattern' if pat.empty?
+      raise WrongQuery, "pattern too short: #{pat}" if pat.length < 2
+      raise WrongQuery, 'pattern too long' if pat.length > 128
     end
 
     def send(cgi, html, mtime = nil)

@@ -33,12 +33,18 @@ module Wikitik
     end
 
     def html
-      erb = ERB.new(@config.read_rhtml(template_id()))
+      erb = ERB.new(get_template(@config.templatedir, template_id()))
       erb.filename = "#{template_id()}.rhtml"
       erb.result(binding())
     end
 
     private
+
+    def get_template(tmpldir, tmplname)
+      File.read("#{tmpldir}/#{tmplname}.rhtml").gsub(/^\.include (\w+)/) {
+        get_template(tmpldir, $1)
+      }
+    end
 
     def charset
       url(@config.charset)
@@ -54,6 +60,10 @@ module Wikitik
 
     def url(str)
       escape_html(URI.escape(str))
+    end
+
+    def query_string
+      ''
     end
   end
 
@@ -269,6 +279,67 @@ module Wikitik
       @repository.entries\
           .map {|name| [escape_html(name), @repository.mtime(name)] }\
           .sort_by {|name, mtime| -(mtime.to_i) }
+    end
+  end
+
+
+  class SearchResultPage < GenericPage
+    def initialize(config, repo, q, patterns)
+      super config, repo
+      @query_string = q
+      @patterns = patterns
+    end
+
+    private
+
+    def template_id
+      'search_result'
+    end
+
+    def query_string
+      escape_html(jsplit(@query_string).join(' '))
+    end
+
+    def matched_pages(&block)
+      title_match, not_match = @repository.entries.sort.partition {|name|
+        @patterns.all? {|re| re =~ name }
+      }
+      title_match.each do |name|
+        yield name, @repository[name]
+      end
+      not_match.sort_by {|name| -@repository.mtime(name).to_i }.each do |name|
+        content = @repository[name]
+        if @patterns.all? {|re| re =~ content }
+          yield name, content
+        end
+      end
+    end
+
+    def shorten(str)
+      escape_html(str.slice(/\A.{0,60}/m).delete('[]*').gsub(/\s+/, ' ').strip)
+    end
+  end
+
+
+  class SearchErrorPage < GenericPage
+    def initialize(config, repo, query, err)
+      super config, repo
+      @query = query
+      @error = err
+    end
+
+    private
+
+    def template_id
+      'search_error'
+    end
+
+    def error_message
+      escape_html(@error.message)
+    end
+
+    def query_string
+      escape_html(Array(@query).join(' '))
     end
   end
 

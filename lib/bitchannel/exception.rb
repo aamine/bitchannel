@@ -13,6 +13,7 @@ module Wikitik
   class ConfigError < WikitikError; end
   class ResourceError < WikitikError; end
   class UnknownRCSLogFormat < WikitikError; end
+  class WrongQuery < WikitikError; end
 
   class CommandFailed < WikitikError
     def initialize(msg, status)

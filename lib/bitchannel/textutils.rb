@@ -62,6 +62,13 @@ module Wikitik
       }
     end
 
+    Z_SPACE = "\241\241"   # zen-kaku space
+
+    def jsplit(str)
+      str.sub(/\A[\s#{Z_SPACE}]+/oe, '').sub(/[\s#{Z_SPACE}]+\z/oe, '')\
+          .split(/[\s#{Z_SPACE}]+/oe)
+    end
+
   end
 
 end   # module Wikitik
