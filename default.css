@@ -1,4 +1,4 @@
-/*
+/* vi:set sw=4
 
     default.css
 
@@ -84,14 +84,11 @@ li {
 
 dl {
     margin-left: 0em;
-    width: 80%;
 }
 
 dt {
-    border-style: solid;
-    border-color: #33a;
-    border-width: 0px 0px 1px 0px;
-    margin-top: 0.7em;
+    font-weight: bold;
+    font-family: sans-serif;
 }
 
 dd {
