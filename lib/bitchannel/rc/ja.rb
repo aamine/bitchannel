@@ -11,9 +11,8 @@
 require 'wikitik/exception'
 
 module Wikitik
-  Resource_ja = Hash.new {|h,k| raise ResourceError, "unknown resource key: #{k}" }
-  @resource = Resource_ja
-  Resource_ja[:save_without_name] = 'Text saved without page name; make sure.'
-  Resource_ja[:conflict] = 'Edit conflicted; make sure.'
-  Resource_ja[:last_modified] = 'Last Modified'
+  rc = Hash.new {|h,k| raise ResourceError, "unknown resource key: #{k}" }
+  rc[:save_without_name] = 'Text saved without page name; make sure.'
+  rc[:edit_conflicted] = 'Edit conflicted; make sure.'
+  @resources['ja'] = rc
 end

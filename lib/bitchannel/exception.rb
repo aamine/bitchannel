@@ -11,6 +11,7 @@
 module Wikitik
   class WikitikError < StandardError; end
   class ConfigError < WikitikError; end
+  class ResourceError < WikitikError; end
   class UnknownRCSLogFormat < WikitikError; end
 
   class CommandFailed < WikitikError

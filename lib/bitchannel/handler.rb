@@ -104,7 +104,7 @@ module Wikitik
         rescue EditConflict => err
           send cgi, EditPage.new(@config, @repository,
                                  page_name, nil,
-                                 merged, gettext(:conflict)).html
+                                 merged, gettext(:edit_conflicted)).html
         end
       when 'diff'
         page_name = cgi.get_param('name')

@@ -9,7 +9,8 @@ cgidir = File.dirname(File.expand_path(__FILE__))
 
 $:.unshift "#{cgidir}/lib"
 require 'wikitik'
-require 'wikitik/rc/ja'
+
+Wikitik.lang = 'ja'
 
 config = Wikitik::Config.new(
   :templatedir => "#{cgidir}/template",
