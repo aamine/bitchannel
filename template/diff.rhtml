@@ -28,6 +28,10 @@
 </div>
 
 <h1><%= page_name() %> : Diff r1.<%= rev1() %> &lt;=&gt; r1.<%= rev2() %></h1>
+<ul>
+<li><a href="<%= cgi_url() %>?cmd=view;rev=<%= rev2() %>;name=<%= page_url() %>">Revision 1.<%= rev2() %></a></li>
+<li><a href="<%= cgi_url() %>?cmd=view;rev=<%= rev1() %>;name=<%= page_url() %>">Revision 1.<%= rev1() %></a></li>
+</ul>
 <pre>
 <%= escape_html(diff()) %>
 </pre>
