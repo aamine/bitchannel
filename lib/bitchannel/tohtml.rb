@@ -250,8 +250,10 @@ module BitChannel
       @internal_links.push exlink
       href = escape_html(URI.escape(exlink))
       anchor = escape_html(exlink)
-      q = (@repository.exist?(exlink) ? '' : '?')
-      %Q[<a href="#{cgi_href()}?cmd=view;name=#{href}">#{q}#{anchor}</a>]
+      if @repository.exist?(exlink)
+      then %Q[<a href="#{cgi_href()}?cmd=view;name=#{href}">#{anchor}</a>]
+      else %Q[<a href="#{cgi_href()}?cmd=view;name=#{href}">?</a>#{anchor}]
+      end
     end
 
     def interwikiname(name)
