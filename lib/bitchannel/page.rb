@@ -46,7 +46,7 @@ module Wikitik
     end
 
     def compile_page(content)
-      ToHTML.new(@config).compile(content)
+      ToHTML.new(@config, @repository).compile(content)
     end
 
   end

@@ -18,8 +18,9 @@ module Wikitik
 
     include TextUtils
 
-    def initialize(config)
+    def initialize(config, repo)
       @config = config
+      @repository = repo
       @indent_stack = [[0,'top']]
     end
 
@@ -266,11 +267,13 @@ module Wikitik
         elsif wikiname = $2
           href = escape_html(URI.escape(wikiname))
           link = escape_html(wikiname)
-          %Q[<a href="#{cgi_href}?cmd=view;name=#{href}">#{link}</a>]
+          q = (@repository.exist?(wikiname) ? '' : '?')
+          %Q[<a href="#{cgi_href}?cmd=view;name=#{href}">#{q}#{link}</a>]
         elsif exlink = $3
           href = escape_html(URI.escape(exlink[2..-3]))
           link = escape_html(exlink[2..-3])
-          %Q[<a href="#{cgi_href}?cmd=view;name=#{href}">#{link}</a>]
+          q = (@repository.exist?(exlink[2..-3]) ? '' : '?')
+          %Q[<a href="#{cgi_href}?cmd=view;name=#{href}">#{q}#{link}</a>]
         elsif url = $4
           if url[-1,1] == ')'   # special case
             url[-1,1] = ''
