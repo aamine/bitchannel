@@ -1,3 +1,8 @@
+Sun Mar 28 15:08:48 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* template/menu.rhtml: change menu item order.
+	  [Edit Diff Ann Hist] [Recent List Top Help] SEARCH.
+
 Sat Mar 27 16:51:19 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/textutils.rb: `check' is a Proc, not method.

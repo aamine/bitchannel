@@ -12,13 +12,6 @@ Edit
 <%  end  %>
 </span>
 <span class="menuitem">
-<%  if menuitem_recent_enabled?  %>
-<a href="<%= cgi_url() %>?cmd=recent">Recent</a>
-<%  else  %>
-Recent
-<%  end  %>
-</span>
-<span class="menuitem">
 <%  if menuitem_diff_enabled?  %>
 <a href="<%= cgi_url() %>?cmd=diff;rev1=<%= diff_base_revision() - 1 %>;rev2=<%= diff_base_revision() %>;name=<%= page_url() %>">Diff</a>
 <%  else  %>
@@ -37,6 +30,13 @@ Annotate
 <a href="<%= cgi_url() %>?cmd=history;name=<%= page_url() %>">History</a>
 <%  else  %>
 History
+<%  end  %>
+</span>
+<span class="menuitem">
+<%  if menuitem_recent_enabled?  %>
+<a href="<%= cgi_url() %>?cmd=recent">Recent</a>
+<%  else  %>
+Recent
 <%  end  %>
 </span>
 <span class="menuitem">
