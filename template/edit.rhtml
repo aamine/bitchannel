@@ -8,8 +8,10 @@
   <title>Edit: <%= title() %></title>
 </head>
 <body>
-<h1>Edit: <%= title() %></h1>
+<h1>Edit: <%= page_name() %></h1>
 <form method="POST" action="<%= cgi_url() %>">
+<input type="hidden" name="page" value="<%= page_name() %>">
+<input type="hidden" name="origrev" value="<%= page_revision() %>">
 <textarea name="text" cols="70" rows="30">
 <%= body() %></textarea>
 <input type="submit" id="okbutton" value="save">

@@ -10,9 +10,6 @@
 
 module AlphaWiki
 
-  INDEX_PAGE = 'IndexPage'
-
-
   class Config
 
     def initialize( config_env )
@@ -20,17 +17,21 @@ module AlphaWiki
           *config_env.instance_eval {
             [@datadir, @templatedir, @cgi_url, @css_url]
           }
+      @index_page = nil
     end
 
     attr_reader :cgi_url
     attr_reader :css_url
+    attr_reader :datadir
 
-    def read_pagesrc(name)
-      File.read("#{@datadir}/#{name}")
+    INDEX_PAGE = 'IndexPage'
+
+    def index_page_name
+      @index_page || INDEX_PAGE
     end
 
     def read_rhtml(name)
-      File.read("#{@templatedir}/#{name}")
+      File.read("#{@templatedir}/#{name}.rhtml")
     end
 
   end

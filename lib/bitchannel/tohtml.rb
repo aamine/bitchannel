@@ -47,7 +47,7 @@ module AlphaWiki
 
     def next_level( toplevel_p )
       case @f.peek
-      when /\A={1,6}\s/    then caption @f.gets
+      when /\A={2,6}\s/    then caption @f.gets
       when /\A\s*\*\s/     then xlist 'ul'
       when /\A\s*\d*\.\s/  then xlist 'ol'
       when /\A\s*:\s/      then dl
@@ -237,7 +237,7 @@ module AlphaWiki
     def detab( str, ts = 8 )
       add = 0
       str.gsub(/\t/) {
-        len = ts - ($`.length + add) % ts
+        len = ts - ($~.begin(0) + add) % ts
         add += len - 1
         ' ' * len
       }
