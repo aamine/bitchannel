@@ -8,13 +8,15 @@ end
 
 def setup_environment
   $KCODE = 'EUC'
-  $LOAD_PATH.unshift "#{bitchannel_cgidir()}/lib"
+  srcdir = bitchannel_cgidir()
+  $LOAD_PATH.unshift "#{srcdir}/lib"
   require 'bitchannel'
 end
 
 def bitchannel_context
-  cgidir = bitchannel_cgidir()
-  vardir = cgidir
+  cgidir = bitchannel_cgidir()   # index.xxx and bitchannelrc located
+  srcdir = cgidir                # bitchannel source tree root
+  vardir = cgidir                # internal working copies and cache
 
   config = BitChannel::Config.new(
     # :site_name    => 'My Site',
@@ -25,7 +27,7 @@ def bitchannel_context
         # The URL of site logo.
         # This image is shown on all pages.
 
-    :templatedir  => "#{cgidir}/template",
+    :templatedir  => "#{srcdir}/template",
 
     :locale       => BitChannel::Locale.get('ja_JP.eucJP'),
         # The locale.

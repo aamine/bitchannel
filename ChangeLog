@@ -1,3 +1,7 @@
+Sun Nov  7 06:19:05 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* bitchannelrc.sample.ja: separate each directories more strictly.
+
 Sun Nov  7 06:14:37 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/syntax.rb: make link for https: scheme.
