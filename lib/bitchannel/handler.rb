@@ -203,12 +203,12 @@ module BitChannel
       res.set_content_type 'text/plain', @config.charset
       name = (cgi.get_param('name') || FRONT_PAGE_NAME)
       begin
-        res.last_modified = @repository.mtime(page_name)
+        res.last_modified = @repository.mtime(name)
       rescue Errno::ENOENT
         ;
       end
       begin
-        res.body = @repository[page_name]
+        res.body = @repository[name]
       rescue Errno::ENOENT
         res.body = ''
       end
