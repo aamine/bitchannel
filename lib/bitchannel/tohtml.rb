@@ -241,8 +241,10 @@ module Wikitik
       @internal_links.push name
       href = escape_html(URI.escape(name))
       anchor = escape_html(name)
-      q = (@repository.exist?(name) ? '' : '?')
-      %Q[<a href="#{cgi_href()}?cmd=view;name=#{href}">#{q}#{anchor}</a>]
+      if @repository.exist?(name)
+      then %Q[<a href="#{cgi_href()}?cmd=view;name=#{href}">#{anchor}</a>]
+      else %Q[<a href="#{cgi_href()}?cmd=view;name=#{href}">?</a>#{anchor}]
+      end
     end
 
     def explicit_link(exlink)
