@@ -1,6 +1,6 @@
 Fri Apr  9 23:42:16 2004  Minero Aoki  <aamine@loveruby.net>
 
-	lib/bitchannel/handler.rb: implement "diff from my last visit".
+	* lib/bitchannel/handler.rb: implement "diff from my last visit".
 
 	* template/recent.rhtml: add link to "diff from my last visit".
 
