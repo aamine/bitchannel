@@ -1,3 +1,8 @@
+Mon Mar 28 01:48:00 2005  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/fcgi.rb: use C level signal handler to avoid blocking on
+	  Ruby 1.9.
+
 Thu Mar 17 15:04:49 2005  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/erdsyntax.rb: compile to HTML.

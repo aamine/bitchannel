@@ -117,7 +117,7 @@ class FCGI
     def each_request(&block)
       graceful = false
       Signal.trap(:USR1) { graceful = true }
-      Signal.trap(:TERM) { exit 0 }
+      Signal.trap(:TERM, 'EXIT')
       Signal.trap(:PIPE, 'IGNORE')   # We use Errno::EPIPE exception.
       while true
         begin
