@@ -1,3 +1,9 @@
+Thu Apr  1 23:41:07 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* index.cgi: give filename for eval.
+
+	* index.fcgi: ditto.
+
 Thu Apr  1 20:38:59 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/config.rb (cgi_url): don't rely on caller, some
