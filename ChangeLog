@@ -1,3 +1,8 @@
+Wed Sep  1 21:18:51 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/locale/ja.rb: Iconv.iconv -> Iconv.conv.
+	  (reported on /w/BitChannelComment rev 61)
+
 Mon Aug 30 12:08:28 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* version 0.3.0 released.

@@ -46,7 +46,7 @@ module BitChannel
 
         check = lambda {|code|
           begin
-            Iconv.iconv(code, 'UTF-8', 'test string')
+            Iconv.conv(code, 'UTF-8', 'test string')
             true
           rescue Iconv::InvalidEncoding
             false
@@ -60,7 +60,7 @@ module BitChannel
 
         def unify_encoding(text)
           dest = MIME_CHARSET_TO_ICONV[@encoding] or return unify_encoding_NKF(text)
-          Iconv.iconv(dest, 'UTF-8', text)
+          Iconv.conv(dest, 'UTF-8', text)
         rescue Iconv::Failure
           unify_encoding_NKF(text)
         end
