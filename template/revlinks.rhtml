@@ -3,7 +3,7 @@
 <%
     show_max = 10
     ordered_revlinks()[0, show_max].each do |page|
-%><a href="<%= cgi_url() %>?cmd=view;name=<%= url(page) %>"><%= escape_html(page) %></a>
+%><a href="<%= view_url(page) %>"><%= escape_html(page) %></a>
 <%
     end
 %><%= num_revlinks() > show_max ? '...' : '' %>

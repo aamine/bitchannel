@@ -11,7 +11,7 @@
 <div class="menu">
 Edit
 <a href="<%= cgi_url() %>?cmd=recent">Recent</a>
-<a href="<%= cgi_url() %>?cmd=recent">List</a>
+<a href="<%= cgi_url() %>?cmd=list">List</a>
 History
 Annotate
 Diff
@@ -25,7 +25,7 @@ Diff
 <%
     n_hits = 0
     matched_pages do |page, content|
-%><li><a href="<%= cgi_url() %>?cmd=view;name=<%= url(page) %>"><%= escape_html(page) %></a> <%= shorten(content) %></li>
+%><li><a href="<%= view_url(page) %>"><%= escape_html(page) %></a> <%= shorten(content) %></li>
 <%
       n_hits += 1
     end

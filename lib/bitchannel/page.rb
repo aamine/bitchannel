@@ -55,15 +55,15 @@ module BitChannel
     end
 
     def charset
-      url(@config.charset)
+      escape_url(@config.charset)
     end
 
     def css_url
-      url(@config.css_url)
+      escape_url(@config.css_url)
     end
 
     def cgi_url
-      url(@config.cgi_url)
+      escape_url(@config.cgi_url)
     end
 
     def logo_url
@@ -81,12 +81,12 @@ module BitChannel
 
     def view_url(page_name)
       if @config.html_url?
-      then "#{url(page_name)}.html"
-      else "#{cgi_url()}?cmd=view;name=#{url(page_name)}"
+      then "#{escape_url(page_name)}.html"
+      else "#{cgi_url()}?cmd=view;name=#{escape_url(page_name)}"
       end
     end
 
-    def url(str)
+    def escape_url(str)
       escape_html(URI.escape(str))
     end
 
@@ -121,7 +121,7 @@ module BitChannel
     end
 
     def page_url
-      url(@page_name)
+      escape_url(@page_name)
     end
 
     def page_view_url
