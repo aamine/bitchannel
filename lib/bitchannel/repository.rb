@@ -63,7 +63,7 @@ module BitChannel
     include LockUtils
     include TextUtils
 
-    def initialize(hash)
+    def initialize(hash, id = nil)
       UserConfig.parse(hash, 'repository') {|conf|
         @cvs_cmd  = conf.get_required(:cmd_path)
         @wc_read  = conf.get_required(:wc_read)
@@ -71,8 +71,8 @@ module BitChannel
         @logfile  = conf.get_required(:logfile)
         cachedir  = conf.get_required(:cachedir)
         @link_cache = LinkCache.new("#{cachedir}/link", "#{cachedir}/revlink")
-        @module_id = conf.get_optional(:id, nil)
       }
+      @id = id
       # per-request cache
       @Entries = nil
     end

@@ -1,3 +1,8 @@
+Sun May  9 06:47:01 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb: id is not config, but independent
+	  argument.
+
 Sat May  8 21:33:08 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* index.rbx: divided from index.cgi.
