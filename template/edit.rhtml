@@ -13,11 +13,12 @@
 <h1>Edit: <%= page_name() %></h1>
 <%= opt_message() %>
 <form method="POST" action="<%= cgi_url() %>">
-<input type="hidden" name="page" value="<%= page_name() %>">
+<input type="hidden" name="cmd" value="save">
+<input type="hidden" name="name" value="<%= page_name() %>">
 <input type="hidden" name="origrev" value="<%= page_revision() %>">
 <textarea name="text" cols="70" rows="30">
 <%= body() %></textarea>
-<input type="submit" id="okbutton" value="save">
+<input type="submit" id="okbutton" value="Save">
 </form>
 </body>
 </html>
