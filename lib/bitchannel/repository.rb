@@ -88,21 +88,21 @@ module BitChannel
       @module_id = id
       UserConfig.parse(hash, 'repository') {|conf|
         @read_only_p = (conf[:read_only] ? true : false)
-        conf.required! :cmd_path
-        conf.required! :wc_read
         conf.exclusive! :logfile, :logger
-        logger = conf.get(:logfile) {|path| FileLogger.new(path) } ||
-                 conf[:logger] ||
-                 NullLogger.new
-        kill = KillList.load(DEFAULT_KILL_FILE)
-        @wc_read  = CVSWorkingCopy.new(id, conf[:wc_read], conf[:cmd_path], logger, kill)
+        @logger = conf.get(:logfile) {|path| FileLogger.new(path) } ||
+                  conf[:logger] ||
+                  NullLogger.new
+        @cmd_path = conf.get_required(:cmd_path)
+        @wc_read_dir = conf.get_required(:wc_read)
         unless @read_only_p
           conf.required! :wc_write
-          @wc_write = CVSWorkingCopy.new(id, conf[:wc_write], conf[:cmd_path], logger, kill)
+          @wc_write_dir = conf[:wc_write]
         else
           conf.ignore :wc_write
+          @wc_write_dir = nil
           @wc_write = nil
         end
+        update_wc
         @syntax = conf.get(:syntax_proc) {|pr| pr.call(self) }
         conf.required! :cachedir
         @link_cache = LinkCache.new("#{conf[:cachedir]}/link")
@@ -115,10 +115,18 @@ module BitChannel
 
     attr_reader :module_id
 
+    def update_wc
+      kill = KillList.load(DEFAULT_KILL_FILE)
+      @wc_read  = CVSWorkingCopy.new(@module_id, @wc_read_dir, @cmd_path,
+                                     @logger, kill)
+      @wc_write = CVSWorkingCopy.new(@module_id, @wc_write_dir, @cmd_path,
+                                     @logger, kill) if @wc_write_dir
+    end
+    private :update_wc
+
     def clear_per_request_cache
       @pages.clear
-      @wc_read.clear_cache
-      @wc_write.clear_cache if @wc_write
+      update_wc
     end
 
     # internal use only
@@ -351,17 +359,12 @@ module BitChannel
       @logger = logger
       @killlist = killlist
       @in_chdir = false
-      # per-process cache
+      # cache
       @cvs_version = nil
-      # per-request cache
       @cvs_Entries = nil
     end
 
     attr_reader :dir
-
-    def clear_cache
-      @cvs_Entries = nil
-    end
 
     def last_modified
       File.mtime(@dir)

@@ -1,3 +1,9 @@
+Thu Sep  2 05:34:06 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb: replace WC for each reqests.
+
+	* lib/bitchannel/killlist.rb: remove useless method.
+
 Thu Sep  2 04:07:39 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/config.rb: define default kill file name.

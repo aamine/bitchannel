@@ -13,13 +13,6 @@ require 'bitchannel/exception'
 module BitChannel
 
   class KillList
-  
-    def KillList.load_if_modified(path, since)
-      if File.mtime(path) > since
-      then load(path)
-      else nil
-      end
-    end
 
     def KillList.load(path)
       parse(File.readlines(path))
