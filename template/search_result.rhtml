@@ -19,7 +19,7 @@
     n_hits = 0
     matched_pages do |page|
 %>
-<li><a href="<%= view_url(page.name) %>"><%= escape_html(page.name) %></a> <%= shorten(page.source) %></li>
+<li><a href="<%= view_url(page.name) %>"><%= escape_html(page.name) %></a> <%= escape_html(shorten(page.source)) %></li>
 <%
       n_hits += 1
     end

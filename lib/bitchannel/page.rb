@@ -528,7 +528,7 @@ module BitChannel
     end
 
     def query_string
-      escape_html(@config.locale.split_words(@query_string).join(' '))
+      @config.locale.split_words(@query_string).join(' ')
     end
 
     def matched_pages(&block)
@@ -542,7 +542,7 @@ module BitChannel
     end
 
     def shorten(str)
-      escape_html(str.slice(/\A.{0,60}/m).delete('[]*').gsub(/\s+/, ' ').strip)
+      str.slice(/\A.{0,60}/m).delete('[]*').gsub(/\s+/, ' ').strip
     end
   end
 
@@ -565,11 +565,11 @@ module BitChannel
     end
 
     def error_message
-      escape_html(@error.message)
+      @error.message
     end
 
     def query_string
-      escape_html(Array(@query).join(' '))
+      [@query].flatten.join(' ')
     end
   end
 

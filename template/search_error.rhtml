@@ -13,7 +13,7 @@
 
 <h1><%= logo_url() %>Search Error</h1>
 <p>
-<%= error_message() %>
+<%= escape_html(error_message()) %>
 </p>
 .include search_form
 

@@ -1,3 +1,14 @@
+Thu Jun 24 01:32:32 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* template/search_error.rhtml: escape HTML explicitly in template,
+	  not in Page class.
+
+	* template/search_form.rhtml: ditto.
+
+	* template/search_result.rhtml: ditto.
+
+	* lib/bitchannel/page.rb: ditto.
+
 Thu Jun 24 00:51:01 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/repository.rb: new method Time.diffdate.
