@@ -33,11 +33,10 @@ module BitChannel
       @html_url_p  = args.getopt(:use_html_url)
       @site_name   = args.fetchopt(:site_name, nil)
       @logo_url    = args.fetchopt(:logo_url, nil)
+      @cgi_url     = args.fetchopt(:cgi_url, nil)
       args.each do |key, val|
         raise ConfigError, "Config Error: unknown key: config.#{key}"
       end
-
-      @cgi_url = nil
     end
 
     attr_reader :templatedir

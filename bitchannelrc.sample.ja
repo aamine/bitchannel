@@ -27,6 +27,9 @@ def initialize_environment
         # The charactor encoding of pages.
         # I have tested only euc-jp.
 
+    # :cgi_url      => nil,       # auto detect
+    # :cgi_url      => '/wiki/',  # static
+
     :css_url      => 'default.css',
 
     :use_html_url => false
