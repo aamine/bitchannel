@@ -114,7 +114,7 @@ module BitChannel
     def menuitem_annotate_enabled?() true end
 
     def compile_page(content)
-      @page.repository.syntax(@config).compile(content, @page.name)
+      @page.syntax.compile(content, @page.name)
     end
 
     def page_name

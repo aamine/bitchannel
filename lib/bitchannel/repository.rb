@@ -703,6 +703,10 @@ module BitChannel
     attr_reader :repository
     attr_reader :name
 
+    def syntax
+      @repository.syntax
+    end
+
     def orphan?
       revlinks().empty?
     end
