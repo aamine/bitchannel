@@ -1,3 +1,11 @@
+Mon Apr 26 19:34:46 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb: automatically sync CVS/Entries
+	  cache.
+
+	* lib/bitchannel/handler.rb: clear_per_request_cache is no longer
+	  needed.
+
 Mon Apr 26 01:51:15 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* template/menu.rhtml: insert span.menuseparator between page menu

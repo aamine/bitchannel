@@ -85,11 +85,6 @@ module BitChannel
     # internal use only
     attr_reader :link_cache
 
-    # internal use only
-    def clear_per_request_cache
-      @Entries = nil
-    end
-
     def page_names
       cvs_Entries().keys.map {|name| decode_filename(name) }
     end
@@ -314,6 +309,7 @@ module BitChannel
       Dir.chdir(@wc_read) {
         cvs 'up', '-A', filename
       }
+      repository_updated
     end
 
     def checkin(page_name, origrev, new_text)
@@ -331,6 +327,7 @@ module BitChannel
       Dir.chdir(@wc_read) {
         cvs 'up', '-A', filename
       }
+      repository_updated
       @link_cache.update_cache_for page_name,
           ToHTML.extract_links(new_text, self)
     end
@@ -449,6 +446,11 @@ module BitChannel
     def cvs_Entries
       @Entries ||= read_Entries("#{@wc_read}/CVS/Entries")
     end
+
+    def repository_updated
+      @Entries = nil
+    end
+    private :repository_updated
 
     def read_Entries(filename)
       table = {}
