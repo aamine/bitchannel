@@ -10,13 +10,23 @@
 
 module AlphaWiki
   class AlphaWikiError < StandardError; end
-  class CommandFailed < AlphaWikiError; end
+
+  class CommandFailed < AlphaWikiError
+    def initialize(msg, status)
+      @status = status
+    end
+
+    def precise_message
+      @status.inspect
+    end
+  end
 
   class EditConflict < AlphaWikiError
     def initialize(msg, merged)
       super msg
       @merged = merged
     end
+
     attr_reader :merged
   end
 end
