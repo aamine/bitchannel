@@ -1,3 +1,12 @@
+Sat Oct  9 00:40:49 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* misc/page-updated.rb: new file.
+
+	* lib/bitchannel/repository.rb: external update interface
+	  #updated_externally.
+
+	* lib/bitchannel/exception.rb: new exception PageNotFound.
+
 Fri Oct  8 21:40:13 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* misc/refresh-linkcache.rb: use optparse.

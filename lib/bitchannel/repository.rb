@@ -208,6 +208,21 @@ module BitChannel
       notify name, new_rev
     end
 
+    def updated_externally(name)
+      @wc_read.chdir {|wc|
+        wc.cvs_update name
+      }
+      text = @wc_read.read(name)
+      @wc_write.chdir {|wc|
+        wc.lock(name) {
+          wc.cvs_update name
+        }
+      }
+      update_linkcache name, @syntax.extract_links(text)
+    rescue Errno::ENOENT
+      raise PageNotFound, "no such page: #{name}"
+    end
+
     private
 
     def new_page(name)
@@ -679,6 +694,11 @@ module BitChannel
       cvs 'up', '-A', encode_filename(name)
     end
 
+    def cvs_update(name)
+      assert_chdir
+      cvs 'up', encode_filename(name)
+    end
+
     def cvs(*args)
       execute(ignore_status_p(args[0]), @cvs_cmd, '-f', '-q', *args)
     end
@@ -882,7 +902,7 @@ module BitChannel
         }
       }
       @wc_read.chdir {|wc|
-        wc.cvs_update_A @name
+        wc.cvs_update @name
       }
       @repository.updated @name, new_rev, new_text
     end
@@ -901,7 +921,7 @@ module BitChannel
         }
       }
       @wc_read.chdir {|wc|
-        wc.cvs_update_A @name
+        wc.cvs_update @name
       }
       @repository.updated @name, new_rev, new_text
     end

@@ -41,4 +41,5 @@ module BitChannel
 
   class KillListParseError < BitChannelError; end
   class IntListParseError < BitChannelError; end
+  class PageNotFound < BitChannelError; end
 end
