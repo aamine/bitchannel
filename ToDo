@@ -6,9 +6,10 @@
 - simplify syntax (ulist): one item per one line
 - simplify syntax (verbatim): introduce explicit declaration
 - table   || item || item ||
-* ReverseLink
+- インライン画像
+- ReverseLink
 * InterWikiName
-* インライン画像
 * 検索
 * コメントボックス (追加のみ)
+* "load rev XX" on edit page
 * 情報が古くなっていく (ページが古くなったことがわかる)
