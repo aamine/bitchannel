@@ -3,19 +3,21 @@
 # $Id$
 #
 
-require 'getopts'
-
-def usage(status)
-  (status == 0 ? $stdout : $stderr).print(<<EOS)
-Usage: #{File.basename($0)}
-EOS
-  exit status
-end
+require 'optparse'
 
 def main
-  ok = getopts(nil, 'help')
-  usage(0) if $OPT_help
-  usage(1) unless ok
+  parser = OptionParser.new
+  parser.on('--help') {
+    puts parser.help
+    exit 0
+  }
+  begin
+    parser.parse!
+  rescue OptionParser::ParseError => err
+    $stderr.puts err.message
+    $stderr.puts parser.help
+    exit 1
+  end
 
   load './bitchannelrc'
   setup_environment

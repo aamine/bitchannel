@@ -1,3 +1,14 @@
+Fri Oct  8 21:40:13 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* misc/refresh-linkcache.rb: use optparse.
+
+Fri Oct  8 21:39:30 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb (Repo#initialize): Config value is
+	  safe.
+
+	* lib/bitchannel/repository.rb (LinkCache#clear): create prefix.
+
 Thu Sep 30 19:47:47 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/repository.rb (checkin): fix typo.
