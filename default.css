@@ -95,7 +95,6 @@ div.main p {
     margin-top: 1em;
     margin-bottom: 1em;
     margin-left: 0px;
-    width: 40em;
 }
 
 pre {
@@ -107,14 +106,8 @@ pre {
 
 blockquote {
     background-color: transparent;
-    /*
-    border-style: solid;
-    border-color: #33a;
-    border-width: 4px 0px 4px 0px;
-    */
     padding: 4px;
     margin-left: 3em;
-    width: 30em;
     font-weight: normal;
 }
 
@@ -124,13 +117,11 @@ ul {
 }
 
 li {
-    width: 36em;
     margin-left: 0px;
     padding-left: 0px;
 }
 
 dl {
-    width: 36em;
     margin-left: 0em;
 }
 
