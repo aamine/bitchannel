@@ -34,6 +34,15 @@ module BitChannel
       @result
     end
 
+    DUMMY_CONFIG = Object.new
+    def DUMMY_CONFIG.html_url?
+      true
+    end
+
+    def ToHTML.extract_links(str, repo)
+      new(DUMMY_CONFIG, repo).extract_links(str)
+    end
+
     def extract_links(str)
       compile(str, ' (dummy) ')   # page name never includes ' ' in BitChannel
       @internal_links

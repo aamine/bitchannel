@@ -61,8 +61,7 @@ module BitChannel
     include LockUtils
     include TextUtils
 
-    def initialize(config, args)
-      @config = config
+    def initialize(args)
       t = Hash.new {|h,k|
         raise ConfigError, "Config Error: not set: repository.#{k}"
       }
@@ -71,11 +70,11 @@ module BitChannel
       @wc_read  = t[:wc_read];  t.delete(:wc_read)
       @wc_write = t[:wc_write]; t.delete(:wc_write)
       @sync_wc  = t[:sync_wc];  t.delete(:sync_wc)
+      cachedir  = t[:cachedir]; t.delete(:cachedir)
       t.each do |k,v|
-        raise ConfigError, "Config Error: unknown key set: #{k}"
+        raise ConfigError, "Config Error: unknown key: repository.#{k}"
       end
-      @link_cache = LinkCache.new(@config.link_cachedir,
-                                  @config.revlink_cachedir)
+      @link_cache = LinkCache.new("#{cachedir}/link", "#{cachedir}/revlink")
       # in-process cache
       @Entries = nil
     end
@@ -235,7 +234,7 @@ module BitChannel
         cvs 'up', '-A', filename
       } if @sync_wc
       @link_cache.update_cache_for page_name,
-          ToHTML.new(@config, self).extract_links(new_text)
+          ToHTML.extract_links(new_text, self)
     end
 
     private
@@ -352,12 +351,12 @@ module BitChannel
     end
 
     def extract_links(page_text)
-      ToHTML.new(@config, self).extract_links(page_text)
+      ToHTML.extract_links(page_text, self)
     end
 
     def collect_revlinks(page_name)
       page_names().select {|name|
-        ToHTML.new(@config, self).extract_links(self[name]).include?(page_name)
+        ToHTML.extract_links(self[name], self).include?(page_name)
       }
     end
 

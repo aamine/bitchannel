@@ -20,7 +20,6 @@ module BitChannel
 
       # Required
       @templatedir = t[:templatedir];  t.delete(:templatedir)
-      @cachedir    = t[:cachedir];     t.delete(:cachedir)
       @charset     = t[:charset];      t.delete(:charset)
       @css_url     = t[:css_url];      t.delete(:css_url)
       @html_url_p  = t[:use_html_url]; t.delete(:use_html_url)
@@ -36,15 +35,6 @@ module BitChannel
     end
 
     attr_reader :templatedir
-
-    def link_cachedir
-      "#{@cachedir}/link"
-    end
-
-    def revlink_cachedir
-      "#{@cachedir}/revlink"
-    end
-
     attr_reader :charset
     attr_reader :css_url
 
@@ -69,7 +59,7 @@ module BitChannel
     end
 
     def tmp_page_name
-      'SandBox'
+      'tmp'
     end
 
   end

@@ -14,7 +14,6 @@ def initialize_environment
 
   config = BitChannel::Config.new(
     :templatedir  => "#{cgidir}/template",
-    :cachedir     => "#{cgidir}/cache",
     :charset      => 'euc-jp',
     :css_url      => 'default.css',
     :use_html_url => false,       # true: PageName.html,  false: ?cmd=view;name=PageName
@@ -22,10 +21,11 @@ def initialize_environment
     :index_page   => 'FrontPage',
     :help_page    => 'HelpPage'
   )
-  repo = BitChannel::Repository.new(config,
+  repo = BitChannel::Repository.new(
     :cmd_path  => '/usr/bin/cvs',
     :wc_read   => "#{cgidir}/wc.read",
     :wc_write  => "#{cgidir}/wc.write",
+    :cachedir  => "#{cgidir}/cache",
     :sync_wc   => true
   )
 
