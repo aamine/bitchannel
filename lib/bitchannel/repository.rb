@@ -69,6 +69,7 @@ module BitChannel
         @wc_read  = conf.get_required(:wc_read)
         @wc_write = conf.get_required(:wc_write)
         @logfile  = conf.get_required(:logfile)
+        @notifier = conf.get_optional(:notifier)
         cachedir  = conf.get_required(:cachedir)
         @link_cache = LinkCache.new("#{cachedir}/link", "#{cachedir}/revlink")
       }
@@ -202,14 +203,14 @@ module BitChannel
       page_must_exist page_name
       Dir.chdir(@wc_read) {
         out, err = cvs('diff', '-u', "-r1.#{rev1}", "-r1.#{rev2}", encode_filename(page_name))
-        return Diff.parse(out)
+        return Diff.parse(@module_id, out)
       }
     end
 
     def diff_from(org)
       Dir.chdir(@wc_read) {
         out, err = cvs('diff', '-uN', "-D#{format_time_cvs(org)}")
-        return Diff.parse_diffs(out)
+        return Diff.parse_diffs(@module_id, out)
       }
     end
 
@@ -222,25 +223,27 @@ module BitChannel
     class Diff
       extend FilenameEncoding
 
-      def Diff.parse_diffs(out)
+      def Diff.parse_diffs(mod, out)
         chunks = out.split(/^Index: /)
         chunks.shift
-        chunks.map {|c| parse(c) }
+        chunks.map {|c| parse(mod, c) }
       end
 
-      def Diff.parse(chunk)
+      def Diff.parse(mod, chunk)
         # cvs output may be corrupted
         meta = chunk.slice!(/\A.*?^(?=@@)/m).to_s
         file = meta.slice(/\A(?:Index:)?\s*(\S+)/, 1).strip
         _, stime, srev = *meta.slice(/^\-\-\- .*/).split("\t", 3)
         _, dtime, drev = *meta.slice(/^\+\+\+ .*/).split("\t", 3)
-        new(decode_filename(file),
+        new(mod,
+            decode_filename(file),
             srev.to_s.slice(/\A1\.(\d+)/, 1).to_i, Time.parse(stime + ' UTC').getlocal,
             drev.slice(/\A1\.(\d+)/, 1).to_i, Time.parse(dtime + ' UTC').getlocal,
             chunk)
       end
 
-      def initialize(page, srev, stime, drev, dtime, diff)
+      def initialize(mod, page, srev, stime, drev, dtime, diff)
+        @module = mod
         @page_name = page
         @rev1 = srev
         @time1 = stime
@@ -249,6 +252,7 @@ module BitChannel
         @diff = diff
       end
 
+      attr_reader :module
       attr_reader :page_name
       attr_reader :rev1
       attr_reader :time1

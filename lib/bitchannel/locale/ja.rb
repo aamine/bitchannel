@@ -12,20 +12,19 @@ module BitChannel
 
   class Locale_ja < Locale
 
-    def initialize
-      super
+    def initialize(name, encoding)
+      super()
+      @name = name
+      @encoding = encoding
       rc = rc_table()
-      rc[:save_without_name] = 'Text saved without page name; make sure.'
-      rc[:edit_conflicted] = 'Edit conflicted; make sure.'
+      rc[:save_without_name] = _('Text saved without page name; make sure.')
+      rc[:edit_conflicted] = _('Edit conflicted; make sure.')
     end
 
-    def name
-      'ja_JP.eucJP'
-    end
-
-    def charset
-      'euc-jp'
-    end
+    attr_reader :name
+    attr_reader :encoding
+    alias mime_charset encoding
+    alias charset encoding
 
     begin
       begin
@@ -37,7 +36,7 @@ module BitChannel
         }
 
         def unify_encoding(text)
-          method = MIME_CHARSET_TO_UCONV[charset()] or return text
+          method = MIME_CHARSET_TO_UCONV[@encoding] or return unify_encoding_NKF(text)
           Uconv.__send__(method, text)
         rescue Uconv::Error
           unify_encoding_NKF(text)
@@ -60,7 +59,7 @@ module BitChannel
         }
 
         def unify_encoding(text)
-          dest = MIME_CHARSET_TO_ICONV[charset()] or return text
+          dest = MIME_CHARSET_TO_ICONV[@encoding] or return unify_encoding_NKF(text)
           Iconv.iconv(dest, 'UTF-8', text)
         rescue Iconv::Failure
           unify_encoding_NKF(text)
@@ -76,14 +75,16 @@ module BitChannel
 
     MIME_CHARSET_TO_NKF = {
       'euc-jp'    => '-e -m0 -X',
-      'shift_jis' => '-s -m0 -x'
+      'shift_jis' => '-s -m0 -x',
+      'iso-2022-jp' => '-j -m0 -x'
     }
 
     def unify_encoding_NKF(text)
-      flags = MIME_CHARSET_TO_NKF[charset()] or return text
+      flags = MIME_CHARSET_TO_NKF[@encoding] or return text
       NKF.nkf(flags, text)
     end
 
+    alias _ unify_encoding
 
     Z_SPACE = "\241\241"   # zen-kaku space
 
@@ -94,9 +95,12 @@ module BitChannel
 
   end
 
-  loc = Locale_ja.new
+  loc = Locale_ja.new('ja_JP.eucJP', 'euc-jp')
   Locale.declare_locale 'ja', loc
   Locale.declare_locale 'ja_JP', loc
   Locale.declare_locale 'ja_JP.eucJP', loc
+
+  loc = Locale_ja.new('ja_JP.iso2022jp', 'iso-2022-jp')
+  Locale.declare_locale 'ja_JP.iso2022jp', loc
 
 end
