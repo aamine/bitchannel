@@ -13,6 +13,7 @@ require 'bitchannel/repository'
 require 'bitchannel/handler'
 require 'bitchannel/webrick_cgi'
 require 'fileutils'
+require 'forwardable'
 
 module BitChannel
 
@@ -40,13 +41,13 @@ module BitChannel
       when req.cascade?
         return farm_index() unless @farm.exist?(req.node_id)
         webrickreq.query['name'] ||= req.page_name
-        wiki = @farm[id]
+        wiki = @farm[req.node_id]
         Handler.new(wiki).handle(Request.new(webrickreq, wiki.locale, false))
       when req.new_node?
         @farm.create_node req.id, { :name => req.name,
                                     :theme => req.theme,
                                     :logo => nil }
-        FarmThanksPage.new(@farm, id).response
+        FarmThanksPage.new(@farm, req.id).response
       else
         farm_index()
       end
@@ -173,7 +174,7 @@ module BitChannel
     end
     
     def mtime(id)
-      @farm[id].mtime
+      @farm[id].last_modified
     end
 
     def name(id)
@@ -203,43 +204,6 @@ module BitChannel
   end
 
 
-  class Farm
-
-    def initialize(config, repository)
-      @config = config
-      @repository = repository
-    end
-
-    def [](id)
-      @nodes[id] ||= new_node(id)
-    end
-
-    extend Forwardable
-
-    def_delegator "@repository", :create_node
-    def_delegator "@repository", :node_ids
-    def_delegator "@repository", :last_modified
-
-    private
-
-    def new_node(id)
-      repo = @repository.node_repository(id)
-      conf = Config.new({
-        :templatedir   => @config.templatedir,
-        :cgi_url       => "#{@config.node_urlbase}/#{id}/",
-        :use_html_url  => "",
-        :locale        => @config.locale,
-        :theme_urlbase => @config.theme_urlbase,
-        :theme         => repo.theme,
-        :site_name     => repo.name,
-        :logo_url      => repo.logo
-      })
-      WikiSpace.new(conf, repo)
-    end
-
-  end
-
-
   class FarmConfig
 
     def initialize(hash)
@@ -254,9 +218,10 @@ module BitChannel
     end
 
     attr_reader :locale
+    attr_reader :templatedir
     attr_reader :farm_url
     attr_reader :node_urlbase
-    attr_reader :templatedir
+    attr_reader :theme_urlbase
 
     def themes
       Dir.glob("#{@themedir}/*/").map {|path| File.basename(path) }
@@ -273,11 +238,12 @@ module BitChannel
   end
 
 
-  class FarmRepository
+  class Farm
 
     include FilenameEncoding
 
-    def initialize(hash)
+    def initialize(config, hash)
+      @config = config
       UserConfig.parse(hash, 'farm') {|conf|
         @datadir     = conf.get_required(:datadir)
         @cmd_path    = conf.get_required(:cmd_path)
@@ -285,7 +251,10 @@ module BitChannel
         @skeleton    = conf.get_required(:skeleton)
         @logfile     = conf.get_optional(:logfile, nil)
       }
+      @nodes = {}
     end
+
+    attr_reader :config
 
     def create_node(id, prop)
       tmpprefix = "#{@datadir}/.#{id}"
@@ -294,7 +263,7 @@ module BitChannel
       rescue Errno::EEXIST
         raise NodeExist, "node `#{id}' already exists"
       end
-      if File.directory?("#{@datadir}/#{id}")
+      if File.directory?(prefix(id))
         Dir.rmdir tmpprefix
         raise NodeExist, "node `#{id}' already exists"
       end
@@ -312,48 +281,68 @@ module BitChannel
         repo.checkin decode_filename(File.basename(path)), nil, File.read(path)
       end
       repo.properties = prop
-      File.rename tmpprefix, "#{@datadir}/#{id}"
+      File.rename tmpprefix, prefix(id)
     ensure
-      unless File.directory?("#{@datadir}/#{id}")
+      unless File.directory?(prefix(id))
         FileUtils.rm_rf tmpprefix
       end
     end
 
     def last_modified
-      node_ids().map {|id| File.mtime("#{@datadir}/#{id}") }.sort.last
+      node_ids().map {|id| File.mtime(prefix(id)) }.sort.last
     end
 
     def node_ids
       Dir.entries(@datadir).select {|ent|
-        not /\A\./ =~ ent and File.directory?("#{@datadir}/#{ent}")
+        not /\A\./ =~ ent and File.directory?(prefix(ent))
       }
     end
 
     def exist?(id)
-      File.directory?("#{@datadir}/#{id}")
+      File.directory?(prefix(id))
     end
 
-    def node_repository(id)
-      Repository.new({
-        :cmd_path     => @cmd_path,
-        :wc_read      => "#{path(id)}/wc.read",
-        :wc_write     => "#{path(id)}/wc.write",
-        :cachedir     => "#{path(id)}/cache",
-        :logfile      => @logfile
-      }, id)
+    def [](id)
+      @nodes[id] ||= new_node(id)
     end
 
     private
 
-    def path(id)
+    def new_node(id)
+      repo = Repository.new({
+        :cmd_path     => @cmd_path,
+        :wc_read      => "#{prefix(id)}/wc.read",
+        :wc_write     => "#{prefix(id)}/wc.write",
+        :cachedir     => "#{prefix(id)}/cache",
+        :logfile      => @logfile
+      }, id)
+      conf = Config.new({
+        :templatedir   => @config.templatedir,
+        :cgi_url       => "#{@config.node_urlbase}/#{id}/",
+        :use_html_url  => "",
+        :locale        => @config.locale,
+        :theme_urlbase => @config.theme_urlbase,
+        :theme         => repo.theme,
+        :site_name     => repo.name,
+        :logo_url      => repo.logo
+      })
+      WikiSpace.new(conf, repo)
+    end
+
+    def prefix(id)
       "#{@datadir}/#{id}"
     end
 
-    def must_exist(id)
-      raise ArgumentError, "node not exist: #{id}" unless exist?(id)
-    end
-
   end   # class Farm
+
+
+  class WikiSpace   # redefine
+    extend Forwardable
+    def_delegator "@repository", :last_modified
+    def_delegator "@repository", :name
+    def_delegator "@repository", :logo
+    def_delegator "@repository", :theme
+  end
 
 
   class Repository   # redefine

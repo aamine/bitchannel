@@ -50,15 +50,15 @@ module BitChannel
   class Config
     def initialize(hash)
       UserConfig.parse(hash, 'config') {|conf|
-        @locale      = conf.get_required(:locale)
-        @templatedir = conf.get_required(:templatedir)
-        @css_url     = conf.get_optional(:css_url, nil)
-        @theme       = conf.get_optional(:theme, nil)
-        @theme_url   = conf.get_optional(:theme_url, 'theme')
-        @html_url_p  = conf.get_required(:use_html_url)
-        @site_name   = conf.get_optional(:site_name, nil)
-        @logo_url    = conf.get_optional(:logo_url, nil)
-        @cgi_url     = conf.get_optional(:cgi_url, nil)
+        @locale        = conf.get_required(:locale)
+        @templatedir   = conf.get_required(:templatedir)
+        @css_url       = conf.get_optional(:css_url, nil)
+        @theme         = conf.get_optional(:theme, nil)
+        @theme_urlbase = conf.get_optional(:theme_urlbase, 'theme')
+        @html_url_p    = conf.get_required(:use_html_url)
+        @site_name     = conf.get_optional(:site_name, nil)
+        @logo_url      = conf.get_optional(:logo_url, nil)
+        @cgi_url       = conf.get_optional(:cgi_url, nil)
       }
       if @theme and @css_url
         raise ConfigError, "both of theme and css_url given"

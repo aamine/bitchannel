@@ -504,7 +504,7 @@ module BitChannel
     end
 
     def last_modified
-      @repository.latest_mtime
+      @repository.last_modified
     end
 
     private
