@@ -105,7 +105,11 @@ module BitChannel
           conf.get_optional(:wc_write, nil)   # discard
           @wc_write = nil
         end
-        @syntax = conf.get_optional(:syntax, nil)
+        if syn = conf.get_optional(:syntax_proc, nil)
+          @syntax = syn.call(self)
+        else
+          @syntax = nil
+        end
         cachedir  = conf.get_required(:cachedir)
         @link_cache = LinkCache.new("#{cachedir}/link")
         @revlink_cache = LinkCache.new("#{cachedir}/revlink")
@@ -179,6 +183,12 @@ module BitChannel
       then @wc_read.last_modified
       else @wc_write.last_modified
       end
+    end
+
+    def diff_from(org)
+      @wc_read.chdir {|wc|
+        return wc.cvs_diff_from(org)
+      }
     end
 
     def [](name)
@@ -451,7 +461,9 @@ module BitChannel
     end
 
     def cvs_diff_from(time)
-      diff('-uN', "-D#{format_time_cvs(time)}")
+      assert_chdir
+      out, err = *cvs('diff', '-uN', "-D#{format_time_cvs(time)}")
+      Diff.parse_diffs(@module_id, out)
     end
 
     def format_time_cvs(time)
@@ -750,12 +762,6 @@ module BitChannel
     def diff(rev1, rev2)
       @wc_read.chdir {|wc|
         return wc.cvs_diff(rev1, rev2, @name)
-      }
-    end
-
-    def diff_from(org)
-      @wc_read.chdir {|wc|
-        return wc.cvs_diff_from(org)
       }
     end
 

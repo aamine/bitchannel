@@ -1,3 +1,13 @@
+Sat Aug 14 16:34:07 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb: new option syntax_proc.
+
+	* lib/bitchannel/repository.rb: PageEntry#diff_from ->
+	  Repository#diff_from.
+
+	* lib/bitchannel/repository.rb (CVSWC#cvs_diff_from): did not
+	  work.
+
 Sat Aug 14 15:20:26 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/repository.rb: new method PageEntry#read_only?
