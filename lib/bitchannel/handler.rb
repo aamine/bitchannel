@@ -23,7 +23,7 @@ end
 module Wikitik
 
   def Wikitik.main(repo, config)
-    Handler.new(repo, config).main(CGI.new)
+    Handler.new(repo, config).handle_request(CGI.new)
   end
 
   class Handler
@@ -33,7 +33,7 @@ module Wikitik
       @config = config
     end
 
-    def main(cgi)
+    def handle_request(cgi)
       begin
         wiki_main cgi
       rescue Exception => err
@@ -63,10 +63,10 @@ module Wikitik
       when 'save'
         page_name = cgi.get_param('name')
         unless page_name
-          send cgi, Wikitik::EditPage.new(@config, @repository,
-                                          @config.tmp_page_name, nil,
-                                          cgi.get_param('text').to_s,
-                                          text(:save_without_name)).html
+          send cgi, EditPage.new(@config, @repository,
+                                 @config.tmp_page_name, nil,
+                                 cgi.get_param('text').to_s,
+                                 gettext(:save_without_name)).html
           return
         end
         origrev = cgi.get_param('origrev').to_i
@@ -74,17 +74,17 @@ module Wikitik
         begin
           @repository.checkin page_name, origrev, (cgi.get_param('text') || "")
           view cgi, page_name
-        rescue Wikitik::EditConflict => err
-          send cgi, Wikitik::EditPage.new(@config, @repository,
-                                          page_name, nil,
-                                          merged, text(:conflict)).html
+        rescue EditConflict => err
+          send cgi, EditPage.new(@config, @repository,
+                                 page_name, nil,
+                                 merged, gettext(:conflict)).html
         end
       when 'history'
         history cgi, cgi.get_param('name')
       when 'list'
-        send cgi, Wikitik::ListPage.new(@config, @repository).html
+        send cgi, ListPage.new(@config, @repository).html
       when 'recent'
-        send cgi, Wikitik::RecentPage.new(@config, @repository).html
+        send cgi, RecentPage.new(@config, @repository).html
       else
         view cgi, cgi.get_param('name')
       end
@@ -101,12 +101,12 @@ module Wikitik
         viewrev cgi, page_name, rev.to_i
         return
       end
-      page = Wikitik::ViewPage.new(@config, @repository, page_name)
+      page = ViewPage.new(@config, @repository, page_name)
       send cgi, page.html, page.last_modified
     end
 
     def viewrev(cgi, page_name, rev)
-      page = Wikitik::ViewRevPage.new(@config, @repository, page_name, rev)
+      page = ViewRevPage.new(@config, @repository, page_name, rev)
       send cgi, page.html, page.last_modified
     end
 
@@ -115,7 +115,7 @@ module Wikitik
         view cgi, @config.index_page_name
         return
       end
-      send cgi, Wikitik::EditPage.new(@config, @repository, page_name).html
+      send cgi, EditPage.new(@config, @repository, page_name).html
     end
 
     def history(cgi, page_name)
@@ -123,22 +123,19 @@ module Wikitik
         view cgi, @config.index_page_name
         return
       end
-      send cgi, Wikitik::HistoryPage.new(@config, @repository, page_name).html
+      send cgi, HistoryPage.new(@config, @repository, page_name).html
     end
 
     def send(cgi, html, mtime = nil)
       header = {'status' => '200 OK',
-                'type' => 'text/html', 'charset' => @config.charset,
+                'type' => 'text/html',
+                'charset' => @config.charset,
                 'Pragma' => 'no-cache',
                 'Cache-Control' => 'no-cache',
                 'Content-Length' => html.length.to_s}
       header['Last-Modified'] = CGI.rfc1123_date(mtime) if mtime
       print cgi.header(header)
       print html unless cgi.request_method.to_s.upcase == 'HEAD'
-    end
-
-    def text(key)
-      Wikitik.gettext(key)
     end
 
   end
