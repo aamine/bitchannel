@@ -29,10 +29,11 @@
 </p>
 
 <% log = diff() %>
-<pre>
-<span class="removedline">--- <%= page_name() %>  rev<%= log.rev1 %>  <%= format_time(log.time1) %></span>
-<span class="addedline">+++ <%= page_name() %>  rev<%= log.rev2 %>  <%= format_time(log.time2) %></span>
-<%=
+<p>
+<span class="removedline">--- rev<%= log.rev1 %>  <%= format_time(log.time1) %></span><br>
+<span class="addedline">+++ rev<%= log.rev2 %>  <%= format_time(log.time2) %></span>
+</p>
+<pre class="diff"><%=
   log.diff.map {|line|
     case line
     when /\A-/

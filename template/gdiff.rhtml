@@ -14,11 +14,25 @@
 <div class="main">
 <h1><%= logo_url() %>Diff from <%= format_time(origin_time()) %></h1>
 
-<pre>
 <% diffs().each do |log| %>
-<span class="removedline">--- <%= escape_html(log.page_name) %>  rev<%= log.rev1 %>  <%= format_time(log.time1) %></span>
-<span class="addedline">+++ <%= escape_html(log.page_name) %>  rev<%= log.rev2 %>  <%= format_time(log.time2) %></span>
-<%=
+<div>
+<h2><a href="<%= view_url(log.page_name) %>"><%= escape_html(log.page_name) %></a></h2>
+<p class="minimenu">
+<a href="<%= cgi_url() %>?cmd=edit;name=<%= escape_html(log.page_name) %>">[edit]</a>
+<% if log.rev2 > 1 %>
+<a href="<%= cgi_url() %>?cmd=diff;rev1=<%= log.rev2 - 1 %>;rev2=<%= log.rev2 %>;name=<%= escape_html(log.page_name) %>">[diff]</a>
+<% else %>
+[diff]
+<% end %>
+<a href="<%= cgi_url() %>?cmd=annotate;name=<%= escape_html(log.page_name) %>">[ann]</a>
+<a href="<%= cgi_url() %>?cmd=history;name=<%= escape_html(log.page_name) %>">[hist]</a>
+</p>
+<p>
+</div>
+<span class="removedline">--- rev<%= log.rev1 %>  <%= format_time(log.time1) %></span><br>
+<span class="addedline">+++ rev<%= log.rev2 %>  <%= format_time(log.time2) %></span>
+</p>
+<pre class="diff"><%=
   log.diff.map {|line|
     case line
     when /\A\-/
@@ -29,10 +43,8 @@
       escape_html(line)
     end
   }.join('')
-%>
-<hr>
+%></pre>
 <% end %>
-</pre>
 </div>
 
 </body>

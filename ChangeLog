@@ -1,3 +1,18 @@
+Fri Apr  9 22:18:47 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* template/gdiff.rhtml: extract page name to <h2>.
+
+	* template/gdiff.rhtml: add mini menu.
+
+	* template/gdiff.rhtml: remove meta data from <pre>.
+
+	* template/diff.rhtml: ditto.
+
+	* lib/bitchannel/repository.rb (Diff.parse): rev[12] should return
+	  int.
+
+	* default.css: change diff background color.
+
 Fri Apr  9 21:49:13 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/repository.rb: #diff returns a Diff.

@@ -170,7 +170,16 @@ span.addedline {
     background-color: #fdd;
 }
 span.removedline {
-    background-color: #fdd;
+    background-color: #ddd;
+}
+pre.diff {
+    background-color: transparent;
+}
+
+/*
+    gdiff
+*/
+p.minimenu {
 }
 
 /*

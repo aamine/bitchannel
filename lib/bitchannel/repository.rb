@@ -254,8 +254,8 @@ module BitChannel
         _, stime, srev = *meta.slice(/^\-\-\- .*/).split("\t", 3)
         _, dtime, drev = *meta.slice(/^\+\+\+ .*/).split("\t", 3)
         new(decode_filename(file),
-            srev.slice(/\A1\.(\d+)/, 1), Time.parse(stime),
-            drev.slice(/\A1\.(\d+)/, 1), Time.parse(dtime),
+            srev.slice(/\A1\.(\d+)/, 1).to_i, Time.parse(stime),
+            drev.slice(/\A1\.(\d+)/, 1).to_i, Time.parse(dtime),
             chunk)
       end
 
