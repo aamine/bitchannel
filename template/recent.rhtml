@@ -9,9 +9,10 @@
 <body>
 <div class="menu">
 <a href="<%= cgi_url() %>?cmd=list">List</a>
+<a href="<%= cgi_url() %>?cmd=view;name=IndexPage">Top</a>
 <a href="<%= cgi_url() %>?cmd=view;name=HelpPage">Help</a>
 </div>
-<h1>Recent</h1>
+<h1>Recent Edit</h1>
 <ul><%
    page_list().each do |page, mtime| %>
 <li><%= format_time(mtime) %>: <a href="<%= cgi_url() %>?cmd=view;name=<%= page %>"><%= page %></a></li><%
