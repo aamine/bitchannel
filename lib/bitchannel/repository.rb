@@ -105,8 +105,8 @@ module BitChannel
         update_wc
         @syntax = conf.get(:syntax_proc) {|pr| pr.call(self) }
         conf.required! :cachedir
-        @link_cache = LinkCache.new("#{conf[:cachedir]}/link")
-        @revlink_cache = LinkCache.new("#{conf[:cachedir]}/revlink")
+        @link_cache = LinkCache.new("#{conf[:cachedir]}/link".untaint)
+        @revlink_cache = LinkCache.new("#{conf[:cachedir]}/revlink".untaint)
         @notifier = conf[:notifier]
       }
       # per-request cache
@@ -262,6 +262,7 @@ module BitChannel
 
     def clear
       FileUtils.rm_rf @dir
+      Dir.mkdir @dir
     end
 
     def entries
