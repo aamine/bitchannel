@@ -1,3 +1,8 @@
+Thu Dec 23 09:56:30 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/handler.rb (handle): check_IfModifiedSince does
+	  not return value.
+
 Thu Dec  9 00:16:35 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* standalone.rb: use optparse.

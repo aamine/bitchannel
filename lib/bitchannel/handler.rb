@@ -36,7 +36,8 @@ module BitChannel
 
     def handle(req)
       res = (_handle(req) || @wiki.view(FRONT_PAGE_NAME).response)
-      check_IfModifiedSince(req, res)
+      check_IfModifiedSince req, res
+      res
     rescue WEBrick::HTTPStatus::Status
       raise
     rescue Exception => err
@@ -52,12 +53,12 @@ module BitChannel
     private
 
     def check_IfModifiedSince(req, res)
-      return nil unless res
-      return res unless req.if_modified_since
+      return unless res
+      return unless req.if_modified_since
+      return unless res.last_modified
       if res.last_modified <= req.if_modified_since
         raise WEBrick::HTTPStatus::NotModified, 'not modified'
       end
-      res
     end
 
     def error_response(err, debugp)
