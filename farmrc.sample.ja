@@ -1,0 +1,55 @@
+#
+# BitChannelFarm 設定ファイル例
+#
+
+def bitchannel_cgidir
+  File.dirname(File.expand_path(__FILE__)).untaint
+end
+
+# プロセスの最初に一度だけ呼ばれる
+def setup_environment
+  $KCODE = 'EUC'
+  $LOAD_PATH.unshift "#{bitchannel_cgidir()}/lib"
+  require 'bitchannel'
+  require 'bitchannel/farm'
+end
+
+# Farm オブジェクトを作成
+def farm_context
+  cgidir = bitchannel_cgidir()
+  config = BitChannel::FarmConfig.new({
+    # WikiFarm (自体) の URL。
+    # 下記の設定は、Apache を前提に、CGI スクリプト /bc/farm.cgi に
+    # URL /bc/farm/ でアクセスするようにしている。
+    # なお、この設定をする場合、farm.{cgi,fcgi,rbx} の三つのうち、
+    # 使わないファイルは必ず消しておくこと。
+    :farm_url      => '/bc/farm/',
+
+    # WikiFarm でホストされる Wiki のベース URL。
+    # この場合ならば各 Wiki の URL は /bc/farm/somewiki/ となる。
+    # node_urlbase を /bc/farm.cgi にすれば /bc/farm.cgi/somewiki/ となる。
+    :node_urlbase  => '/bc/farm',
+
+    :theme_urlbase => '/bc/theme',
+    :themedir      => "#{cgidir}/theme",
+    :templatedir   => "#{cgidir}/template",
+    :locale        => BitChannel::Locale.get('ja_JP.eucJP')
+  })
+  BitChannel::Farm.new(config, {
+    :cmd_path      => '/usr/bin/cvs',
+
+    # CVS レポジトリの絶対パス。
+    # レポジトリはあらかじめ cvs init で作り、
+    # パーミッションやコンフィグファイルを正しく設定しておくこと。
+    :repository    => '/var/cvs/bcfarm',
+
+    # WikiFarm のデータ (ワーキングコピーやキャッシュなど) を置くディレクトリ。
+    # ウェブサーバから見えない場所に置くべき。
+    :datadir       => '/var/bcfarm',
+
+    # 新しい Wiki を作るときのデフォルトページ群。
+    :skeleton      => "#{cgidir}/pages",
+
+    :logfile       => nil   # '/var/log/bitchannel/main.log'
+  })
+end

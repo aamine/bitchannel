@@ -1,3 +1,7 @@
+Mon May 10 01:04:05 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* farmrc.sample.ja: new file.
+
 Mon May 10 00:20:44 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/config.rb: support use_html_url=>".html", etc.
