@@ -1,0 +1,112 @@
+BitChannel README
+=================
+
+  BitChannel は Ruby ベースの Wiki clone です。
+  CVS と密接に連結しているのが特徴です。
+
+
+必要な環境
+----------
+
+  * Ruby 1.8.1 以上
+  * CVS (新しいほうが望ましいが、少し古くても動作には問題なし)
+  * できれば uconv
+
+
+インストールと設定
+------------------
+
+  1. CGI ディレクトリ
+
+    以下のようにファイルを配置してください。
+
+      $cgidir/index.cgi
+      $cgidir/bitchannelrc
+      $cgidir/.htaccess         dot.htaccessをコピー
+
+    index.cgi の #! などを含め、適切に編集してください。
+    基本的にこの三つのファイルは環境に合わせて編集すべきです。
+
+  2. ライブラリ
+
+    lib/ 以下のファイルを Ruby のロードパスのどこかにコピー
+    します。デフォルトの index.cgi では自分と同じディレクトリ
+    に lib/ があれば動くようになっていますので、問題があれば
+    書き換えてください。
+
+  3. CVS レポジトリとワーキングコピー
+
+    CVS レポジトリとワーキングコピーはどこにあっても構いません。
+    できるだけ DocumentRoot の外に置くのが適切です。
+
+    まずパッケージの pages/ 以下をインポートしてレポジトリを作り
+    ます。CVS レポジトリはローカルでもリモートでも構いません。
+    
+    それを二ヶ所にチェックアウトして、そのディレクトリを HTTP
+    サーバから書き込み可能かつ cvs commit 可能にしてください。
+    このディレクトリ二つを bitchannelrc の wc_read と wc_write
+    に設定します。
+
+    なお、CVS の特性上、リモートレポジトリを使う場合はパスワード
+    が必要になるはずです。CGI が動くときのユーザから commit 可能に
+    なるよう、$HOME と ~/.cvspass をうまく設定してください。
+
+  4. キャッシュディレクトリ
+
+    どこかにディレクトリを作って、HTTP サーバから読み書き可能に
+    してください。それを bitchannelrc の cachedir に設定します。
+
+  5. テンプレート
+
+    template/ 以下を好きな場所にまるごとコピーしてください。
+    DocumentRoot の外に置くのが適切です。
+    そのパスを bitchannelrc の templatedir に設定します。
+
+
+  以上です。
+
+
+ファイル配置の一例
+------------------
+
+  HTTP サーバの実効ユーザを www とします。
+
+  -rw-r--r--  root  root  /usr/lib/cgi-bin/bitchannel/.htaccess
+  -rwxr-xr-x  root  root  /usr/lib/cgi-bin/bitchannel/index.cgi        CGIエントリポイント
+  -rw-r--r--  root  root  /usr/lib/cgi-bin/bitchannel/bitchannelrc     設定ファイル
+  -rwxr--r--  root  root  /usr/lib/ruby/site_ruby/1.8/bitchannel.rb    ライブラリ
+  drwxr-xr-x  root  root  /usr/lib/ruby/site_ruby/1.8/bitchannel/      ライブラリ
+  drwxr-xr-x  root  root  /usr/share/bitchannel/template/              テンプレート
+  drwxr-xr-x  www   www   /var/cvs/bitchannel/CVSROOT/
+  drwxr-xr-x  www   www   /var/cvs/bitchannel/bitchannel/              レポジトリ
+  drwxr-xr-x  www   www   /var/bitchannel/wc.read/                     ワーキングコピー1
+  drwxr-xr-x  www   www   /var/bitchannel/wc.write/                    ワーキングコピー2
+  drwxr-xr-x  www   www   /var/cache/bitchannel                        キャッシュ
+
+
+PageName.html 形式
+------------------
+
+  以下の手順でページの URL を PageName.html 形式にすることができます。
+
+    * Apache ならば mod_rewrite を使えるようにする
+    * mod_rewrite で PageName.html を
+      ./?cmd=view;name=PageName に書き換えるよう設定する
+    * bitchannelrc で use_html_url を true にする
+
+  以上です。
+
+
+ライセンス
+----------
+
+  GNU LGPL (Lesser General Public License) version 2 です。
+
+
+連絡先
+------
+
+  青木峰郎 (あおき・みねろう)
+  Minero Aoki <aamine@loveruby.net>
+  http://i.loveruby.net/wiki/
+
