@@ -43,7 +43,7 @@ def main
     params[:lang] = lang
   }
   parser.on('--cgiurl=URLPATH', 'Base URL of CGI [REQUIRED]') {|path|
-    params[:cgi_url] = path
+    params[:cgi_url] = (path + '/').gsub(%r</+>, '/')
   }
   parser.on('--vardir=PATH',
       'Location of working copies and caches [REQUIRED]') {|path|
