@@ -52,8 +52,9 @@ module BitChannel
       UserConfig.parse(hash, 'config') {|conf|
         @locale      = conf.get_required(:locale)
         @templatedir = conf.get_required(:templatedir)
-        @css_url     = conf.get_optional(:css_url)
-        @theme       = conf.get_optional(:theme)
+        @css_url     = conf.get_optional(:css_url, nil)
+        @theme       = conf.get_optional(:theme, nil)
+        @theme_url   = conf.get_optional(:theme_url, 'theme')
         @html_url_p  = conf.get_required(:use_html_url)
         @site_name   = conf.get_optional(:site_name, nil)
         @logo_url    = conf.get_optional(:logo_url, nil)
@@ -71,7 +72,7 @@ module BitChannel
     attr_reader :logo_url
 
     def css_url
-      @css_url || "#{@theme}/#{@theme}.css"
+      @css_url || "#{@theme_url}/#{@theme}/#{@theme}.css"
     end
 
     def charset

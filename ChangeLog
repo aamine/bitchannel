@@ -1,3 +1,10 @@
+Sat May  8 20:08:13 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/config.rb: new config `theme_url'.
+
+	* lib/bitchannel/config.rb: get_optional requires default value
+	  arg.
+
 Sat May  8 19:59:37 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* bitchannelrc.sample.ja: new config `theme'.
