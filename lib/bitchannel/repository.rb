@@ -87,7 +87,7 @@ module BitChannel
     end
 
     def page_names
-      cvs_Entries().map {|rev, name| decode_filename(name) }
+      cvs_Entries().keys.map {|name| decode_filename(name) }
     end
 
     alias entries page_names
