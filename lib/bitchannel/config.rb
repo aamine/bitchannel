@@ -10,15 +10,19 @@
 
 module AlphaWiki
 
+  INDEX_PAGE = 'IndexPage'
+
+
   class Config
 
     def initialize( config_env )
-      @datadir, @templatedir, @css_url =
+      @datadir, @templatedir, @cgi_url, @css_url =
           *config_env.instance_eval {
-            [@datadir, @templatedir, @css_url]
+            [@datadir, @templatedir, @cgi_url, @css_url]
           }
     end
 
+    attr_reader :cgi_url
     attr_reader :css_url
 
     def read_pagesrc(name)

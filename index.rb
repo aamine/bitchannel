@@ -10,8 +10,15 @@ require 'alphawiki'
 
 def main
   config = AlphaWiki::Config.new(self)
-  page = ARGV[0]
-  print AlphaWiki::View.new(config, page).html
+  cmd, page, = *ARGV
+  case cmd
+  when 'view'
+    print AlphaWiki::View.new(config, page).html
+  when 'edit'
+    print AlphaWiki::Edit.new(config, page).html
+  else
+    print AlphaWiki::View.new(config, AlphaWiki::INDEX_PAGE).html
+  end
 end
 
 main

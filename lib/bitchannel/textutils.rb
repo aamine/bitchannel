@@ -17,7 +17,19 @@ module AlphaWiki
     def beautify_wikiname(name)
       name.gsub(/(.)([A-Z])/) { "#{$1} #{$2}" }
     end
-  
+
+    ESC = {
+      '&' => '&amp;',
+      '"' => '&quot;',
+      '<' => '&lt;',
+      '>' => '&gt;'
+    }
+
+    def escape_html( str )
+      esc = ESC
+      str.gsub(/[&"<>]/) {|s| esc[s] }
+    end
+
   end
 
-end
+end   # module AlphaWiki

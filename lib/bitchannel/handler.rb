@@ -49,4 +49,44 @@ module AlphaWiki
   
   end
 
+
+  class Edit
+
+    include TextUtils
+
+    def initialize(config, name)
+      @config = config
+      @pagename = name
+    end
+
+    TEMPLATE = 'edit.rhtml'
+
+    def html
+      ERB.new(@config.read_rhtml(TEMPLATE)).result(binding())
+    end
+
+    private
+
+    def title
+      beautify_wikiname(@pagename)
+    end
+
+    def body
+      escape_html(@config.read_pagesrc(@pagename))
+    end
+
+    def cgi_url
+      @config.cgi_url
+    end
+
+    def css_url
+      @config.css_url
+    end
+
+    def opt_headers
+      ''
+    end
+
+  end
+
 end

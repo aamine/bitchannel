@@ -8,11 +8,14 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
+require 'alphawiki/textutils'
 require 'stringio'
 
 module AlphaWiki
 
   class ToHTML
+
+    include TextUtils
 
     def ToHTML.compile(str)
       new().compile(str)
@@ -101,7 +104,7 @@ module AlphaWiki
     end
 
     def text( str )
-      html_escape(str)
+      escape_html(str)
     end
 
     def xlist( type )
@@ -181,7 +184,7 @@ module AlphaWiki
     end
 
     def preline( line )
-      html_escape(line)
+      escape_html(line)
     end
 
     #
@@ -242,22 +245,6 @@ module AlphaWiki
 
     def function_line?( line )
       /\A=+\s|\A\s*(\*|\d+\.|:)\s/ === line
-    end
-
-    #
-    # HTML
-    #
-
-    ESC = {
-      '&' => '&amp;',
-      '"' => '&quot;',
-      '<' => '&lt;',
-      '>' => '&gt;'
-    }
-
-    def html_escape( str )
-      esc = ESC
-      str.gsub(/[&"<>]/) {|s| esc[s] }
     end
 
     #
