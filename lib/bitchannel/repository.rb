@@ -16,6 +16,8 @@ require 'fileutils'
 module BitChannel
 
   module FilenameEncoding
+    private
+
     def encode_filename(name)
       # encode [A-Z] ?  (There are case-insensitive filesystems)
       name.gsub(/[^a-z\d]/in) {|c| sprintf('%%%02x', c[0]) }.untaint
@@ -28,6 +30,8 @@ module BitChannel
 
 
   module LockUtils
+    private
+
     # This method locks write access.
     # Read only access is always allowed.
     def lock(path)
@@ -210,7 +214,7 @@ module BitChannel
       page_must_exist page_name
       Dir.chdir(@wc_read) {
         out, err = cvs('diff', '-u', "-r1.#{rev1}", "-r1.#{rev2}", encode_filename(page_name))
-        return out.sub(/\A.*^diff .*?\n/m, '')
+        return Diff.parse(out)
       }
     end
 
@@ -228,6 +232,8 @@ module BitChannel
     end
 
     class Diff
+      extend FilenameEncoding
+
       def Diff.parse_diffs(out)
         chunks = out.split(/^Index: /)
         chunks.shift
@@ -244,15 +250,17 @@ module BitChannel
       def Diff.parse(chunk)
         # cvs output may be corrupted
         meta = chunk.slice!(/\A.*(?=^@@)/m).to_s + DUMMY_HEADER
-        file = meta.slice(/\S+/).strip
+        file = meta.slice(/\A(?:Index:)?\s*(\S+)/, 1).strip
         _, stime, srev = *meta.slice(/^\-\-\- .*/).split("\t", 3)
         _, dtime, drev = *meta.slice(/^\+\+\+ .*/).split("\t", 3)
-        new(file, srev.slice(/\A1\.(\d+)/, 1), Time.parse(stime),
-                  drev.slice(/\A1\.(\d+)/, 1), Time.parse(dtime), chunk)
+        new(decode_filename(file),
+            srev.slice(/\A1\.(\d+)/, 1), Time.parse(stime),
+            drev.slice(/\A1\.(\d+)/, 1), Time.parse(dtime),
+            chunk)
       end
 
-      def initialize(file, srev, stime, drev, dtime, diff)
-        @file = file
+      def initialize(page, srev, stime, drev, dtime, diff)
+        @page_name = page
         @rev1 = srev
         @time1 = stime
         @rev2 = drev
@@ -260,7 +268,7 @@ module BitChannel
         @diff = diff
       end
 
-      attr_reader :file
+      attr_reader :page_name
       attr_reader :rev1
       attr_reader :time1
       attr_reader :rev2

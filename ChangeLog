@@ -1,3 +1,16 @@
+Fri Apr  9 21:49:13 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb: #diff returns a Diff.
+
+	* lib/bitchannel/repository.rb: rename method: Diff#file ->
+	  page_name.
+
+	* template/diff.rhtml: ditto.
+
+	* template/gdiff.rhtml: ditto.
+
+	* template/gdiff.rhtml: add <hr> between diffs.
+
 Fri Apr  9 21:28:57 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* template/recent.rhtml: add link to [gdiff].

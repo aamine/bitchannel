@@ -28,8 +28,12 @@
 <a href="<%= page_view_url() %>">&gt;&gt;HEAD</a>]
 </p>
 
-<pre><%=
-  diff().map {|line|
+<% log = diff() %>
+<pre>
+<span class="removedline">--- <%= page_name() %>  rev<%= log.rev1 %>  <%= format_time(log.time1) %></span>
+<span class="addedline">+++ <%= page_name() %>  rev<%= log.rev2 %>  <%= format_time(log.time2) %></span>
+<%=
+  log.diff.map {|line|
     case line
     when /\A-/
       %Q[<span class="removedline">#{escape_html(line.rstrip)}</span>\n]

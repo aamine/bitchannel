@@ -16,8 +16,8 @@
 
 <pre>
 <% diffs().each do |log| %>
-<span class="removedline">--- <%= escape_html(log.file) %>  rev<%= log.rev1 %>  <%= format_time(log.time1) %></span>
-<span class="addedline">+++ <%= escape_html(log.file) %>  rev<%= log.rev2 %>  <%= format_time(log.time2) %></span>
+<span class="removedline">--- <%= escape_html(log.page_name) %>  rev<%= log.rev1 %>  <%= format_time(log.time1) %></span>
+<span class="addedline">+++ <%= escape_html(log.page_name) %>  rev<%= log.rev2 %>  <%= format_time(log.time2) %></span>
 <%=
   log.diff.map {|line|
     case line
@@ -28,8 +28,9 @@
     else
       escape_html(line)
     end
-  }
+  }.join('')
 %>
+<hr>
 <% end %>
 </pre>
 </div>
