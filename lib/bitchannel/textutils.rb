@@ -61,6 +61,15 @@ module Wikitik
               *(offset / 60).divmod(60))
     end
 
+    def detab(str, ts = 8)
+      add = 0
+      str.gsub(/\t/) {
+        len = ts - ($~.begin(0) + add) % ts
+        add += len - 1
+        ' ' * len
+      }
+    end
+
   end
 
 end   # module Wikitik

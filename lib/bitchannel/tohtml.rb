@@ -21,23 +21,17 @@ module Wikitik
     def initialize(config, repo)
       @config = config
       @repository = repo
-      @indent_stack = [[0,'top']]
     end
 
     def compile(str)
-      convert(StringIO.new(str))
+      @f = LineInput.new(StringIO.new(str))
+      @result = ''
+      @indent_stack = [0]
+      do_compile
+      @result
     end
 
     private
-
-    def convert( input, output = nil )
-      @f = LineInput.new(input)
-      @output = output || StringIO.new
-      while @f.next?
-        next_level true
-      end
-      output ? nil : @output.string
-    end
 
     #
     # Block
@@ -48,202 +42,159 @@ module Wikitik
       str.strip.empty?
     end
 
-    def next_level( toplevel_p )
-      case @f.peek
-      when /\A={2,6}\s/    then caption @f.gets
-      when /\A\s*\*\s/     then xlist 'ul'
-      when /\A\s*\d*\.\s/  then xlist 'ol'
-      when /\A\s*:\s/      then dl
-      when BlankLine
-        @f.skip_blank_lines
-      else
-        paragraph_cluster toplevel_p
-        return
+    CAPTION = /\A={2,6}/
+    UL = /\A\s*\*/
+    OL = /\A\s*\#|\A\s*\(\d+\)/
+    DL = /\A\s*:/
+    TABLE = /\A\|\|/
+    PRE = /\A\{\{\{/
+
+    def do_compile
+      while @f.next?
+        case @f.peek
+        when CAPTION  then caption @f.gets
+        when UL       then ul
+        when OL       then ol
+        when DL       then dl
+        when TABLE    then table
+        when PRE      then pre
+        when BlankLine
+          @f.gets
+        else
+          paragraph
+        end
       end
     end
 
-    def caption( line )
-      level = line.slice(/\A(=+)\s/, 1).length
+    def caption(line)
+      level = line.slice(/\A(=+)/, 1).length
       str = line.sub(/\A=+/, '').strip
       puts "<h#{level}>#{escape_html(str)}</h#{level}>"
     end
 
-    def paragraph_cluster( toplevel_p )
-      push_indent(indent(@f.peek), 'pcluster') {
-        while @f.next? and indent_same?(@f.peek)
-          paragraph
-          @f.skip_blank_lines
-          while @f.next?
-            return if /\A=/ === @f.peek
-            return if indent_shallower?(@f.peek)
-            if toplevel_p
-              return if indent_same?(@f.peek) and function_line?(@f.peek)
-              break if indent_same?(@f.peek)
-            else
-              break if indent_same?(@f.peek) and not function_line?(@f.peek)
-            end
-            case
-            when function_line?(@f.peek) then next_level false
-            when indent_deeper?(@f.peek) then pre
-            else
-              raise 'must not happen'
-            end
-            @f.skip_blank_lines
-          end
-        end
-      }
-    end
-
     def paragraph
       print '<p>'
-      while line = @f.peek
-        return if line.strip.empty?
-        return if function_line?(line)
-        return if indent_changed?(line)
-        puts text(remove_current_indent(@f.gets))
+      @f.until_match(/#{CAPTION}|#{UL}|#{OL}|#{DL}|#{TABLE}|#{PRE}/o) do |line|
+        break if line.strip.empty?
+        puts text(line.strip)
       end
-    ensure
       puts '</p>'
     end
 
-    def xlist( type )
+    def ul
+      xlist 'ul', UL
+    end
+
+    def ol
+      xlist 'ol', OL
+    end
+
+    def xlist(type, mark_re)
       puts "<#{type}>"
-      mark_re = /\A\s*#{'\\' + @f.peek.slice(/\*|\d/).sub(/\d/, 'd\\.')}/
-      push_indent(indent(@f.peek), 'xlist') {
-        while @f.next?
-          return if /\A=/ === @f.peek
-          break if indent_shallower?(@f.peek)
-          break unless mark_re === @f.peek
-          li
+      push_indent(indentof(@f.peek)) {
+        @f.while_match(mark_re) do |line|
+          line = emulate_rdstyle(line) if /\A\s*[\*\#]{2,}/ =~ line
+          if indent_shallower?(line)
+            @f.ungets line
+            break
+          end
+          if indent_deeper?(line)
+            @f.ungets line
+            xlist type, mark_re
+          else
+            puts "<li>#{text(line.sub(mark_re, '').strip)}</li>"
+          end
           @f.skip_blank_lines
         end
       }
-    ensure
       puts "</#{type}>"
     end
 
-    def li
-      print '<li>'
-      @f.ungets remove_li_mark(@f.gets)
-      paragraph_cluster false
-    ensure
-      puts '</li>'
-    end
-
-    def remove_li_mark( str )
-      str.sub(/\*|\d+\./) {|s| ' ' * s.length }
+    def emulate_rdstyle(line)
+      marks = line.slice(/\A\s*[\*\#]+/).strip
+      line.sub(/\A\s*[\*\#]+\s*/) {
+        if marks.size <= (@indent_stack.size - 1)
+          ' ' * @indent_stack[marks.size] + marks[0,1]
+        else
+          ' ' * (current_indent() + 1) + marks[0,1]
+        end
+      }
     end
 
     def dl
       puts '<dl>'
-      push_indent(indent(@f.peek), 'dl') {
-        while @f.next?
-          break if indent_shallower?(@f.peek)
-          break unless /\A\s*:/ === @f.peek
-          dt @f.gets
-          @f.skip_blank_lines
-          dd
-          @f.skip_blank_lines
-        end
-      }
-    ensure
+      @f.while_match(DL) do |line|
+        _, dt, dd = line.strip.split(/\s*:\s*/, 3)
+        puts "<dt>#{text(dt)}</dt><dd>#{text(dd.to_s)}</dd>"
+      end
       puts '</dl>'
     end
 
-    def dt( line )
-      puts "<dt>#{text(line.sub(/:/, '').strip)}</dt>"
-    end
-
-    def dd
-      return unless @f.next?
-      begin
-        print '<dd>'
-        paragraph_cluster false
-      ensure
-        puts '</dd>'
+    def table
+      buf = []
+      @f.while_match(TABLE) do |line|
+        cols = line.strip.split(/(\|\|\|?)/)
+        cols.shift   # discard first ""
+        cols.pop     # discard last "||"
+        tmp = []
+        until cols.empty?
+          headp = (cols.shift == '|||')
+          tmp.push [cols.shift, headp]
+        end
+        buf.push tmp
       end
+      n_maxcols = buf.map {|cols| cols.size }.max
+      puts '<table>'
+      buf.each do |cols|
+        cols.concat [['',false]] * (n_maxcols - cols.size)
+        puts '<tr>' +
+             cols.map {|col, headp|
+               if headp
+               then "<th>#{text(col.strip)}</th>"
+               else "<td>#{text(col.strip)}</td>"
+               end
+             }.join('') +
+             '</tr>'
+      end
+      puts '</table>'
     end
 
     def pre
-      delayed_blanks = 0
+      @f.gets   # discard '{{{'
       puts '<pre>'
-      push_indent(indent(@f.peek), 'pre') {
-        while @f.next?
-          break if indent_shallower?(@f.peek)
-          delayed_blanks.times do
-            puts
-          end
-          delayed_blanks = 0
-          puts preline(remove_current_indent(@f.gets))
-          delayed_blanks = @f.skip_blank_lines
-        end
-      }
-    ensure
+      @f.until_terminator(/\A\}\}\}/) do |line|
+        puts escape_html(line.rstrip)
+      end
       puts '</pre>'
-    end
-
-    def preline( line )
-      escape_html(line)
     end
 
     #
     # Indent
     #
 
-    def push_indent( n, label )
-      raise "wrong indent stack status: ...#{@indent_stack.last},#{n}:#{label}"\
+    def push_indent(n)
+      raise "shollower indent pushed: #{@indent_stack.inspect}" \
           unless n >= current_indent()
-      raise "duplicated push: #{@indent_stack.last[1]}"\
-          if @indent_stack.last[1] == label
-      @indent_stack.push [n,label]
+      @indent_stack.push n
       yield
     ensure
       @indent_stack.pop
     end
 
     def current_indent
-      @indent_stack.last[0]
+      @indent_stack.last
     end
 
-    def indent_same?( line )
-      indent(line) == current_indent()
+    def indent_deeper?(line)
+      indentof(line) > current_indent()
     end
 
-    def indent_changed?( line )
-      indent(line) != current_indent()
+    def indent_shallower?(line)
+      indentof(line) < current_indent()
     end
 
-    def indent_not_shallower?( line )
-      indent(line) >= current_indent()
-    end
-
-    def indent_deeper?( line )
-      indent(line) > current_indent()
-    end
-
-    def indent_shallower?( line )
-      indent(line) < current_indent()
-    end
-
-    def remove_current_indent( line )
-      detab(line)[current_indent()..-1]
-    end
-
-    def indent( line )
+    def indentof(line)
       detab(line.slice(/\A\s*/)).length
-    end
-
-    def detab( str, ts = 8 )
-      add = 0
-      str.gsub(/\t/) {
-        len = ts - ($~.begin(0) + add) % ts
-        add += len - 1
-        ' ' * len
-      }
-    end
-
-    def function_line?( line )
-      /\A=+\s|\A\s*(\*|\d+\.|:)\s/ === line
     end
 
     #
@@ -291,16 +242,17 @@ module Wikitik
     # I/O
     #
 
-    def print( str )
-      @output.print str
+    def print(str)
+      @result << str
     end
 
-    def puts( *args )
-      @output.puts(*args)
+    def puts(str)
+      @result << str
+      @result << "\n" unless @result[-1,1] == "\n"
     end
 
     class LineInput
-      def initialize( f )
+      def initialize(f)
         @f = f
         @buf = []
       end
@@ -330,7 +282,7 @@ module Wikitik
         line
       end
 
-      def ungets( line )
+      def ungets(line)
         @buf.push line
       end
 
@@ -349,6 +301,37 @@ module Wikitik
         end
         n
       end
+
+      def while_match(re)
+        while line = gets()
+          unless re === line
+            ungets line
+            return
+          end
+          yield line
+        end
+        nil
+      end
+
+      def until_match(re)
+        while line = gets()
+          if re === line
+            ungets line
+            return
+          end
+          yield line
+        end
+        nil
+      end
+
+      def until_terminator(re)
+        while line = gets()
+          return if re === line   # discard terminal line
+          yield line
+        end
+        nil
+      end
+
     end
 
   end
@@ -359,7 +342,7 @@ end   # module Wikitik
 if $0 == __FILE__
   require 'getopts'
 
-  def usage( status )
+  def usage(status)
     (status == 0 ? $stdout : $stderr).print(<<EOS)
 Usage: #{File.basename($0)} [file file...] > output.html
 EOS
@@ -370,8 +353,11 @@ EOS
     ok = getopts(nil, 'help')
     usage(0) if $OPT_help
     usage(1) unless ok
-    c = Wikitik::ToHTML.new
-    c.convert(ARGF, STDOUT)
+    env = Object.new
+    def env.cgi_url() 'index.rb' end
+    def env.exist?(name) true end
+    c = Wikitik::ToHTML.new(env, env)
+    puts c.compile(ARGF.read)
   end
 
   main
