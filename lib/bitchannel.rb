@@ -1,3 +1,3 @@
-require 'alphawiki/config'
-require 'alphawiki/page'
-require 'alphawiki/rc'
+require 'wikitik/config'
+require 'wikitik/page'
+require 'wikitik/rc'

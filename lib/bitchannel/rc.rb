@@ -8,10 +8,10 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
-require "alphawiki/rc/#{@LC_MESSAGES}"
+require "wikitik/rc/#{@LC_MESSAGES}"
 
-module AlphaWiki
-  def AlphaWiki.gettext(key)
+module Wikitik
+  def Wikitik.gettext(key)
     @resource[key]
   end
 end

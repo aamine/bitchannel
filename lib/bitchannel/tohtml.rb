@@ -8,10 +8,10 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
-require 'alphawiki/textutils'
+require 'wikitik/textutils'
 require 'stringio'
 
-module AlphaWiki
+module Wikitik
 
   class ToHTML
 
@@ -313,7 +313,7 @@ module AlphaWiki
 
   end
 
-end   # module AlphaWiki
+end   # module Wikitik
 
 
 if $0 == __FILE__
@@ -330,7 +330,7 @@ EOS
     ok = getopts(nil, 'help')
     usage(0) if $OPT_help
     usage(1) unless ok
-    c = AlphaWiki::ToHTML.new
+    c = Wikitik::ToHTML.new
     c.convert(ARGF, STDOUT)
   end
 

@@ -12,7 +12,7 @@
 load "#{File.dirname(__FILE__)}/config"
 $LOAD_PATH.unshift @libdir if @libdir
 
-require 'alphawiki'
+require 'wikitik'
 require 'cgi'
 
 class CGI
@@ -46,8 +46,8 @@ def main
 end
 
 def wiki_main(cgi)
-  repo = AlphaWiki::Repository.new(@cvs_path, @cvswc_read, @cvswc_write)
-  config = AlphaWiki::Config.new(self)
+  repo = Wikitik::Repository.new(@cvs_path, @cvswc_read, @cvswc_write)
+  config = Wikitik::Config.new(self)
   case cgi.get_param('cmd').to_s.downcase
   when 'view'
     view repo, config, cgi, cgi.get_param('name')
@@ -56,7 +56,7 @@ def wiki_main(cgi)
   when 'save'
     page_name = cgi.get_param('name')
     unless page_name
-      send cgi, AlphaWiki::EditPage.new(config, repo,
+      send cgi, Wikitik::EditPage.new(config, repo,
                                         config.tmp_page_name, nil,
                                         cgi.get_param('text').to_s,
                                         text(:save_without_name)).html
@@ -67,17 +67,17 @@ def wiki_main(cgi)
     begin
       repo.checkin page_name, origrev, (cgi.get_param('text') || "")
       view repo, config, cgi, page_name
-    rescue AlphaWiki::EditConflict => err
-      send cgi, AlphaWiki::EditPage.new(config, repo,
+    rescue Wikitik::EditConflict => err
+      send cgi, Wikitik::EditPage.new(config, repo,
                                         page_name, nil,
                                         merged, text(:conflict)).html
     end
   when 'history'
     history repo, config, cgi, cgi.get_param('name')
   when 'list'
-    send cgi, AlphaWiki::ListPage.new(config, repo).html
+    send cgi, Wikitik::ListPage.new(config, repo).html
   when 'recent'
-    send cgi, AlphaWiki::RecentPage.new(config, repo).html
+    send cgi, Wikitik::RecentPage.new(config, repo).html
   else
     view repo, config, cgi, cgi.get_param('name')
   end
@@ -94,12 +94,12 @@ def view(repo, config, cgi, page_name)
     viewrev repo, config, cgi, page_name, rev.to_i
     return
   end
-  page = AlphaWiki::ViewPage.new(config, repo, page_name)
+  page = Wikitik::ViewPage.new(config, repo, page_name)
   send cgi, page.html, page.last_modified
 end
 
 def viewrev(repo, config, cgi, page_name, rev)
-  page = AlphaWiki::ViewRevPage.new(config, repo, page_name, rev)
+  page = Wikitik::ViewRevPage.new(config, repo, page_name, rev)
   send cgi, page.html, page.last_modified
 end
 
@@ -108,7 +108,7 @@ def edit(repo, config, cgi, page_name)
     view repo, config, cgi, config.index_page_name
     return
   end
-  send cgi, AlphaWiki::EditPage.new(config, repo, page_name).html
+  send cgi, Wikitik::EditPage.new(config, repo, page_name).html
 end
 
 def history(repo, config, cgi, page_name)
@@ -116,7 +116,7 @@ def history(repo, config, cgi, page_name)
     view repo, config, cgi, config.index_page_name
     return
   end
-  send cgi, AlphaWiki::HistoryPage.new(config, repo, page_name).html
+  send cgi, Wikitik::HistoryPage.new(config, repo, page_name).html
 end
 
 def send(cgi, html, mtime = nil)
@@ -131,7 +131,7 @@ def send(cgi, html, mtime = nil)
 end
 
 def text(key)
-  AlphaWiki.gettext(key)
+  Wikitik.gettext(key)
 end
 
 main

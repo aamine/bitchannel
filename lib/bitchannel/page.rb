@@ -8,13 +8,13 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
-require 'alphawiki/repository'
-require 'alphawiki/tohtml'
-require 'alphawiki/textutils'
+require 'wikitik/repository'
+require 'wikitik/tohtml'
+require 'wikitik/textutils'
 require 'erb'
 require 'forwardable'
 
-module AlphaWiki
+module Wikitik
 
   class Page
 

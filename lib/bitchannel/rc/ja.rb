@@ -8,9 +8,9 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
-require 'alphawiki/exception'
+require 'wikitik/exception'
 
-module AlphaWiki
+module Wikitik
   Resource_ja = Hash.new {|h,k| raise ResourceError, "unknown resource key: #{k}" }
   @resource = Resource_ja
   Resource_ja[:save_without_name] = 'Text saved without page name; make sure.'

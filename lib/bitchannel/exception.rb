@@ -8,10 +8,10 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
-module AlphaWiki
-  class AlphaWikiError < StandardError; end
+module Wikitik
+  class WikitikError < StandardError; end
 
-  class CommandFailed < AlphaWikiError
+  class CommandFailed < WikitikError
     def initialize(msg, status)
       @status = status
     end
@@ -21,7 +21,7 @@ module AlphaWiki
     end
   end
 
-  class EditConflict < AlphaWikiError
+  class EditConflict < WikitikError
     def initialize(msg, merged)
       super msg
       @merged = merged
@@ -30,5 +30,5 @@ module AlphaWiki
     attr_reader :merged
   end
 
-  class UnknownRCSLogFormat < AlphaWikiError; end
+  class UnknownRCSLogFormat < WikitikError; end
 end

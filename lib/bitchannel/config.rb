@@ -8,7 +8,7 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
-module AlphaWiki
+module Wikitik
 
   class Config
 

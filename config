@@ -1,14 +1,14 @@
 #
-# AlphaWiki Config File
+# Wikitik Config File
 #
 
 # @libdir:
-#	RUBYLIB for AlphaWiki.
-#	If you have installed AlphaWiki in right place, set @libdir to nil.
+#	RUBYLIB for Wikitik.
+#	If you have installed Wikitik in right place, set @libdir to nil.
 @libdir = File.dirname(File.expand_path(__FILE__)) + '/lib'
 
 # @templatedir:
-#	The path to AlphaWiki template files.
+#	The path to template files.
 @templatedir = File.dirname(File.expand_path(__FILE__)) + '/template'
 
 # CVS related parameters.

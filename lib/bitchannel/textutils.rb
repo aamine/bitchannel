@@ -8,7 +8,7 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
-module AlphaWiki
+module Wikitik
 
   module TextUtils
 
@@ -62,4 +62,4 @@ module AlphaWiki
 
   end
 
-end   # module AlphaWiki
+end   # module Wikitik

@@ -8,11 +8,11 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
-require 'alphawiki/textutils'
-require 'alphawiki/exception'
+require 'wikitik/textutils'
+require 'wikitik/exception'
 require 'time'
 
-module AlphaWiki
+module Wikitik
 
   class Repository
 
@@ -155,7 +155,7 @@ LOG %Q[exec: "#{cmd.join('", "')}"]
 
     def lock(path)
       failed = 0
-      lock = path + ',alphawiki,lock'
+      lock = path + ',wikitik,lock'
       begin
         Dir.mkdir(lock)
         begin
