@@ -40,7 +40,7 @@ module BitChannel
     end
 
     def handle_request(req)
-      mid = "handle_#{req.cmd}"
+      mid = "handle_#{req.cmd || 'view'}"
       return nil unless respond_to?(mid, true)
       __send__(mid, req)
     end
