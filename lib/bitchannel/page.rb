@@ -202,8 +202,34 @@ module Wikitik
       @rev2
     end
 
-    def body
-      escape_html(@repository.diff(@page_name, @rev1, @rev2))
+    def diff
+      @repository.diff(@page_name, @rev1, @rev2)
+    end
+  end
+
+
+  class AnnotatePage < Page
+    private
+
+    def template_id
+      'annotate'
+    end
+
+    def annotate
+      @repository.annotate(@page_name)
+    end
+  end
+
+
+  class HistoryPage < Page
+    private
+
+    def template_id
+      'history'
+    end
+
+    def logs
+      @repository.getlog(@page_name)
     end
   end
 
@@ -238,19 +264,6 @@ module Wikitik
 
     def revision
       @revision || 0
-    end
-  end
-
-
-  class HistoryPage < Page
-    private
-
-    def template_id
-      'history'
-    end
-
-    def logs
-      @repository.getlog(@page_name)
     end
   end
 

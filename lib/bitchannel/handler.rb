@@ -126,6 +126,13 @@ module Wikitik
           return
         end
         send cgi, HistoryPage.new(@config, @repository, page_name).html
+      when 'annotate'
+        page_name = cgi.get_param('name')
+        if not page_name or not @repository.exist?(page_name)
+          view cgi, @config.index_page_name
+          return
+        end
+        send cgi, AnnotatePage.new(@config, @repository, page_name).html
       when 'src'
         page_name = (cgi.get_param('name') || @config.index_page_name)
         begin
@@ -203,28 +210,23 @@ raise ArgumentError, "view page=nil" unless page_name
     end
 
     def send(cgi, html, mtime = nil)
-      header = {'status' => '200 OK',
-                'type' => 'text/html',
-                'charset' => @config.charset,
-                'Pragma' => 'no-cache',
-                'Cache-Control' => 'no-cache',
-                'Content-Length' => html.length.to_s}
-      header['Last-Modified'] = CGI.rfc1123_date(mtime) if mtime
-      print cgi.header(header)
-      print html unless cgi.request_method.to_s.upcase == 'HEAD'
-      $stdout.flush
+      send0 cgi, html, 'text/html', mtime
     end
 
     def send_text(cgi, text, mtime = nil)
+      send0 cgi, text, 'text/plain', mtime
+    end
+
+    def send0(cgi, content, type, mtime)
       header = {'status' => '200 OK',
-                'type' => 'text/plain',
+                'type' => type,
                 'charset' => @config.charset,
                 'Pragma' => 'no-cache',
                 'Cache-Control' => 'no-cache',
-                'Content-Length' => text.length.to_s}
+                'Content-Length' => content.length.to_s}
       header['Last-Modified'] = CGI.rfc1123_date(mtime) if mtime
       print cgi.header(header)
-      print text unless cgi.request_method.to_s.upcase == 'HEAD'
+      print content unless cgi.request_method.to_s.upcase == 'HEAD'
       $stdout.flush
     end
 

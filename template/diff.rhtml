@@ -13,6 +13,7 @@
 <a href="<%= cgi_url() %>?cmd=edit;name=<%= page_url() %>">EditHEAD</a>
 <a href="<%= cgi_url() %>?cmd=recent">Recent</a>
 <a href="<%= cgi_url() %>?cmd=list">List</a>
+<a href="<%= cgi_url() %>?cmd=annotate;name=<%= page_url() %>">Annotate</a>
 <a href="<%= cgi_url() %>?cmd=history;name=<%= page_url() %>">History</a>
 <a href="<%= cgi_url() %>?cmd=view;name=IndexPage">Top</a>
 <a href="<%= cgi_url() %>?cmd=view;name=HelpPage">Help</a>
@@ -20,7 +21,7 @@
 </div>
 <h1>Diff: <%= page_name() %> r1.<%= rev1() %> &lt;=&gt; r1.<%= rev2() %></h1>
 <pre>
-<%= body() %>
+<%= escape_html(diff()) %>
 </pre>
 
 </body>

@@ -110,6 +110,13 @@ module Wikitik
       }
     end
 
+    def annotate(page_name)
+      Dir.chdir(@wc_read) {
+        out, err = cvs('ann', '-F', encode_filename(page_name))
+        return out.map {|line| line.sub(/\(\S+\s*/, '(') }.join('').strip
+      }
+    end
+
     def links(page_name)
       read_linkcache(link_cache(page_name))
     end
