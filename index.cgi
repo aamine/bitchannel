@@ -4,6 +4,6 @@
 rc = File.read("#{File.dirname(__FILE__)}/bitchannelrc".untaint).untaint
 env = Object.new
 env.instance_eval(rc, 'bitchannelrc')
-config, repo = env.initialize_environment
+env.setup_environment
 require 'bitchannel/cgi'
-BitChannel::CGI.main config, repo
+BitChannel::CGI.main(*env.bitchannel_context)

@@ -1,3 +1,12 @@
+Wed Apr 28 18:12:34 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* bitchannelrc.sample.ja: split method: initialize_environment ->
+	  setup_environment, bitchannel_context.
+
+	* index.cgi: ditto.
+
+	* index.fcgi: ditto.
+
 Wed Apr 28 17:31:57 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/webrickservlet.rb: fix typo.

@@ -2,15 +2,26 @@
 # BitChannel Config File
 #
 
-def initialize_environment
+def bitchannel_cgidir
+  File.dirname(File.expand_path(__FILE__)).untaint
+end
+
+def setup_environment
+  $BitChannelInitialized ||= false
+  return if $BitChannelInitialized
+  $BitChannelInitialized = true
+
   $KCODE = 'EUC'
-
-  cgidir = File.dirname(File.expand_path(__FILE__)).untaint
-
-  $:.unshift "#{cgidir}/lib"
+  cgidir = bitchannel_cgidir()
+  $LOAD_PATH.unshift "#{cgidir}/lib"
   require 'bitchannel'
-
   BitChannel.lang = 'ja'
+end
+
+def bitchannel_context
+  setup_environment
+
+  cgidir = bitchannel_cgidir()
 
   config = BitChannel::Config.new(
     # :site_name    => 'My Site',
@@ -37,7 +48,7 @@ def initialize_environment
         # true: PageName.html
         # false: ?cmd=view;name=PageName
   )
-  repo = BitChannel::Repository.new(
+  repository = BitChannel::Repository.new(
     :cmd_path  => '/usr/bin/cvs',
     :wc_read   => "#{cgidir}/wc.read",
     :wc_write  => "#{cgidir}/wc.write",
@@ -45,5 +56,5 @@ def initialize_environment
     :logfile   => nil
   )
 
-  return config, repo
+  return config, repository
 end
