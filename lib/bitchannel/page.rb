@@ -488,7 +488,7 @@ module BitChannel
     end
 
     def page_list
-      @repository.entries.sort_by {|name| name.downcase }
+      @repository.page_names.sort_by {|name| name.downcase }
     end
 
     def orphan_page?(name)
@@ -518,7 +518,7 @@ module BitChannel
     end
 
     def page_list
-      @repository.entries\
+      @repository.page_names\
           .map {|name| [name, @repository.mtime(name)] }\
           .sort_by {|name, mtime| -(mtime.to_i) }
     end
@@ -548,7 +548,7 @@ module BitChannel
     end
 
     def matched_pages(&block)
-      title_match, not_match = @repository.entries.sort.partition {|name|
+      title_match, not_match = @repository.page_names.sort.partition {|name|
         @patterns.all? {|re| re =~ name }
       }
       title_match.each do |name|

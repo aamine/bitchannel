@@ -84,8 +84,6 @@ module BitChannel
       cvs_Entries().keys.map {|name| decode_filename(name) }
     end
 
-    alias entries page_names
-
     def orphan_pages
       page_names().select {|name| orphan?(name) }
     end

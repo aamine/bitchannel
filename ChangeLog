@@ -1,3 +1,9 @@
+Mon May 10 01:15:57 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb: remove alias #entries.
+
+	* lib/bitchannel/page.rb: entries -> page_names.
+
 Mon May 10 01:14:33 2004  Minero Aoki  <aamine@loveruby.net>
 
 	misc/refresh-linkcache.rb: modify for bitchannelrc change.
