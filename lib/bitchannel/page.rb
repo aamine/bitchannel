@@ -306,11 +306,18 @@ module BitChannel
       @revision
     end
 
+    def annotate_revision
+      @revision || @repository.revision(@page_name)
+    end
+
     def annotate
-      @repository.annotate(@page_name, @revision).map {|data|
-        rev = data.slice(/\A\s*\d+/)
-        line = data.sub(/\A\s*\d+\s/, '')
-        %Q[<a href="#{@config.cgi_url}?cmd=view;rev=#{rev.to_i};name=#{page_url()}">#{rev}</a>: #{escape_html(line)}]
+      latest = annotate_revision()
+      @repository.annotate(@page_name, @revision).map {|line|
+        rev = line.slice(/\d+/).to_i
+        sprintf(%Q[<a href="%s?cmd=view;rev=%d;name=%s">%4d</a>: <span class="new%d">%s</span>\n],
+                @config.cgi_url, rev, page_url(), rev,
+                latest - rev,
+                escape_html(line.sub(/\A\s*\d+\s/, '').rstrip))
       }
     end
   end

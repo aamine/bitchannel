@@ -15,7 +15,16 @@
 
 <p class="revnavi">[<a href="<%= page_view_url() %>">&gt;&gt;HEAD</a>]</p>
 
-<pre>
+<p class="colorbar">
+Latest Revisions:
+<% latest = annotate_revision() %>
+<% if latest > 4 %><span class="new4">rev<%= latest-4 %></span> <% end %>
+<% if latest > 3 %><span class="new3">rev<%= latest-3 %></span> <% end %>
+<% if latest > 2 %><span class="new2">rev<%= latest-2 %></span> <% end %>
+<% if latest > 1 %><span class="new1">rev<%= latest-1 %></span> <% end %>
+<% if latest > 0 %><span class="new0">rev<%= latest-0 %></span><% end %>
+</p>
+<pre class="annotate">
 <%= annotate() %>
 </pre>
 </div>

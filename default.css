@@ -63,7 +63,6 @@ h1 {
     color: white;
     background-color: #33a;
     padding: 0.4em;
-    width: 40em;
 }
 
 img.sitelogo {
@@ -171,4 +170,26 @@ form {
 hr {
     color: #33a;
     height: 1px;
+}
+
+/*
+    annotate
+*/
+pre.annotate {
+    background-color: transparent;
+}
+span.new4 {
+    background-color: #ffcfcf;
+}
+span.new3 {
+    background-color: #ffbfbf;
+}
+span.new2 {
+    background-color: #ffafaf;
+}
+span.new1 {
+    background-color: #ff8f8f;
+}
+span.new0 {
+    background-color: #ff6f6f;
 }
