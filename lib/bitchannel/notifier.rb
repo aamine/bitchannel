@@ -20,11 +20,11 @@ module BitChannel
     def initialize(hash)
       UserConfig.parse(hash, 'smtpnotifier') {|conf|
         @host        = conf.get_required(:host)
-        @port        = conf.get_optional(:port, Net::SMTP.default_port)
-        @helo_domain = conf.get_optional(:helo, Socket.gethostname)
+        @port        = conf[:port] || Net::SMTP.default_port
+        @helo_domain = conf[:helo] || Socket.gethostname
         @from        = conf.get_required(:from)
         @to          = [conf.get_required(:to)].flatten
-        @subject     = conf.get_optional(:subject, default_subject_maker())
+        @subject     = conf[:subject] || default_subject_maker()
         @locale      = conf.get_required(:locale)
       }
     end
@@ -66,7 +66,7 @@ module BitChannel
         @format  = conf.get_required(:format)
         @from    = conf.get_required(:from)
         @to      = [conf.get_required(:to)].flatten
-        @subject_maker = conf.get_optional(:subject, default_subject_maker())
+        @subject_maker = conf[:subject] || default_subject_maker()
         @locale = conf.get_required(:locale)
       }
     end

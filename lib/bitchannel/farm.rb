@@ -262,8 +262,11 @@ module BitChannel
         @cmd_path    = conf.get_required(:cmd_path)
         @repository  = conf.get_required(:repository)
         @skeleton    = conf.get_required(:skeleton)
-        @notifier    = conf.get_optional(:notifier, nil)
-        @logger      = conf.get_optional(:logger, NullLogger.new)
+        @notifier    = conf[:notifier]
+        conf.exclusive! :logger, :logfile
+        @logger      = conf[:logger] ||
+                       conf.get(:logfile) {|path| FileLogger.new(path) } ||
+                       NullLogger.new
       }
       @nodes = {}
     end
@@ -287,6 +290,12 @@ module BitChannel
       end
       Dir.mkdir "#{tmpprefix}/cache"
       initialize_working_copy tmpprefix, id
+      repo = Repository.new({
+        :cmd_path     => @cmd_path,
+        :wc_read      => "#{tmpprefix}/wc.read",
+        :wc_write     => "#{tmpprefix}/wc.write",
+        :cachedir     => "#{tmpprefix}/cache",
+      }, id)
       repo.properties = prop
       File.rename tmpprefix, prefix(id)
     ensure
@@ -296,11 +305,12 @@ module BitChannel
     end
 
     def initialize_working_copy(tmpprefix, id)
-      wc = CVSWorkingCopy.new(id, "#{tmpprefix}/tmp", @logger)
+      wc = CVSWorkingCopy.new(id, "#{tmpprefix}/tmp", @cmd_path, @logger)
       Dir.mkdir wc.dir
       wc.chdir {
         log = 'BitChannelFarm auto import'
         wc.cvs '-d',@repository, 'import', '-m',log, id, 'bcfarm', 'start'
+        wc.cvs '-d',@repository, 'co', '-d','.', id
         Dir.glob("#{@skeleton}/*").select {|n| File.file?(n) }.each do |path|
           name = decode_filename(File.basename(path))
           wc.write name, File.read(path)
@@ -429,7 +439,7 @@ module BitChannel
     end
 
     def prefix
-      File.dirname(@wc_read)
+      File.dirname(@wc_read.dir)
     end
 
   end   # class Repository

@@ -1,3 +1,20 @@
+Wed Sep  1 22:58:07 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/config.rb (UserConfig): new method #required!,
+	  #ignore, #exclusive!, #select!, #get, #[].
+
+	* lib/bitchannel/config.rb (UserConfig): remove #get_optional.
+
+	* lib/bitchannel/config.rb (Config): use new UserConfig methods.
+
+	* lib/bitchannel/farm.rb: ditto.
+
+	* lib/bitchannel/notifier.rb: ditto.
+
+	* lib/bitchannel/repository.rb: ditto.
+
+	* lib/bitchannel/farm.rb: did not work.
+
 Wed Sep  1 21:22:33 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* template/preview.rhtml: add class="edit" for also preview

@@ -85,35 +85,26 @@ module BitChannel
     def initialize(hash, id = nil)
       @module_id = id
       UserConfig.parse(hash, 'repository') {|conf|
-        logfile = conf.get_optional(:logfile, nil)
-        logger = conf.get_optional(:logger, nil)
-        raise ConfigError, "logger and logfile given" if logfile and logger
-        if logfile
-          logger = FileLogger.new(logfile)
-        elsif logger
-          ;
-        else
-          logger = NullLogger.new
-        end
-
-        cmd = conf.get_required(:cmd_path)
-        @read_only_p = conf.get_optional(:read_only, false)
-        @wc_read  = CVSWorkingCopy.new(id, conf.get_required(:wc_read), cmd, logger)
+        @read_only_p = (conf[:read_only] ? true : false)
+        conf.required! :cmd_path
+        conf.required! :wc_read
+        conf.exclusive! :logfile, :logger
+        logger = conf.get(:logfile) {|path| FileLogger.new(path) } ||
+                 conf[:logger] ||
+                 NullLogger.new
+        @wc_read  = CVSWorkingCopy.new(id, conf[:wc_read], conf[:cmd_path], logger)
         unless @read_only_p
-          @wc_write = CVSWorkingCopy.new(id, conf.get_required(:wc_write), cmd, logger)
+          conf.required! :wc_write
+          @wc_write = CVSWorkingCopy.new(id, conf[:wc_write], conf[:cmd_path], logger)
         else
-          conf.get_optional(:wc_write, nil)   # discard
+          conf.ignore :wc_write
           @wc_write = nil
         end
-        if syn = conf.get_optional(:syntax_proc, nil)
-          @syntax = syn.call(self)
-        else
-          @syntax = nil
-        end
-        cachedir  = conf.get_required(:cachedir)
-        @link_cache = LinkCache.new("#{cachedir}/link")
-        @revlink_cache = LinkCache.new("#{cachedir}/revlink")
-        @notifier = conf.get_optional(:notifier, nil)
+        @syntax = conf.get(:syntax_proc) {|pr| pr.call(self) }
+        conf.required! :cachedir
+        @link_cache = LinkCache.new("#{conf[:cachedir]}/link")
+        @revlink_cache = LinkCache.new("#{conf[:cachedir]}/revlink")
+        @notifier = conf[:notifier]
       }
       # per-request cache
       @pages = {}
