@@ -1,3 +1,11 @@
+Fri Apr  2 12:21:18 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/handler.rb: new method Handler#handle_extent.
+
+	* lib/bitchannel/repository.rb: new method Repository#latest_mtime.
+
+	* lib/bitchannel/page.rb: use Repository#latest_mtime.
+
 Fri Apr  2 12:01:35 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/config.rb: new optional parameter cgi_url.

@@ -125,6 +125,10 @@ module BitChannel
       File.size("#{@wc_read}/#{encode_filename(page_name)}")
     end
 
+    def latest_mtime
+      page_names().map {|name| mtime(name) }.sort.last
+    end
+
     def mtime(page_name, rev = nil)
       page_must_valid page_name
       page_must_exist page_name

@@ -232,6 +232,21 @@ module BitChannel
       res
     end
 
+    def handle_extent(cgi)
+      res = CGIResponse.new
+      res.set_content_type 'text/plain', @config.charset
+      res.last_modified = @repository.latest_mtime
+      buf = ''
+      @repository.page_names.sort.each do |name|
+        buf << "= #{name}\r\n"
+        buf << "\r\n"
+        buf << @repository[name]
+        buf << "\r\n"
+      end
+      res.body = buf
+      res
+    end
+
     def handle_list(cgi)
       ListPage.new(@config, @repository).response
     end

@@ -479,7 +479,7 @@ module BitChannel
     end
 
     def last_modified
-      @repository.entries.map {|name| @repository.mtime(name) }.sort.last
+      @repository.latest_mtime
     end
 
     private
