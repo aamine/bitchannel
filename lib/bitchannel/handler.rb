@@ -135,9 +135,7 @@ module BitChannel
       page_name = cgi.get_param('name') or
           return reedit_response(cgi.get_param('text').to_s,
                                  gettext(:save_without_name))
-      origrev = cgi.get_rev_param('origrev') or
-          return reedit_response(cgi.get_param('text').to_s,
-                                 gettext(:save_without_revision))
+      origrev = cgi.get_rev_param('origrev')
       text = cgi.get_param('text').to_s.gsub(/\r\n|\n|\r/, "\r\n")
       begin
         @repository.checkin page_name, origrev, text
