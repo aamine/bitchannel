@@ -9,6 +9,7 @@
 #
 
 require 'wikitik/textutils'
+require 'wikitik/constants'
 require 'stringio'
 require 'uri'
 
@@ -271,8 +272,6 @@ module Wikitik
       @interwikinames ||= read_interwikiname_table()
     end
 
-    InterWikiName_LIST_PAGE = 'DefInterWikiName'
-
     def read_interwikiname_table()
       text = @repository[InterWikiName_LIST_PAGE] or return {}
       table = {}
@@ -409,27 +408,3 @@ module Wikitik
   end
 
 end   # module Wikitik
-
-
-if $0 == __FILE__
-  require 'getopts'
-
-  def usage(status)
-    (status == 0 ? $stdout : $stderr).print(<<EOS)
-Usage: #{File.basename($0)} [file file...] > output.html
-EOS
-    exit status
-  end
-
-  ok = getopts(nil, 'help')
-  usage(0) if $OPT_help
-  usage(1) unless ok
-  env = Object.new
-  def env.cgi_url() 'index.rb' end
-  def env.exist?(name) true end
-  def env.[](name)
-    File.read("wc.read/#{name}")
-  end
-  c = Wikitik::ToHTML.new(env, env)
-  puts c.compile(ARGF.read, 'argf')
-end

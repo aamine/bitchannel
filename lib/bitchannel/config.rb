@@ -8,6 +8,8 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
+require 'wikitik/constants'
+
 module Wikitik
 
   class Config
@@ -22,10 +24,10 @@ module Wikitik
       @charset     = t[:charset];     t.delete(:charset)
       @cgi_url     = t[:cgi_url];     t.delete(:cgi_url)
       @css_url     = t[:css_url];     t.delete(:css_url)
+      @index_page = t.fetch(:index_page, nil); t.delete(:index_page)
       t.each do |k,v|
         raise ConfigError, "Config Error: unknown key: config.#{k}"
       end
-      @index_page = nil
     end
 
     attr_reader :charset
@@ -33,10 +35,8 @@ module Wikitik
     attr_reader :css_url
     attr_reader :datadir
 
-    INDEX_PAGE = 'IndexPage'
-
     def index_page_name
-      @index_page || INDEX_PAGE
+      @index_page || DEFAULT_INDEX_PAGE_NAME
     end
 
     def tmp_page_name
