@@ -240,16 +240,9 @@ module BitChannel
         chunks.map {|c| parse(c) }
       end
 
-      DUMMY_HEADER = "dummyfilename\n" +
-                     "===================================================================\n" +
-                     "RCS file: /dummyrepo/dummyfilename,v\n" +
-                     "retrieving revision 1.1\n" +
-                     "retrieving revision 1.2\n" +
-                     "diff -u -r1.1 -r1.2\n"
-
       def Diff.parse(chunk)
         # cvs output may be corrupted
-        meta = chunk.slice!(/\A.*(?=^@@)/m).to_s + DUMMY_HEADER
+        meta = chunk.slice!(/\A.*?^(?=@@)/m).to_s
         file = meta.slice(/\A(?:Index:)?\s*(\S+)/, 1).strip
         _, stime, srev = *meta.slice(/^\-\-\- .*/).split("\t", 3)
         _, dtime, drev = *meta.slice(/^\+\+\+ .*/).split("\t", 3)
