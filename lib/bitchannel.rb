@@ -1,4 +1,4 @@
-require 'wikitik/config'
-require 'wikitik/handler'
-require 'wikitik/page'
-require 'wikitik/rc'
+require 'bitchannel/config'
+require 'bitchannel/handler'
+require 'bitchannel/page'
+require 'bitchannel/rc'
