@@ -657,7 +657,7 @@ module BitChannel
         log "conflict: #{name}"
         merged = read(name)
         rev = revision(name)
-        File.unlink encode_filename(filename)   # prevent next writer from conflict
+        File.unlink encode_filename(name)   # prevent next writer from conflict
         cvs_update_A name
         raise EditConflict.new('conflict found', merged, rev)
       end

@@ -1,3 +1,8 @@
+Thu Sep 30 19:47:47 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb (checkin): fix typo.
+	  (/w/BitChannelComment rev.72)
+
 Fri Sep  3 11:46:10 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* version 0.3.1 released.
