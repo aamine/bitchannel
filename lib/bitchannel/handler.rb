@@ -157,23 +157,7 @@ module BitChannel
     end
 
     def thanks_response(name)
-      target = "#{@config.cgi_url}?name=#{URI.encode(name)}"
-      html = <<-ThanksPage
-        <html>
-        <head>
-        <meta http-equiv="refresh" content="1;url=#{escape_html(target)}">
-        <title>Moving...</title>
-        </head>
-        <body>
-        <p>Thank you for your edit.
-        Wait or <a href="#{escape_html(target)}">click here</a>.</p>
-        </body>
-        </html>
-      ThanksPage
-      res = CGIResponse.new
-      res.set_content_type 'text/html', 'us-ascii'
-      res.body = html
-      res
+      ThanksPage.new(@config, name).response
     end
 
     def handle_diff(cgi)
@@ -229,8 +213,7 @@ module BitChannel
         SearchResultPage.new(@config, @repository,
                              cgi.get_param('q'), regs).response
       rescue WrongQuery => err
-        return SearchErrorPage.new(@config, @repository,
-                                   cgi.get_param('q'), err).response
+        return SearchErrorPage.new(@config cgi.get_param('q'), err).response
       end
     end
 

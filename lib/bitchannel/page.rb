@@ -26,9 +26,8 @@ module BitChannel
   class GenericPage
     include TextUtils
 
-    def initialize(config, repo)
+    def initialize(config)
       @config = config
-      @repository = repo
     end
 
     def html
@@ -99,7 +98,8 @@ module BitChannel
   # a page object which is associated with a real file
   class Page < GenericPage
     def initialize(config, repo, page_name)
-      super config, repo
+      super config
+      @repository = repo
       @page_name = page_name
 
       # cache
@@ -320,6 +320,28 @@ module BitChannel
   end
 
 
+  class ThanksPage < GenericPage
+    def initialize(config, page_name)
+      super config
+      @page_name = page_name
+    end
+
+    private
+
+    def template_id
+      'thanks'
+    end
+
+    def page_view_url
+      # We cannot use ';' here.
+      if @config.html_url?
+      then "#{escape_url(@page_name)}.html"
+      else "#{cgi_url()}?name=#{escape_url(@page_name)}"
+      end
+    end
+  end
+
+
   class ListPage < GenericPage
     private
 
@@ -350,7 +372,8 @@ module BitChannel
 
   class SearchResultPage < GenericPage
     def initialize(config, repo, q, patterns)
-      super config, repo
+      super config
+      @repository = repo
       @query_string = q
       @patterns = patterns
     end
@@ -387,8 +410,8 @@ module BitChannel
 
 
   class SearchErrorPage < GenericPage
-    def initialize(config, repo, query, err)
-      super config, repo
+    def initialize(config, query, err)
+      super config
       @query = query
       @error = err
     end
