@@ -12,12 +12,10 @@ module AlphaWiki
 
   class Config
 
-    def initialize( config_env )
-      @charset, @cgi_url, @css_url,
-      @datadir, @templatedir =
+    def initialize(config_env)
+      @charset, @cgi_url, @css_url, @templatedir =
           *config_env.instance_eval {
-            [@charset, @cgi_url, @css_url,
-             @datadir, @templatedir]
+            [@charset, @cgi_url, @css_url, @templatedir]
           }
       @index_page = nil
     end
