@@ -19,8 +19,16 @@
 
 <h2>New Node</h2>
 <form method="POST" action="<%= farm_url() %>">
-ID: <input type="text" name="id" value="" size="10">
-Name: <input type="text" name="name" value="" size="35">
+<p>
+ID: <input type="text" name="id" value="" size="10"><br>
+Name: <input type="text" name="name" value="" size="35"><br>
+Theme:
+</p>
+<ul>
+<% themes().each do |theme| %>
+<li><input type="radio" name="theme" value="<%= theme %>"<%= theme == 'default' ? " checked" : '' %>> <%= theme %></li>
+<% end %>
+</ul>
 <input type="submit" name="create" value="Create">
 </form>
 

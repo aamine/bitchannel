@@ -45,6 +45,9 @@ module BitChannel
         wiki = @farm[req.node_id]
         Handler.new(wiki).handle(Request.new(webrickreq, wiki.locale, false))
       when req.new_node?
+        return prop_missing('id') unless req.id
+        return prop_missing('name') unless req.name
+        return prop_missing('theme') unless req.theme
         @farm.create_node req.id, { :name => req.name,
                                     :theme => req.theme,
                                     :logo => nil }
@@ -56,6 +59,10 @@ module BitChannel
 
     def farm_index
       FarmIndexPage.new(@farm).response
+    end
+
+    def prop_missing(key)
+      farm_index()   # FIXME: tmp
     end
 
   end
@@ -178,6 +185,10 @@ module BitChannel
       @farm[id].name
     end
 
+    def themes
+      @farm.themes
+    end
+
   end
 
 
@@ -224,10 +235,11 @@ module BitChannel
     attr_reader :locale
 
     def themes
-      Dir.glob("#{@themedir}/*/").map {|path| File.basename(path) }
+      Dir.glob("#{@themedir}/*/").map {|path| File.basename(path) } - %w(CVS)
     end
 
     def theme?(name)
+      return false if name == 'CVS'
       File.directory?("#{@themedir}/#{encode_filename(name)}")
     end
 
@@ -255,6 +267,10 @@ module BitChannel
     end
 
     attr_reader :config
+
+    def themes
+      @config.themes
+    end
 
     def create_node(id, prop)
       tmpprefix = "#{@datadir}/.#{id}"
