@@ -40,8 +40,7 @@ module BitChannel
       nil
     end
 
-    # `charset' method already exists
-    def page_charset
+    def charset
       @config.charset
     end
 
@@ -53,7 +52,7 @@ module BitChannel
       }.untaint
     end
 
-    def charset
+    def page_charset
       escape_url(@config.charset)
     end
 

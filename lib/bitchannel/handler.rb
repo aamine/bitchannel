@@ -290,7 +290,7 @@ module BitChannel
       res = CGIResponse.new
       res.no_cache = true
       res.last_modified = last_modified()
-      res.set_content_type 'text/html', page_charset()
+      res.set_content_type 'text/html', charset()
       res.body = html()
       res
     end
