@@ -48,13 +48,10 @@ module BitChannel
     end
 
     def cgi_url
-      File.basename(program_name())
-    end
-
-    def program_name
-      return $0 if $0
-      return ::Apache.request.filename if defined?(::Apache)
-      caller(0).last.split(':')[0]
+      return ENV['SCRIPT_NAME'] if ENV['SCRIPT_NAME']
+      return File.basename($0) if $0
+      return File.basename(::Apache.request.filename) if defined?(::Apache)
+      raise "cannot get cgi url; given up"
     end
 
     def site_name
