@@ -10,7 +10,7 @@ body {
     margin-top: 20px;
     margin-left: 2%;
     margin-right: 2%;
-    line-height: 130%;
+    line-height: 1.3;
 }
 
 span.menuitem {
@@ -91,14 +91,14 @@ h4, h5, h6 {
 }
 
 div.main p {
-    line-height: 140%;
+    line-height: 1.4;
     margin-top: 1em;
     margin-bottom: 1em;
     margin-left: 0px;
 }
 
 pre {
-    line-height: 110%;
+    line-height: 1.1;
     background-color: #eee;
     padding: 10px;
     font-weight: normal;
@@ -174,7 +174,7 @@ span.removedline {
 }
 pre.diff {
     background-color: transparent;
-    line-height: 140%
+    line-height: 1.4;
     padding: 0px;
     font-weight: normal;
 }
