@@ -248,7 +248,7 @@ module BitChannel
     end
 
     def origrev
-      getrev('orgrev')
+      getrev('origrev')
     end
 
     def getrev(name)

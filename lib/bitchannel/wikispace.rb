@@ -70,7 +70,7 @@ module BitChannel
       EditPage.new(@config, @repository, name, '', nil)
     end
 
-    def edit_again(name, src, cirev, reason = :edit_conflict)
+    def edit_again(name, src, cirev, reason = :edit_conflicted)
       EditPage.new(@config, @repository, name,
                    src, cirev || @repository.revision(name), reason)
     end
