@@ -1,3 +1,12 @@
+Thu Jun 24 00:51:01 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb: new method Time.diffdate.
+
+	* lib/bitchannel/repository.rb: new method Time.rcslogdate.
+
+	* lib/bitchannel/tohtml.rb (extract_links): provide dummy
+	  PageEntity object.
+
 Thu Jun 24 00:28:15 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/repository.rb: new class PageEntity and CVSWorkingCopy.

@@ -46,18 +46,29 @@ module BitChannel
       'dummy_cgi_url'
     end
     def DUMMY_CONFIG.inspect
-      '#<dummy config object>'
+      '#<dummy Config object>'
+    end
+
+    DUMMY_PAGE_ENTITY = Object.new
+    def DUMMY_PAGE_ENTITY.source
+      ''
+    end
+    def DUMMY_PAGE_ENTITY.inspect
+      '#<dummy PageEntity object>'
     end
 
     DUMMY_REPOSITORY = Object.new
     def DUMMY_REPOSITORY.[](name)
-      ''
+      DUMMY_PAGE_ENTITY
     end
     def DUMMY_REPOSITORY.invalid?(name)
       false
     end
     def DUMMY_REPOSITORY.exist?(name)
       true
+    end
+    def DUMMY_PAGE_ENTITY.inspect
+      '#<dummy Repository object>'
     end
 
     def ToHTML.extract_links(str)

@@ -14,9 +14,25 @@ require 'bitchannel/exception'
 require 'time'
 require 'fileutils'
 
+# "Wed Jun 23 15:39:58 2004" (UTC)
 def Time.rcsdate(t)
   m = /\w{3} (\w{3})  ?(\d{1,2}) (\d{1,2}):(\d{1,2}):(\d{1,2}) (\d{4})/.match(t)
+  raise ArgumentError, "not RCS date: #{t.inspect}" unless m
   Time.utc(m[6], m[1], m[2], m[3], m[4], m[5])
+end
+
+# "11 Jun 2004 10:39:56 -0000" (UTC, when reported by CVS)
+def Time.diffdate(t)
+  m = /(\d{1,2}) (\w{3}) (\d{4}) (\d{2}):(\d{2}):(\d{2})/.match(t)
+  raise ArgumentError, "not diff date: #{t.inspect}" unless m
+  Time.utc(m[3], m[2], m[1], m[4], m[5], m[6])
+end
+
+# "2004/06/11 10:39:56" (UTC)
+def Time.rcslogdate(t)
+  m = %r<(\d{4})/(\d{2})/(\d{2}) (\d{2}):(\d{2}):(\d{2})>.match(t)
+  raise ArgumentError, "not RCS log date: #{t.inspect}" unless m
+  Time.utc(*m.captures)
 end
 
 module BitChannel
@@ -112,17 +128,12 @@ module BitChannel
       page_names().map {|name| new_page(name) }
     end
 
-    def new_page(name)
-      @pages[name] ||= PageEntity.new(self, name, @wc_read, @wc_write)
-    end
-    private :new_page
-
     def orphan_pages
       pages().select {|page| page.orphan? }
     end
 
-    def exist?(page_name)
-      st = @wc_read.stat(page_name)
+    def exist?(name)
+      st = @wc_read.stat(name)
       st.file? and st.readable? and st.writable?
     rescue Errno::ENOENT
       return false
@@ -133,8 +144,8 @@ module BitChannel
     end
     private :page_must_exist
 
-    def invalid?(page_name)
-      st = @wc_read.stat(page_name)
+    def invalid?(name)
+      st = @wc_read.stat(name)
       not st.file? or not st.readable?
     rescue Errno::ENOENT
       return false
@@ -153,37 +164,41 @@ module BitChannel
       @wc_write.last_modified
     end
 
-    def [](page_name)
-      page_must_exist page_name
-      new_page(page_name)
+    def [](name)
+      page_must_exist name
+      new_page(name)
     end
 
-    def fetch(page_name)
-      page_must_valid page_name
-      new_page(page_name)
+    def fetch(name)
+      page_must_valid name
+      new_page(name)
     end
 
-    def updated(page_name, new_rev, new_text)
-      update_linkcache page_name, ToHTML.extract_links(new_text)
-      notify page_name, new_rev
+    def updated(name, new_rev, new_text)
+      update_linkcache name, ToHTML.extract_links(new_text)
+      notify name, new_rev
     end
 
     private
 
-    def update_linkcache(page_name, new_links)
-      old_links = @link_cache[page_name]
-      @link_cache[page_name] = new_links
+    def new_page(name)
+      @pages[name] ||= PageEntity.new(self, name, @wc_read, @wc_write)
+    end
+
+    def update_linkcache(name, new_links)
+      old_links = @link_cache[name]
+      @link_cache[name] = new_links
       @revlink_cache.updating {|cache|
         (new_links - old_links).each do |n|
-          cache.add_link n, page_name
+          cache.add_link n, name
         end
         (old_links - new_links).each do |n|
-          cache.del_link n, page_name
+          cache.del_link n, name
         end
       }
     end
 
-    def notify(page_name, new_rev)
+    def notify(name, new_rev)
       return unless @notifier
       # fork twice not to make zombie
       pid = fork {
@@ -191,9 +206,9 @@ module BitChannel
           sleep 2  # dirty hack: wait unlocking
           @wc_read.chdir {|wc|
             if new_rev == 1
-              diffs = wc.cvs_diff_all(new_rev, page_name)
+              diffs = wc.cvs_diff_all(new_rev, name)
             else
-              diffs = wc.cvs_diff(new_rev-1, new_rev, page_name)
+              diffs = wc.cvs_diff(new_rev-1, new_rev, name)
             end
             @notifier.notify diffs
           }
@@ -359,6 +374,10 @@ module BitChannel
       }
     end
 
+    def exist?(name)
+      File.exist?("#{@dir}/#{encode_filename(name)}")
+    end
+
     def size(name)
       File.size("#{@dir}/#{encode_filename(name)}")
     end
@@ -448,8 +467,8 @@ module BitChannel
         _, dtime, drev = *meta.slice(/^\+\+\+ .*/).split("\t", 3)
         new(mod,
             decode_filename(file),
-            srev.to_s.slice(/\A1\.(\d+)/, 1).to_i, Time.rcsdate(stime).getlocal,
-            drev.slice(/\A1\.(\d+)/, 1).to_i, Time.rcsdate(dtime).getlocal,
+            srev.to_s.slice(/\A1\.(\d+)/, 1).to_i, Time.diffdate(stime).getlocal,
+            drev.slice(/\A1\.(\d+)/, 1).to_i, Time.diffdate(dtime).getlocal,
             chunk)
       end
 
@@ -495,7 +514,7 @@ module BitChannel
       def Log.parse(str)
         rline, dline, *msg = *str.to_a
         new(rline.slice(/\Arevision 1\.(\d+)\s/, 1).to_i,
-            Time.rcsdate(dline.slice(/date: (.*?);/, 1)).getlocal,
+            Time.rcslogdate(dline.slice(/date: (.*?);/, 1)).getlocal,
             dline.slice(/lines: \+(\d+)/, 1).to_i,
             dline.slice(/lines:(?: \+(?:\d+))? -(\d+)/, 1).to_i,
             msg.join(''))
