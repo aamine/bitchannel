@@ -14,6 +14,7 @@ end
 
 def bitchannel_context
   cgidir = bitchannel_cgidir()
+  vardir = cgidir
 
   config = BitChannel::Config.new(
     # :site_name    => 'My Site',
@@ -44,9 +45,9 @@ def bitchannel_context
   )
   repository = BitChannel::Repository.new(
     :cmd_path  => '/usr/bin/cvs',
-    :wc_read   => "#{cgidir}/wc.read",
-    :wc_write  => "#{cgidir}/wc.write",
-    :cachedir  => "#{cgidir}/cache",
+    :wc_read   => "#{vardir}/wc.read",
+    :wc_write  => "#{vardir}/wc.write",
+    :cachedir  => "#{vardir}/cache",
     :logfile   => nil
   )
 
