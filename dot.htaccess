@@ -9,24 +9,18 @@ DirectoryIndex index.cgi
 # If you want to use PageName.html style URL, comment out
 # following lines and set config.use_html_url=true in bitchannelrc.
 #RewriteEngine on
-#RewriteRule "(.*)\.html" ./?cmd=view;name=$1
+#RewriteRule "([^/]+)\.html" ./?cmd=view;name=$1
 
 <Files bitchannelrc>
   deny from all
 </Files>
-<Files CVS>
+<FilesMatch "^(CVS|Root|Repository|Entries)$">
   deny from all
-</Files>
-<Files lib>
+</FilesMatch>
+<FilesMatch "^(lib|misc|template)$">
   deny from all
-</Files>
-<Files misc>
-  deny from all
-</Files>
+</FilesMatch>
 <Files *.rb>
-  deny from all
-</Files>
-<Files template>
   deny from all
 </Files>
 <Files *.rhtml>
