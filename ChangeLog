@@ -1,3 +1,7 @@
+Thu Jun 10 18:57:23 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* version 0.2.1 released.
+
 Thu Jun 10 18:56:51 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* template/edit.rhtml: must escape body. [XSS CRITICAL]
