@@ -18,12 +18,8 @@ module WEBrick
       app.run
     end
 
-    def CGI.each_cgi_request
-      yield ENV, $stdin, $stdout
-    end
-
     def CGI.each_request(&block)
-      each_cgi_request(&block)
+      yield ENV, $stdin, $stdout
     end
 
     def run

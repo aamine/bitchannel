@@ -1,3 +1,15 @@
+Wed May 26 23:44:26 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/fcgi.rb: fix graceful termination.
+
+	* lib/fcgi.rb (Server#each_request): trap SIGTERM.
+
+	* lib/fcgi.rb (Server#each_request): ignore SIGPIPE explicitly.
+
+	* lib/bitchannel/webrick_cgi.rb: simplify using new fcgi.rb.
+
+	* lib/bitchannel/webrick_fcgi.rb: ditto.
+
 Wed May 26 20:22:14 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/repository.rb (update_checkin): -kb rejects

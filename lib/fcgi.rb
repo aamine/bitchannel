@@ -26,21 +26,28 @@ class FCGI
     end
   end
 
-  def FCGI.each_request(&block)
-    Server.new(::Socket.for_fd($stdin.fileno)).each_request(&block)
-  end
-
-  class << FCGI
-    alias each each_request
-    alias is_cgi? cgi?   # obsolete
-  end
-
   def FCGI.each_cgi_request(&block)
     if cgi?
       yield Request.new(FCGI_NULL_REQUEST_ID, ENV, $stdin, $stdout, $stderr)
     else
       each_request(&block)
     end
+  end
+
+  def FCGI.each_request(&block)
+    f = default_connection()
+    Server.new(f).each_request(&block)
+  ensure
+    f.close if f
+  end
+
+  def FCGI.default_connection
+    ::Socket.for_fd($stdin.fileno)
+  end
+
+  class << FCGI
+    alias each each_request
+    alias is_cgi? cgi?   # obsolete
   end
 
 
@@ -88,20 +95,31 @@ class FCGI
       }
     end
 
-    def each_request(&block)
-      while true
+    def each_request
+      graceful_exit = false
+      Signal.trap(:USR1) { graceful_exit = true }
+      Signal.trap(:TERM) { exit 0 }
+      Signal.trap(:PIPE, 'IGNORE')   # We use Errno::EPIPE exception.
+      each_request_nosignal do |req|
+        yield req
+        graceful_exit
+      end
+      exit 0
+    end
+
+    def each_request_nosignal
+      graceful = false
+      until graceful
         begin
           sock, addr = *@server.accept
           break unless sock
-          handle_socket FastCGISocket.new(sock), &block
-        rescue Errno::EPIPE
+          handle_socket(FastCGISocket.new(sock)) {|req|
+            graceful = yield(req)
+          }
+        rescue Errno::EPIPE, EOFError
           ;
         ensure
-          begin
-            sock.close if sock
-          rescue SystemCallError
-            ;
-          end
+          sock.close if sock and not sock.closed?
         end
       end
     end
@@ -137,6 +155,7 @@ class FCGI
           end
         end
       end
+      raise "must not happen: FCGI socket unexpected EOF"
     end
 
     def handle_GET_VALUES(rec)
