@@ -13,7 +13,7 @@ Edit
 <a href="<%= cgi_url() %>?cmd=recent">Recent</a>
 <a href="<%= cgi_url() %>?cmd=list">List</a>
 <a href="<%= cgi_url() %>?cmd=history;name=<%= page_url() %>">History</a>
-<a href="<%= cgi_url() %>?cmd=annotate;name=<%= page_url() %>">History</a>
+<a href="<%= cgi_url() %>?cmd=annotate;name=<%= page_url() %>">Annotate</a>
 <%
     if original_revision() and original_revision() > 1
 %><a href="<%= cgi_url() %>?cmd=diff;rev1=<%= original_revision() - 1 %>;rev2=<%= original_revision() %>;name=<%= page_url() %>">Diff</a><%
