@@ -164,23 +164,43 @@ hr {
 }
 
 /*
+    diff
+*/
+span.addedline {
+    background-color: #fdd;
+}
+span.removedline {
+    background-color: #fdd;
+}
+
+/*
     annotate
 */
 pre.annotate {
     background-color: transparent;
 }
 span.new4 {
-    background-color: #ffcfcf;
+    background-color: #fdd;
 }
 span.new3 {
-    background-color: #ffbfbf;
+    background-color: #fbb;
 }
 span.new2 {
-    background-color: #ffafaf;
+    background-color: #faa;
 }
 span.new1 {
-    background-color: #ff8f8f;
+    background-color: #f88;
 }
 span.new0 {
-    background-color: #ff6f6f;
+    background-color: #f66;
+}
+
+/*
+    preview
+*/
+span.previewmark {
+    color: red;
+    background-color: transparent;
+    font-size: 200%;
+    font-weight: bold;
 }

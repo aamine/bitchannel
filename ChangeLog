@@ -1,3 +1,11 @@
+Sat Mar 27 01:12:45 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* default.css: add rule for span.previewmark.
+
+	* default.css: add rule for span.addedline.
+
+	* default.css: add rule for span.removedline.
+
 Sat Mar 27 01:12:13 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* template/diff.rhtml: add <span class="addedline">.
