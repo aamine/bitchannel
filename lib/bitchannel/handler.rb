@@ -96,7 +96,7 @@ module Wikitik
           return
         end
         begin
-          text = cgi.get_param('text').to_s
+          text = cgi.get_param('text').to_s.gsub(/\r\n|\n|\r/, "\r\n")
           @repository.checkin page_name,
                               cgi.get_rev_param('origrev'),
                               text
