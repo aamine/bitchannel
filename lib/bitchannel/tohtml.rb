@@ -100,7 +100,7 @@ module BitChannel
       nl = ''
       @f.until_match(/#{CAPTION}|#{UL}|#{OL}|#{DL}|#{CITE}|#{TABLE}|#{PRE}|#{INDENTED}/o) do |line|
         break if line.strip.empty?
-        print text(nl + line.strip)
+        print nl + text(line.sub(/\A\~/, '').strip)
         nl = "\n"
       end
       puts '</p>'
@@ -181,9 +181,19 @@ module BitChannel
 
     def cite
       puts '<blockquote>'
+      print '<p>'
+      nl = ''
       @f.while_match(CITE) do |line|
-        puts line.sub(/\A""/, '').strip
+        str = line.sub(/\A""/, '').strip
+        if str.empty?
+          print "</p>\n<p>"
+          nl = ''
+        else
+          print nl + escape_html(str)
+          nl = "\n"
+        end
       end
+      puts '</p>'
       puts '</blockquote>'
     end
 
@@ -290,7 +300,7 @@ module BitChannel
     #
 
     WikiName = /\b(?:[A-Z][a-z0-9]+){2,}\b/n   # /\b/ requires `n' option
-    BlacketLink = /\[\[\S*?\]\]/e
+    BlacketLink = /\[\[\S+?\]\]/e
         # FIXME: `e' option does not effect in the final regexp.
     schemes = %w( http ftp )
     SeemsURL = /\b(?=#{Regexp.union(*schemes)}:)#{URI::PATTERN::X_ABS_URI}/xn
