@@ -34,7 +34,8 @@ def bitchannel_context
     # :cgi_url      => nil,       # auto detect
     # :cgi_url      => '/wiki/',  # static
 
-    :css_url      => 'default.css',
+    #:css_url      => 'default.css',
+    :theme        => 'default',
 
     :use_html_url => false
         # You MUST set up mod_rewrite before turning this flag on.

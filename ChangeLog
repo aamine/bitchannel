@@ -1,3 +1,22 @@
+Sat May  8 19:59:37 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* bitchannelrc.sample.ja: new config `theme'.
+
+	* lib/bitchannel/config.rb: ditto.
+
+	* lib/bitchannel/config.rb (css_url): supports theme.
+
+	* lib/bitchannel/config.rb: new class UserConfig.
+
+	* lib/bitchannel/page.rb: devide ErbUtils from Page.
+
+	* lib/bitchannel/erbutils.rb: new file.
+
+	* lib/bitchannel/repository.rb: logging module ID (is a node ID in
+	  the farm environment).
+
+	* lib/bitchannel/repository.rb: use UserConfig.
+
 Wed May  5 01:20:29 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* template/revlinks.rhtml: Revlinks represents "Related Pages",

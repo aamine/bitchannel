@@ -8,6 +8,7 @@
 # the GNU LGPL, Lesser General Public License version 2.1.
 #
 
+require 'bitchannel/config'
 require 'bitchannel/textutils'
 require 'bitchannel/exception'
 require 'time'
@@ -62,22 +63,16 @@ module BitChannel
     include LockUtils
     include TextUtils
 
-    def initialize(args)
-      args = args.dup
-      def args.getopt(name)
-        raise ConfigError, "Config Error: not set: repository.#{name}" \
-            unless key?(name)
-        delete(name).untaint
-      end
-      @cvs_cmd  = args.getopt(:cmd_path)
-      @wc_read  = args.getopt(:wc_read)
-      @wc_write = args.getopt(:wc_write)
-      @logfile  = args.getopt(:logfile)
-      cachedir  = args.getopt(:cachedir)
-      args.each do |k,v|
-        raise ConfigError, "Config Error: unknown key: repository.#{k}"
-      end
-      @link_cache = LinkCache.new("#{cachedir}/link", "#{cachedir}/revlink")
+    def initialize(hash)
+      UserConfig.parse(hash, 'repository') {|conf|
+        @cvs_cmd  = conf.get_required(:cmd_path)
+        @wc_read  = conf.get_required(:wc_read)
+        @wc_write = conf.get_required(:wc_write)
+        @logfile  = conf.get_required(:logfile)
+        cachedir  = conf.get_required(:cachedir)
+        @link_cache = LinkCache.new("#{cachedir}/link", "#{cachedir}/revlink")
+        @module_id = conf.get_optional(:id, nil)
+      }
       # per-request cache
       @Entries = nil
     end
@@ -425,12 +420,16 @@ module BitChannel
       File.open(@logfile, 'a') {|f|
         begin
           f.flock File::LOCK_EX
-          f.puts "#{format_time(Time.now)};#{$$}; #{msg}"
+          f.puts "#{format_time(Time.now)};#{$$}; #{module_id()}#{msg}"
           f.flush
         ensure
           f.flock File::LOCK_UN
         end
       }
+    end
+
+    def module_id
+      @module_id ? "[#{@module_id}] " : ''
     end
 
     def page_must_valid(name)

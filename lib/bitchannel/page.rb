@@ -9,21 +9,13 @@
 #
 
 require 'bitchannel/tohtml'
+require 'bitchannel/erbutils'
 require 'bitchannel/textutils'
-require 'erb'
-
-class ERB   # tmp
-  attr_accessor :filename  unless method_defined?(:filename)
-
-  remove_method :result
-  def result(binding)
-    eval(@src, binding, @filename, 1)
-  end
-end
 
 module BitChannel
 
   class GenericPage
+    include ErbUtils
     include TextUtils
 
     def initialize(config)
@@ -31,9 +23,7 @@ module BitChannel
     end
 
     def html
-      erb = ERB.new(get_template(@config.templatedir, template_id()), nil, 2)
-      erb.filename = "#{template_id()}.rhtml"
-      erb.result(binding())
+      run_erb(@config.templatedir, template_id())
     end
 
     def last_modified
@@ -55,12 +45,6 @@ module BitChannel
     def menuitem_top_enabled?()      true end
     def menuitem_help_enabled?()     true end
     def menuitem_search_enabled?()   true end
-
-    def get_template(tmpldir, tmplname)
-      File.read("#{tmpldir}/#{tmplname}.rhtml").gsub(/^\.include (\w+)/) {
-        get_template(tmpldir, $1.untaint)
-      }.untaint
-    end
 
     def page_charset
       escape_url(@config.charset)

@@ -8,40 +8,71 @@
 # the GNU LGPL, Lesser General Public License version 2.1.
 #
 
+require 'bitchannel/exception'
+
 module BitChannel
+
+  class UserConfig
+    def UserConfig.parse(hash, cat)
+      conf = new(hash, cat)
+      yield conf
+      conf.check_unknown_options
+    end
+      
+    def initialize(hash, cat)
+      @config = hash.dup
+      @category = cat
+    end
+
+    def get_required(key)
+      raise ConfigError, "Config Error: not set: #{@category}.#{key}" \
+          unless @config.key?(key)
+      @config.delete(key).untaint
+    end
+
+    def get_optional(key, default)
+      return default unless @config.key?(key)
+      @config.delete(key).untaint
+    end
+
+    def check_unknown_options
+      @config.each do |key, val|
+        raise ConfigError, "Config Error: unknown key: #{@category}.#{key}"
+      end
+    end
+  end
+
 
   FRONT_PAGE_NAME = 'FrontPage'
   HELP_PAGE_NAME = 'HelpPage'
   TMP_PAGE_NAME = 'tmp'
 
   class Config
-    def initialize(args)
-      args = args.dup
-      def args.getopt(name)
-        raise ConfigError, "Config Error: not set: config.#{name}" \
-            unless key?(name)
-        delete(name).untaint
+    def initialize(hash)
+      UserConfig.parse(hash, 'config') {|conf|
+        @locale      = conf.get_required(:locale)
+        @templatedir = conf.get_required(:templatedir)
+        @css_url     = conf.get_optional(:css_url)
+        @theme       = conf.get_optional(:theme)
+        @html_url_p  = conf.get_required(:use_html_url)
+        @site_name   = conf.get_optional(:site_name, nil)
+        @logo_url    = conf.get_optional(:logo_url, nil)
+        @cgi_url     = conf.get_optional(:cgi_url, nil)
+      }
+      if @theme and @css_url
+        raise ConfigError, "both of theme and css_url given"
       end
-      def args.fetchopt(name, default)
-        return default unless key?(name)
-        delete(name).untaint
-      end
-
-      @locale      = args.getopt(:locale)
-      @templatedir = args.getopt(:templatedir)
-      @css_url     = args.getopt(:css_url)
-      @html_url_p  = args.getopt(:use_html_url)
-      @site_name   = args.fetchopt(:site_name, nil)
-      @logo_url    = args.fetchopt(:logo_url, nil)
-      @cgi_url     = args.fetchopt(:cgi_url, nil)
-      args.each do |key, val|
-        raise ConfigError, "Config Error: unknown key: config.#{key}"
+      if not @theme and not @css_url
+        raise ConfigError, "theme or css_url required"
       end
     end
 
     attr_reader :templatedir
-    attr_reader :css_url
     attr_reader :logo_url
+
+    def css_url
+      @css_url || "#{@theme}/#{@theme}.css"
+    end
 
     def charset
       @locale.charset
