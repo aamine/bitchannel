@@ -382,7 +382,7 @@ module BitChannel
     end
 
     def diff_base_revision
-      @original_revision || @page.revision
+      @original_revision || @page.revision || 0
     rescue Errno::ENOENT
       return 0
     end

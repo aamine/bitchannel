@@ -1,3 +1,10 @@
+Sat Jul 31 19:33:56 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/page.rb (EditPage#diff_base_revision): revision
+	  might be 0 when a page is not exist.
+
+	* lib/bitchannel/repository.rb (links): wrong method name.
+
 Sun Jul 25 17:58:23 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/repository.rb (popen3): clean up code.

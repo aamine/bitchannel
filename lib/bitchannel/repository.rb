@@ -746,7 +746,7 @@ module BitChannel
 
     def links
       @links ||=
-          (@repository.link_cache[@name] ||= ToHTML.extract_links(page_text))
+          (@repository.link_cache[@name] ||= ToHTML.extract_links(source()))
     end
 
     def revlinks
