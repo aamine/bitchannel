@@ -18,8 +18,10 @@ def main
   usage(1) unless ok
 
   load './bitchannelrc'
-  config, repo = initialize_environment()
+  setup_environment
   require 'bitchannel/tohtml'
+
+  config, repo = *bitchannel_context()
   c = BitChannel::ToHTML.new(config, repo)
   ARGV.each do |page_name|
     puts c.compile(repo[page_name], page_name)

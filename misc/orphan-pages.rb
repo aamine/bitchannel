@@ -18,7 +18,9 @@ def main
   usage(1) unless ok
 
   load './bitchannelrc'
-  config, repo = initialize_environment()
+  setup_environment
+
+  config, repo = *bitchannel_context()
   repo.orphan_pages.each do |page_name|
     puts page_name
   end

@@ -1,3 +1,11 @@
+Wed Apr 28 20:24:02 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* misc/orphan-pages.rb: follow bitchannelrc changes.
+
+	* misc/refresh-linkcache.rb: ditto.
+
+	* misc/tohtml.rb: ditto.
+
 Wed Apr 28 19:22:30 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/tohtml.rb: inline patterns handle only ASCII.
