@@ -39,6 +39,10 @@ module BitChannel
       true
     end
 
+    def DUMMY_CONFIG.cgi_url
+      "dummy_cgi_url"
+    end
+
     def ToHTML.extract_links(str, repo)
       new(DUMMY_CONFIG, repo).extract_links(str)
     end
@@ -62,6 +66,9 @@ module BitChannel
     TABLE = /\A\|\|/
     PRE = /\A\{\{\{/
     INDENTED = /\A\s+\S/
+    BLOCKEXT = /\A\[\[\#(\w+)(:.*?)?\]\]$/
+
+    PARAGRAPH_END = Regexp.union(CAPTION, UL, OL, DL, CITE, TABLE, PRE, INDENTED, BLOCKEXT)
 
     def do_compile
       while @f.next?
@@ -74,6 +81,16 @@ module BitChannel
         when TABLE    then table
         when PRE      then pre
         when INDENTED then indented_pre   # must be checked after ul/ol
+        when BLOCKEXT
+          name = $1
+          arg = $2
+          mid = "block_ext__#{name}"
+          if respond_to?(mid, true)
+            __send__(mid, arg)
+            @f.gets
+          else
+            puts @f.gets
+          end
         else
           if @f.peek.strip.empty?
             @f.gets
@@ -98,7 +115,7 @@ module BitChannel
     def paragraph
       print '<p>'
       nl = ''
-      @f.until_match(/#{CAPTION}|#{UL}|#{OL}|#{DL}|#{CITE}|#{TABLE}|#{PRE}|#{INDENTED}/o) do |line|
+      @f.until_match(PARAGRAPH_END) do |line|
         break if line.strip.empty?
         print nl + text(line.sub(/\A\~/, '').strip)
         nl = "\n"
@@ -272,6 +289,18 @@ module BitChannel
       puts '</pre>'
     end
 
+    def block_ext__comment(arg)
+      puts %Q(
+        <form method="POST" action="#{cgi_href()}" class="commentform">
+        <input type="hidden" name="cmd" value="comment">
+        <input type="hidden" name="name" value="#{escape_html(@page_name)}">
+        Name: <input type="text" name="uname" size="8" value="">
+        <input type="text" name="cmt" size="32" value="">
+        <input type="submit" name="submit" value="Write">
+        </form>
+      ).strip.map {|line| line.strip }.join("\n")
+    end
+
     #
     # Indent
     #
@@ -317,7 +346,7 @@ module BitChannel
     #
 
     WikiName = /\b(?:[A-Z][a-z0-9]+){2,}\b/n   # /\b/ requires `n' option
-    BlacketLink = /\[\[\S+?\]\]/e
+    BracketLink = /\[\[\S+?\]\]/e
         # FIXME: `e' option does not effect in the final regexp.
     schemes = %w( http ftp )
     SeemsURL = /\b(?=#{Regexp.union(*schemes)}:)#{URI::PATTERN::X_ABS_URI}/xn
@@ -326,10 +355,10 @@ module BitChannel
 
     def text(str)
       esctable = TextUtils::ESC
-      str.gsub(/(#{NeedESC})|(#{WikiName})|(#{BlacketLink})|(#{SeemsURL})/on) {
+      str.gsub(/(#{NeedESC})|(#{WikiName})|(#{BracketLink})|(#{SeemsURL})/on) {
         if    ch  = $1 then esctable[ch]
         elsif tok = $2 then internal_link(tok)
-        elsif tok = $3 then blacket_link(tok[2..-3])
+        elsif tok = $3 then bracket_link(tok[2..-3])
         elsif tok = $4 then seems_url(tok)
         else
           raise 'must not happen'
@@ -358,8 +387,15 @@ module BitChannel
       escape_html(@config.cgi_url)
     end
 
-    def blacket_link(link)
+    def bracket_link(link)
       case link
+      when /\A#/
+        name, arg = $'.split(':', 2)
+        mid = "inline_ext__#{name}"
+        if respond_to?(mid, true)
+        then __send__(mid, arg)
+        else "[#{link}]"
+        end
       when /\Aimg:/
         imglink = $'
         if SeemsURL =~ imglink and seems_image_url?(imglink)

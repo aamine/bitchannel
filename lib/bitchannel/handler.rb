@@ -59,19 +59,10 @@ module BitChannel
     private
 
     def wiki_main(cgi)
-      res = case cgi.get_param('cmd').to_s.downcase
-            when 'view'     then handle_view(cgi)
-            when 'edit'     then handle_edit(cgi)
-            when 'save'     then handle_save(cgi)
-            when 'diff'     then handle_diff(cgi)
-            when 'history'  then handle_history(cgi)
-            when 'annotate' then handle_annotate(cgi)
-            when 'src'      then handle_src(cgi)
-            when 'list'     then handle_list(cgi)
-            when 'recent'   then handle_recent(cgi)
-            when 'search'   then handle_search(cgi)
-            else
-              view_page(cgi.get_param('name') || FRONT_PAGE_NAME)
+      handler = "handle_#{cgi.get_param('cmd').to_s.downcase}"
+      res = if respond_to?(handler, true)
+            then __send__(handler, cgi)
+            else view_page(cgi.get_param('name') || FRONT_PAGE_NAME)
             end
       res.exec cgi
     rescue WrongPageName => err
@@ -174,6 +165,26 @@ module BitChannel
 
     def thanks_response(name)
       ThanksPage.new(@config, name).response
+    end
+
+    def handle_comment(cgi)
+      page_name = cgi.get_param('name')
+      return front_page() if not page_name or not @repository.exist?(page_name)
+      uname = unify_encoding(cgi.get_param('uname').to_s.strip, @config.charset)
+      comment = unify_encoding(cgi.get_param('cmt').to_s.strip, @config.charset)
+      @repository.edit(page_name) {|text|
+        insert_comment(@repository[page_name], uname, comment)
+      }
+      thanks_response(page_name)
+    end
+
+    def insert_comment(text, uname, comment)
+      cmtline = "* #{format_time(Time.now)}: #{uname}: #{comment}"
+      unless /\[\[\#comment(:.*?)?\]\]/n =~ text
+        text << "\n" << cmtline
+        return text
+      end
+      text.sub(/\[\[\#comment(:.*?)?\]\]/n) { $& + "\n" + cmtline }
     end
 
     def handle_diff(cgi)

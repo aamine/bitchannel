@@ -1,3 +1,11 @@
+Sun Mar 28 17:27:27 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/handler.rb: new handler #handle_comment.
+
+	* lib/bitchannel/repository.rb: new method #edit.
+
+	* lib/bitchannel/tohtml.rb: new syntax [[#ext]] (block, inline).
+
 Sun Mar 28 15:08:48 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* template/menu.rhtml: change menu item order.

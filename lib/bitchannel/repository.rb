@@ -170,7 +170,6 @@ module BitChannel
       Dir.chdir(@wc_read) {
         out, err = cvs('log', encode_filename(page_name))
         logs = out.split(/^----------------------------/)
-p logs
         logs.shift  # remove header
         logs.last.slice!(/\A={8,}/)
         return logs.map {|str| Log.parse(str.strip) }
@@ -237,6 +236,25 @@ p logs
       result = collect_revlinks(page_name)
       @link_cache.set_revlinkcache page_name, result
       result
+    end
+
+    def edit(page_name)
+      page_must_valid page_name
+      page_must_exist page_name
+      filename = encode_filename(page_name)
+      Dir.chdir(@wc_write) {
+        lock(filename) {
+          cvs 'up', '-A', filename
+          text = yield(File.read(filename))
+          File.open(filename, 'w') {|f|
+            f.write text
+          }
+          cvs 'ci', '-m', "edit checkin", filename
+        }
+      }
+      Dir.chdir(@wc_read) {
+        cvs 'up', '-A', filename
+      }
     end
 
     def checkin(page_name, origrev, new_text)
