@@ -1,3 +1,7 @@
+Sun Jul 25 17:58:23 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb (popen3): clean up code.
+
 Sun Jul 25 17:55:58 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/handler.rb (no_cache=): wrong header name.

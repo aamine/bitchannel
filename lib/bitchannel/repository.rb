@@ -613,36 +613,29 @@ module BitChannel
     end
 
     def popen3(ignore_status, *cmd)
-      pw = IO.pipe
-      pr = IO.pipe
-      pe = IO.pipe
+      child_stdin,   parent_stdin = *IO.pipe
+      parent_stdout, child_stdout = *IO.pipe
+      parent_stderr, child_stderr = *IO.pipe
       pid = Process.fork {
-        pw[1].close
-        STDIN.reopen(pw[0])
-        pw[0].close
-
-        pr[0].close
-        STDOUT.reopen(pr[1])
-        pr[1].close
-
-        pe[0].close
-        STDERR.reopen(pe[1])
-        pe[1].close
-
+        parent_stdin.close
+        parent_stdout.close
+        parent_stderr.close
+        STDIN.reopen child_stdin; child_stdin.close
+        STDOUT.reopen child_stdout; child_stdout.close
+        STDERR.reopen child_stderr; child_stderr.close
         exec(*cmd)
       }
-      pw[0].close
-      pr[1].close
-      pe[1].close
-      pipes = [pw[1], pr[0], pe[0]]
-      pw[1].sync = true
+      child_stdin.close
+      child_stdout.close
+      child_stderr.close
       begin
-        return yield(*pipes)
+        parent_stdin.sync = true
+        return yield(parent_stdin, parent_stdout, parent_stderr)
       ensure
-        pipes.each do |f|
+        [parent_stdin, parent_stdout, parent_stderr].each do |f|
           f.close unless f.closed?
         end
-        dummy, status = Process.waitpid2(pid)
+        dummy, status = *Process.waitpid2(pid)
         if status.exitstatus != 0 and not ignore_status
           raise CommandFailed.new("Command failed: #{cmd.join ' '}", status)
         end
