@@ -38,6 +38,11 @@ module BitChannel
       erb.result(binding())
     end
 
+    # `charset' method already exists
+    def page_charset
+      @config.charset
+    end
+
     private
 
     def get_template(tmpldir, tmplname)
@@ -59,11 +64,11 @@ module BitChannel
     end
 
     def index_page_url
-      view_url(@config.index_page_name)
+      view_url(FRONT_PAGE_NAME)
     end
 
     def help_page_url
-      view_url(@config.help_page_name)
+      view_url(HELP_PAGE_NAME)
     end
 
     def view_url(page_name)
@@ -116,7 +121,7 @@ module BitChannel
     end
 
     def front_page?
-      @page_name == @config.index_page_name
+      @page_name == FRONT_PAGE_NAME
     end
 
     def site_name

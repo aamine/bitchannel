@@ -10,8 +10,11 @@
 
 module BitChannel
 
-  class Config
+  FRONT_PAGE_NAME = 'FrontPage'
+  HELP_PAGE_NAME = 'HelpPage'
+  TMP_PAGE_NAME = 'tmp'
 
+  class Config
     def initialize(args)
       t = Hash.new {|h,k|
         raise ConfigError, "Config Error: not set: config.#{k}"
@@ -25,8 +28,6 @@ module BitChannel
       @html_url_p  = t[:use_html_url]; t.delete(:use_html_url)
 
       # Optional
-      @index_page  = t.fetch(:index_page, nil); t.delete(:index_page)
-      @help_page   = t.fetch(:help_page, nil);  t.delete(:help_page)
       @site_name   = t.fetch(:site_name, nil);  t.delete(:site_name)
 
       t.each do |k,v|
@@ -47,21 +48,8 @@ module BitChannel
     end
 
     def site_name
-      @site_name || index_page_name()
+      @site_name || FRONT_PAGE_NAME
     end
-
-    def index_page_name
-      @index_page || 'FrontPage'
-    end
-
-    def help_page_name
-      @help_page || 'HelpPage'
-    end
-
-    def tmp_page_name
-      'tmp'
-    end
-
   end
 
 end

@@ -70,14 +70,14 @@ module BitChannel
       when 'recent'   then handle_recent cgi
       when 'search'   then handle_search cgi
       else
-        view cgi, (cgi.get_param('name') || @config.index_page_name)
+        view cgi, (cgi.get_param('name') || FRONT_PAGE_NAME)
       end
     rescue WrongPageName => err
       send_error cgi, err, false
     end
 
     def handle_view(cgi)
-      page_name = (cgi.get_param('name') || @config.index_page_name)
+      page_name = (cgi.get_param('name') || FRONT_PAGE_NAME)
       rev = cgi.get_rev_param('rev')
       if rev
         page = ViewRevPage.new(@config, @repository, page_name, rev)
@@ -90,7 +90,7 @@ module BitChannel
     def handle_edit(cgi)
       page_name = cgi.get_param('name')
       unless page_name
-        view cgi, @config.index_page_name
+        view cgi, FRONT_PAGE_NAME
         return
       end
       orgrev = @repository.revision(page_name)
@@ -126,9 +126,9 @@ module BitChannel
 
     def reedit(cgi, text, msg)
       send_html cgi, EditPage.new(@config, @repository,
-                                  @config.tmp_page_name,
+                                  TMP_PAGE_NAME,
                                   text,
-                                  @repository.revision(@config.tmp_page_name),
+                                  @repository.revision(TMP_PAGE_NAME),
                                   msg).html
     end
 
@@ -151,7 +151,7 @@ module BitChannel
     def handle_diff(cgi)
       page_name = cgi.get_param('name')
       if not page_name or not @repository.exist?(page_name)
-        view cgi, @config.index_page_name
+        view cgi, FRONT_PAGE_NAME
         return
       end
       rev1 = cgi.get_rev_param('rev1')
@@ -167,7 +167,7 @@ module BitChannel
     def handle_history(cgi)
       page_name = cgi.get_param('name')
       if not page_name or not @repository.exist?(page_name)
-        view cgi, @config.index_page_name
+        view cgi, FRONT_PAGE_NAME
         return
       end
       send_html cgi, HistoryPage.new(@config, @repository, page_name).html
@@ -176,7 +176,7 @@ module BitChannel
     def handle_annotate(cgi)
       page_name = cgi.get_param('name')
       if not page_name or not @repository.exist?(page_name)
-        view cgi, @config.index_page_name
+        view cgi, FRONT_PAGE_NAME
         return
       end
       rev = cgi.get_rev_param('rev')
@@ -184,7 +184,7 @@ module BitChannel
     end
 
     def handle_src(cgi)
-      page_name = (cgi.get_param('name') || @config.index_page_name)
+      page_name = (cgi.get_param('name') || FRONT_PAGE_NAME)
       begin
         body = @repository[page_name]
       rescue Errno::ENOENT
