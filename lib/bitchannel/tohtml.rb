@@ -271,8 +271,10 @@ module Wikitik
       @interwikinames ||= read_interwikiname_table()
     end
 
+    InterWikiName_LIST_PAGE = 'DefInterWikiName'
+
     def read_interwikiname_table()
-      text = @repository['InterWikiName'] or return {}
+      text = @repository[InterWikiName_LIST_PAGE] or return {}
       table = {}
       text.each do |line|
         if /\A\s*\*\s*(\S+?):/ =~ line
