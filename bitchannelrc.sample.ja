@@ -7,7 +7,7 @@ def initialize_environment
 
   cgidir = File.dirname(File.expand_path(__FILE__))
 
-  $:.unshift "#{cgidir}/lib"
+  $:.unshift "#{cgidir}/lib".untaint
   require 'bitchannel'
 
   BitChannel.lang = 'ja'
