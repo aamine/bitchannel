@@ -132,7 +132,8 @@ module Wikitik
           view cgi, @config.index_page_name
           return
         end
-        send cgi, AnnotatePage.new(@config, @repository, page_name).html
+        rev = cgi.get_rev_param('rev')
+        send cgi, AnnotatePage.new(@config, @repository, page_name, rev).html
       when 'src'
         page_name = (cgi.get_param('name') || @config.index_page_name)
         begin

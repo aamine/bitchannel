@@ -209,14 +209,23 @@ module Wikitik
 
 
   class AnnotatePage < Page
+    def initialize(config, repo, page_name, rev)
+      super config, repo, page_name
+      @revision = rev
+    end
+
     private
 
     def template_id
       'annotate'
     end
 
+    def revision
+      @revision
+    end
+
     def annotate
-      @repository.annotate(@page_name)
+      @repository.annotate(@page_name, @revision)
     end
   end
 

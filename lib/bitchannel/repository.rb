@@ -110,9 +110,13 @@ module Wikitik
       }
     end
 
-    def annotate(page_name)
+    def annotate(page_name, rev = nil)
       Dir.chdir(@wc_read) {
-        out, err = cvs('ann', '-F', encode_filename(page_name))
+        if rev
+          out, err = cvs('ann', '-F', "-r1.#{rev}", encode_filename(page_name))
+        else
+          out, err = cvs('ann', '-F', encode_filename(page_name))
+        end
         return out.map {|line| line.sub(/\(\S+\s*/, '(') }.join('').strip
       }
     end

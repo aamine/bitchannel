@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=<%= charset() %>">
   <meta http-equiv="Content-Language" content="ja-JP">
   <link rel="stylesheet" type="text/css" href="<%= css_url() %>">
-  <title>Diff: <%= page_name() %></title>
+  <title><%= page_name() %> : Diff</title>
 </head>
 <body>
 
@@ -19,7 +19,7 @@
 <a href="<%= cgi_url() %>?cmd=view;name=HelpPage">Help</a>
 .include search_form
 </div>
-<h1>Diff: <%= page_name() %> r1.<%= rev1() %> &lt;=&gt; r1.<%= rev2() %></h1>
+<h1><%= page_name() %> : Diff r1.<%= rev1() %> &lt;=&gt; r1.<%= rev2() %></h1>
 <pre>
 <%= escape_html(diff()) %>
 </pre>

@@ -4,11 +4,12 @@
   <meta http-equiv="Content-Type" content="text/html; charset=<%= charset() %>">
   <meta http-equiv="Content-Language" content="ja-JP">
   <link rel="stylesheet" type="text/css" href="<%= css_url() %>">
-  <title>Edit: <%= page_name() %></title>
+  <title><%= page_name() %> : Edit</title>
 </head>
 <body>
 
 <div class="menu">
+<a href="<%= cgi_url() %>?cmd=view;name=<%= page_url() %>">View</a>
 <a href="<%= cgi_url() %>?cmd=recent">Recent</a>
 <a href="<%= cgi_url() %>?cmd=list">List</a>
 <a href="<%= cgi_url() %>?cmd=history;name=<%= page_url() %>">History</a>
@@ -22,7 +23,7 @@ Diff
 .include search_form
 </div>
 
-<h1>Edit: <%= page_name() %></h1>
+<h1><%= page_name() %> : Edit</h1>
 <%= opt_message() %>
 <form method="POST" action="<%= cgi_url() %>">
 <input type="hidden" name="cmd" value="save">
