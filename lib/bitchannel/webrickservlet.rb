@@ -15,10 +15,9 @@ module BitChannel
 
   class WebrickServlet < WEBrick::HTTPServlet::AbstractServlet
     def do_GET(req, res)
-      conf, repo = *@options
-      conf = conf.dup
-      conf.suggest_cgi_url File.dirname(req.path)
-      Handler.new(conf, repo, true).service req, res
+      h = Handler.new(*@options)
+      h.config.suggest_cgi_url File.dirname(req.path)
+      h.handle(Request.new(req, h.config, true)).update_for res
     end
 
     alias do_POST do_GET

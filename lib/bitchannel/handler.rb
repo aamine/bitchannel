@@ -29,29 +29,25 @@ module BitChannel
   class Handler
     include TextUtils
 
-    def initialize(config, repo, pathinfo_sensitive)
+    def initialize(config, repo)
       @config = config
       @repository = repo
-      @pathinfo_sensitive = pathinfo_sensitive
     end
 
-    def service(webrickreq, webrickres)
-      begin
-        handle(webrickreq).update_for webrickres
-      rescue Exception => err
-        error_response(err, true).update_for webrickres
-      end
+    attr_reader :config
+
+    def handle(req)
+      return _handle(req)
+    rescue Exception => err
+      return error_response(err, true)
     end
 
-    def handle(webrickreq)
-      req = Request.new(webrickreq, @config, @pathinfo_sensitive)
+    def _handle(req)
       mid = "handle_#{req.cmd}"
       if respond_to?(mid, true)
       then __send__(mid, req)
       else view_page(req.page_name || FRONT_PAGE_NAME)
       end
-    rescue WrongPageName => err
-      error_response(err, false)
     end
 
     private

@@ -1,3 +1,11 @@
+Sun May  9 06:49:38 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/cgi.rb: create Request object in BitChannel::CGI.
+
+	* lib/bitchannel/handler.rb: ditto.
+
+	* lib/bitchannel/webrickservlet.rb: ditto.
+
 Sun May  9 06:47:01 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/repository.rb: id is not config, but independent

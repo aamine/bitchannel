@@ -29,8 +29,8 @@ module BitChannel
     end
 
     def do_GET(req, res)
-      conf, repo = *@options
-      Handler.new(conf, repo, false).service req, res
+      h = Handler.new(*@options)
+      h.handle(Request.new(req, h.config, false)).update_for res
     end
 
     alias do_POST do_GET
