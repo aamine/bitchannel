@@ -15,7 +15,7 @@
 <a href="<%= cgi_url() %>?cmd=view;name=HelpPage">Help</a>
 </div>
 <h1><%= page_name() %> rev 1.<%= revision() %></h1>
-<p><%= text(:last_modified) %>: <%= format_time(last_modified()) %></p>
+<p><%= gettext(:last_modified) %>: <%= format_time(last_modified()) %></p>
 <%= body() %>
 </body>
 </html>

@@ -10,6 +10,8 @@
 
 module Wikitik
   class WikitikError < StandardError; end
+  class ConfigError < WikitikError; end
+  class UnknownRCSLogFormat < WikitikError; end
 
   class CommandFailed < WikitikError
     def initialize(msg, status)
@@ -29,6 +31,4 @@ module Wikitik
 
     attr_reader :merged
   end
-
-  class UnknownRCSLogFormat < WikitikError; end
 end

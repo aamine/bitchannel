@@ -12,11 +12,18 @@ module Wikitik
 
   class Config
 
-    def initialize(config_env)
-      @charset, @cgi_url, @css_url, @templatedir =
-          *config_env.instance_eval {
-            [@charset, @cgi_url, @css_url, @templatedir]
-          }
+    def initialize(args)
+      t = Hash.new {|h,k|
+        raise ConfigError, "Config Error: not set: config.#{k}"
+      }
+      t.update args
+      @templatedir = t[:templatedir]; t.delete(:templatedir)
+      @charset     = t[:charset];     t.delete(:charset)
+      @cgi_url     = t[:cgi_url];     t.delete(:cgi_url)
+      @css_url     = t[:css_url];     t.delete(:css_url)
+      t.each do |k,v|
+        raise ConfigError, "Config Error: unknown key: config.#{k}"
+      end
       @index_page = nil
     end
 

@@ -1,136 +1,26 @@
-#!/usr/bin/env ruby
+#!/usr/bin/ruby
 #
-# $Id$
-#
-# Copyright (C) 2003 Minero Aoki
-#
-# This program is free software.
-# You can distribute/modify this program under the terms of
-# the GNU LGPL, Lesser General Public License version 2.
+# Wikitik Config File
 #
 
-load "#{File.dirname(__FILE__)}/config"
+$KCODE = 'EUC'
 
+basedir = File.dirname(File.expand_path(__FILE__))
+
+$:.unshift "#{basedir}/lib"
 require 'wikitik'
-require 'cgi'
+require 'wikitik/rc/ja'
 
-class CGI
-  def get_param(name)
-    a = params()[name]
-    return nil unless a
-    return nil unless a[0]
-    return nil if a[0].empty?
-    a[0]
-  end
-end
-
-def main
-  cgi = CGI.new
-  begin
-    wiki_main cgi
-  rescue Exception => err
-    print "Content-Type: text/plain\r\n"
-    print "Connection: close\r\n"
-    print "\r\n"
-    unless cgi.request_method.to_s.upcase == 'HEAD'
-      puts "#{err.message} (#{err.class})"
-      if true  #$DEBUG
-        puts err.precise_message if err.respond_to?(:precise_message)
-        err.backtrace.each do |i|
-          puts i
-        end
-      end
-    end
-  end
-end
-
-def wiki_main(cgi)
-  repo = Wikitik::Repository.new(@cvs_path, @cvswc_read, @cvswc_write)
-  config = Wikitik::Config.new(self)
-  case cgi.get_param('cmd').to_s.downcase
-  when 'view'
-    view repo, config, cgi, cgi.get_param('name')
-  when 'edit'
-    edit repo, config, cgi, cgi.get_param('name')
-  when 'save'
-    page_name = cgi.get_param('name')
-    unless page_name
-      send cgi, Wikitik::EditPage.new(config, repo,
-                                        config.tmp_page_name, nil,
-                                        cgi.get_param('text').to_s,
-                                        text(:save_without_name)).html
-      return
-    end
-    origrev = cgi.get_param('origrev').to_i
-    origrev = nil if origrev == 0
-    begin
-      repo.checkin page_name, origrev, (cgi.get_param('text') || "")
-      view repo, config, cgi, page_name
-    rescue Wikitik::EditConflict => err
-      send cgi, Wikitik::EditPage.new(config, repo,
-                                        page_name, nil,
-                                        merged, text(:conflict)).html
-    end
-  when 'history'
-    history repo, config, cgi, cgi.get_param('name')
-  when 'list'
-    send cgi, Wikitik::ListPage.new(config, repo).html
-  when 'recent'
-    send cgi, Wikitik::RecentPage.new(config, repo).html
-  else
-    view repo, config, cgi, cgi.get_param('name')
-  end
-end
-
-def view(repo, config, cgi, page_name)
-  page_name ||= config.index_page_name
-  unless repo.exist?(page_name)
-    edit repo, config, cgi, page_name
-    return
-  end
-  rev = cgi.get_param('rev')
-  if rev and rev.to_i > 0
-    viewrev repo, config, cgi, page_name, rev.to_i
-    return
-  end
-  page = Wikitik::ViewPage.new(config, repo, page_name)
-  send cgi, page.html, page.last_modified
-end
-
-def viewrev(repo, config, cgi, page_name, rev)
-  page = Wikitik::ViewRevPage.new(config, repo, page_name, rev)
-  send cgi, page.html, page.last_modified
-end
-
-def edit(repo, config, cgi, page_name)
-  unless page_name
-    view repo, config, cgi, config.index_page_name
-    return
-  end
-  send cgi, Wikitik::EditPage.new(config, repo, page_name).html
-end
-
-def history(repo, config, cgi, page_name)
-  if not page_name or not repo.exist?(page_name)
-    view repo, config, cgi, config.index_page_name
-    return
-  end
-  send cgi, Wikitik::HistoryPage.new(config, repo, page_name).html
-end
-
-def send(cgi, html, mtime = nil)
-  header = {'status' => '200 OK',
-            'type' => 'text/html', 'charset' => @charset,
-            'Pragma' => 'no-cache',
-            'Cache-Control' => 'no-cache',
-            'Content-Length' => html.length.to_s}
-  header['Last-Modified'] = CGI.rfc1123_date(mtime) if mtime
-  print cgi.header(header)
-  print html unless cgi.request_method.to_s.upcase == 'HEAD'
-end
-
-def text(key)
-  Wikitik.gettext(key)
-end
-
-main
+repo = Wikitik::Repository.new(
+  :cmd_path  => '/usr/bin/cvs',
+  # :cvsroot => '/home/aamine/var/cvs/test',
+  :wc_read   => "#{basedir}/wc.read",
+  :wc_write  => "#{basedir}/wc.write"
+)
+config = Wikitik::Config.new(
+  :templatedir => "#{basedir}/template",
+  :charset => 'euc-jp',
+  :css_url => 'default.css',
+  :cgi_url => 'index.rb'
+)
+Wikitik.main repo, config

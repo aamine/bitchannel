@@ -18,10 +18,17 @@ module Wikitik
 
     include TextUtils
 
-    def initialize(cvs, wc_read, wc_write)
-      @cvs_cmd = cvs
-      @wc_read = wc_read
-      @wc_write = wc_write
+    def initialize(args)
+      t = Hash.new {|h,k|
+        raise ConfigError, "Config Error: not set: repository.#{k}"
+      }
+      t.update args
+      @cvs_cmd  = t[:cmd_path]; t.delete(:cmd_path)
+      @wc_read  = t[:wc_read];  t.delete(:wc_read)
+      @wc_write = t[:wc_write]; t.delete(:wc_write)
+      t.each do |k,v|
+        raise ConfigError, "Config Error: unknown key set: #{k}"
+      end
     end
 
     def exist?(page_name)

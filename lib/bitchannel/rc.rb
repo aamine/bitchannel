@@ -8,10 +8,12 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
-require "wikitik/rc/#{@LC_MESSAGES}"
-
 module Wikitik
   def Wikitik.gettext(key)
     @resource[key]
   end
+end
+
+def gettext(key)
+  ::Wikitik.gettext(key)
 end
