@@ -83,6 +83,7 @@ module BitChannel
 
     def page_names
       Dir.entries(@wc_read)\
+          .map {|ent| ent.untaint }\
           .select {|ent| File.file?("#{@wc_read}/#{ent}") }\
           .map {|ent| decode_filename(ent) }
     end
@@ -349,8 +350,8 @@ module BitChannel
       File.readlines(filename).each do |line|
         next if /\AD/ =~ line
         ent, rev, mtime = *line.split(%r</>).values_at(1, 2, 3)
-        table[decode_filename(ent)] = [rev.split(%r<\.>).last.to_i,
-                                       cvstimestamp(mtime)]
+        table[decode_filename(ent).untaint] =
+            [rev.split(%r<\.>).last.to_i, cvstimestamp(mtime).untaint]
       end
       table
     end
@@ -453,7 +454,7 @@ module BitChannel
     end
 
     def read_cache(path)
-      File.readlines(path).map {|line| line.strip }
+      File.readlines(path).map {|line| line.strip.untaint }
     rescue Errno::ENOENT
       return nil
     end
@@ -471,7 +472,7 @@ module BitChannel
     end
 
     def foreach_file(dir, &block)
-      Dir.entries(dir).map {|ent| "#{dir}/#{ent}" }\
+      Dir.entries(dir).map {|ent| "#{dir}/#{ent}".untaint }\
           .select {|path| File.file?(path) }.each(&block)
     end
 
