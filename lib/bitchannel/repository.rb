@@ -188,7 +188,7 @@ module BitChannel
       def Log.parse(str)
         rline, dline, *msg = *str.to_a
         new(rline.slice(/\Arevision 1\.(\d+)\s/, 1).to_i,
-            Time.parse(dline.slice(/date: (.*?;)/, 1)),
+            Time.parse(dline.slice(/date: (.*?);/, 1) + ' UTC').getlocal,
             dline.slice(/lines: \+(\d+)/, 1).to_i,
             dline.slice(/lines:(?: \+(?:\d+))? -(\d+)/, 1).to_i,
             msg.join(''))
@@ -247,8 +247,8 @@ module BitChannel
         _, stime, srev = *meta.slice(/^\-\-\- .*/).split("\t", 3)
         _, dtime, drev = *meta.slice(/^\+\+\+ .*/).split("\t", 3)
         new(decode_filename(file),
-            srev.slice(/\A1\.(\d+)/, 1).to_i, Time.parse(stime),
-            drev.slice(/\A1\.(\d+)/, 1).to_i, Time.parse(dtime),
+            srev.slice(/\A1\.(\d+)/, 1).to_i, Time.parse(stime + ' UTC').getlocal,
+            drev.slice(/\A1\.(\d+)/, 1).to_i, Time.parse(dtime + ' UTC').getlocal,
             chunk)
       end
 

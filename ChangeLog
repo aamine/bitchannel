@@ -1,3 +1,8 @@
+Wed Apr 21 16:08:38 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb (Diff.parse, Log.parse): CVS log
+	  holds UTC.
+
 Sun Apr 18 02:05:18 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/repository.rb (Diff.parse): diffs too much
