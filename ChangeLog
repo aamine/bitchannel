@@ -1,3 +1,9 @@
+Sun Apr  4 03:21:06 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb (page_names): should get page names
+	  from CVS/Entries.  Dir.entries accidentary contains bad file names
+	  e.g. "core".
+
 Fri Apr  2 16:19:45 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/config.rb: rename method: cgi_url= ->

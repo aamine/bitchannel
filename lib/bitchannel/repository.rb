@@ -87,10 +87,7 @@ module BitChannel
     end
 
     def page_names
-      Dir.entries(@wc_read)\
-          .map {|ent| ent.untaint }\
-          .select {|ent| File.file?("#{@wc_read}/#{ent}") }\
-          .map {|ent| decode_filename(ent) }
+      cvs_Entries().map {|rev, name| decode_filename(name) }
     end
 
     alias entries page_names
