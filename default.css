@@ -100,6 +100,10 @@ dd {
     margin-left: 2em;
 }
 
+a {
+    font-weight: bold;
+}
+
 a:link {
     color: #33a;
     text-decoration: none;
