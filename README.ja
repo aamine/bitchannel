@@ -8,19 +8,33 @@ BitChannel README
 必要な環境
 ----------
 
+  * ウェブサーバ
   * Ruby 1.8.1 以上
   * CVS 1.10 以上
   * uconv.so (なくても構いません)
+
+  作者は以下の環境で開発しています。
+
+  * Apache 1.3 系 (CGI, mod_ruby, FastCGI)
+  * Ruby CVS HEAD
+  * uconv あり
+  * CVS 1.11 系
+
+
+旧バージョンからの変更点
+------------------------
+
+  http://i.loveruby.net/w/BitChannelNews.html を参照してください。
 
 
 インストールと設定
 ------------------
 
-注意
+  注意
 
-インストールに関しては http://i.loveruby.net/w/BitChannelInstallation.html
-にも説明がありますので、そちらもごらんください。また、このファイルと
-ウェブの内容で食い違いがある場合はウェブのほうを信用してください。
+  http://i.loveruby.net/w/BitChannelInstallation.html の説明も
+  御覧ください。また、このファイルとウェブの内容で食い違いがある
+  場合はウェブのほうを信用してください。
 
 
   1. CGI ディレクトリ
@@ -77,19 +91,36 @@ BitChannel README
 ファイル配置の一例
 ------------------
 
-  HTTP サーバの実効ユーザを www とします。
+  仮に HTTP サーバの実効ユーザを httpd とします。
 
-  -rw-r--r--  root  root  /usr/lib/cgi-bin/bitchannel/.htaccess
-  -rwxr-xr-x  root  root  /usr/lib/cgi-bin/bitchannel/index.cgi        CGIエントリポイント
-  -rw-r--r--  root  root  /usr/lib/cgi-bin/bitchannel/bitchannelrc     設定ファイル
-  -rwxr--r--  root  root  /usr/lib/bitchannel/lib/bitchannel.rb        ライブラリ
-  drwxr-xr-x  root  root  /usr/lib/bitchannel/lib/bitchannel/          ライブラリ
-  drwxr-xr-x  root  root  /usr/lib/bitchannel/template/                テンプレート
-  drwxr-xr-x  www   www   /var/cvs/wiki/CVSROOT/
-  drwxr-xr-x  www   www   /var/cvs/wiki/bitchannel/                    レポジトリ
-  drwxr-xr-x  www   www   /var/bitchannel/wc.read/                     ワーキングコピー1
-  drwxr-xr-x  www   www   /var/bitchannel/wc.write/                    ワーキングコピー2
-  drwxr-xr-x  www   www   /var/bitchannel/cache/                       キャッシュ
+  -rwxr-xr-x  www    www    /var/www/htdocs/wiki/index.cgi         CGIエントリポイント
+  -rw-r--r--  www    www    /var/www/htdocs/wiki/bitchannelrc      設定ファイル
+  -rw-r--r--  www    www    /var/www/htdocs/wiki/default.css       CSS
+  -rw-r--r--  www    www    /var/www/htdocs/wiki/.htaccess
+  -rwxr--r--  www    www    /usr/lib/bitchannel/lib/bitchannel.rb  ライブラリ
+  drwxr-xr-x  www    www    /usr/lib/bitchannel/lib/bitchannel/    ライブラリ
+  drwxr-xr-x  www    www    /usr/lib/bitchannel/template/          テンプレート
+  drwxr-xr-x  httpd  httpd  /var/cvs/bitchannel/CVSROOT/
+  drwxr-xr-x  httpd  httpd  /var/cvs/bitchannel/wikidoc/           レポジトリ
+  drwxr-xr-x  httpd  httpd  /var/bitchannel/wc.read/               ワーキングコピー1
+  drwxr-xr-x  httpd  httpd  /var/bitchannel/wc.write/              ワーキングコピー2
+  drwxr-xr-x  httpd  httpd  /var/bitchannel/cache/                 キャッシュ
+
+  また、ISP のウェブスペースで動かす場合の典型的な配置を
+  以下に示します。自分のアカウントを仮に taro とします。
+
+  -rwxr-xr-x  taro   users  ~taro/public_html/wiki/index.cgi     CGIエントリポイント
+  -rw-r--r--  taro   users  ~taro/public_html/wiki/bitchannelrc  設定ファイル
+  -rw-r--r--  taro   users  ~taro/public_html/wiki/default.css   CSS
+  -rw-r--r--  taro   users  ~taro/public_html/wiki/.htaccess
+  -rwxr--r--  taro   users  ~taro/bitchannel/lib/bitchannel.rb   ライブラリ
+  drwxr-xr-x  taro   users  ~taro/bitchannel/lib/bitchannel/     ライブラリ
+  drwxr-xr-x  taro   users  ~taro/bitchannel/template/           テンプレート
+  drwxr-xr-x  taro   users  ~taro/bitchannel/cvs/CVSROOT/        レポジトリ
+  drwxr-xr-x  taro   users  ~taro/bitchannel/cvs/wikidoc/
+  drwxr-xr-x  taro   users  ~taro/bitchannel/wc.read/            ワーキングコピー1
+  drwxr-xr-x  taro   users  ~taro/bitchannel/wc.write/           ワーキングコピー2
+  drwxr-xr-x  taro   users  ~taro/bitchannel/cache/              キャッシュ
 
 
 PageName.html 形式
