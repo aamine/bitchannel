@@ -133,15 +133,16 @@ module BitChannel
     end
 
     def thanks(cgi, page_name)
+      target = "#{@config.cgi_url}?name=#{URI.encode(page_name)}"
       send_html cgi, <<-ThanksPage
         <html>
         <head>
-        <meta http-equiv="refresh" content="1;url=#{@config.cgi_url}?name=#{URI.encode(page_name)}">
+        <meta http-equiv="refresh" content="1;url=#{escape_html(target)}">
         <title>Moving...</title>
         </head>
         <body>
         <p>Thank you for your edit.
-        Wait or <a href="#{@config.cgi_url}?cmd=view;name=#{URI.encode(page_name)}">click here</a> to return to the page.</p>
+        Wait or <a href="#{escape_html(target)}">click here</a>.</p>
         </body>
         </html>
       ThanksPage
