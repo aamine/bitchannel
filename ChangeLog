@@ -1,3 +1,8 @@
+Thu Nov 18 00:47:06 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/handler.rb (check_IfModifiedSince): condition was
+	  wrongly inversed.
+
 Sun Nov  7 06:20:22 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* theme/default/default.css: more styles for @media=print.

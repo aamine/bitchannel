@@ -54,7 +54,7 @@ module BitChannel
     def check_IfModifiedSince(req, res)
       return nil unless res
       return res unless req.if_modified_since
-      if res.last_modified >= req.if_modified_since
+      if res.last_modified <= req.if_modified_since
         raise WEBrick::HTTPStatus::NotModified, 'not modified'
       end
       res
