@@ -75,9 +75,9 @@ def wiki_main(cgi)
   when 'history'
     history repo, config, cgi, cgi.get_param('name')
   when 'list'
-    list repo, config, cgi
+    send cgi, AlphaWiki::ListPage.new(config, repo).html
   when 'recent'
-    recent repo, config, cgi
+    send cgi, AlphaWiki::RecentPage.new(config, repo).html
   else
     view repo, config, cgi, cgi.get_param('name')
   end
@@ -98,14 +98,6 @@ def edit(repo, config, cgi, page_name)
     return
   end
   send cgi, AlphaWiki::EditPage.new(config, repo, page_name).html
-end
-
-def list(repo, config, cgi)
-  send cgi, AlphaWiki::ListPage.new(config, repo).html
-end
-
-def recent(repo, config, cgi, page_name)
-  send cgi, AlphaWiki::RecentPage.new(config, repo).html
 end
 
 def history(repo, config, cgi, page_name)
