@@ -1,3 +1,9 @@
+Sat Aug 14 15:20:26 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb: new method PageEntry#read_only?
+
+	* lib/bitchannel/page.rb: use it.
+
 Sat Aug 14 15:18:14 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/repository.rb: new method PageEntry#syntax.

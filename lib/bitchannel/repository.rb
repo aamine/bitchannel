@@ -707,6 +707,10 @@ module BitChannel
       @repository.syntax
     end
 
+    def read_only?
+      @repository.read_only?
+    end
+
     def orphan?
       revlinks().empty?
     end
