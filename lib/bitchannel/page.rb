@@ -69,6 +69,7 @@ module Wikitik
       @mtime = nil
       @links = nil
       @revlinks = nil
+      @nlinks = {}
     end
 
     private
@@ -102,10 +103,13 @@ module Wikitik
     end
 
     def ordered_reverse_links
-      reverse_links().map {|page| [page, @repository.links(page)] }\
-          .reject {|page, links| links.size < 2 }\
-          .sort_by {|page, links| @repository.size(page) / links.size }\
-          .map {|page, links| page }
+      leaves, nodes = reverse_links().partition {|page| num_links(page) < 2 }
+      nodes.sort_by {|page| @repository.size(page) / num_links(page) } +
+        leaves.sort_by {|page| -@repository.size(page) }
+    end
+
+    def num_links(page)
+      @nlinks[page] ||= @repository.links(page).size
     end
 
     def num_revlinks
