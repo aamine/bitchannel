@@ -315,7 +315,7 @@ module BitChannel
     end
 
     def log(msg)
-      File.open('../log', 'a') {|f|
+      File.open('../cvslog', 'a') {|f|
         begin
           f.flock(File::LOCK_EX)
           f.puts "#{format_time(Time.now)}:#{$$}: #{msg}"
