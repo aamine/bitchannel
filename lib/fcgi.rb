@@ -18,20 +18,25 @@ require 'stringio'
 # in single thread environment, force multi threading.
 # See [ruby-dev:25755]
 Thread.fork {
-  loop { sleep 3 }
+  loop { sleep 3; 1+1+1 }
 }
 
 class FCGI
 
   def FCGI.cgi?
-    begin
-      Socket.for_fd($stdin.fileno).getpeername
-      return false
-    rescue Errno::ENOTCONN
-      return false
-    rescue Errno::ENOTSOCK, Errno::EINVAL
-      return true
-    end
+    not fastcgi?
+  end
+
+  def FCGI.fastcgi?
+    return false unless $stdin.respond_to?(:stat)
+    return false unless $stdin.stat.socket?
+    # getpeername causes ENOTCONN in FastCGI.
+    Socket.for_fd($stdin.fileno).getpeername
+    return false
+  rescue Errno::ENOTCONN
+    return true
+  rescue SystemCallError
+    return false
   end
 
   def FCGI.each_cgi_request(&block)
