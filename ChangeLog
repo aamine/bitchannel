@@ -1,3 +1,7 @@
+Mon Aug 30 12:47:24 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/tohtml.rb: fix XSS bug in BracketName.
+
 Thu Jun 10 18:57:23 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* version 0.2.1 released.

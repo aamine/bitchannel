@@ -87,13 +87,13 @@ module BitChannel
         when INDENTED  then indented_pre   # must be placed after UL/OL
         when BLOCKEXT
           name = $1
-          arg = $2
+          arg = $2.to_s[1..-1]
           mid = "block_ext__#{name}"
           if respond_to?(mid, true)
             __send__(mid, arg)
             @f.gets
           else
-            puts @f.gets
+            puts escape_html(@f.gets)
           end
         else
           if @f.peek.strip.empty?
@@ -415,8 +415,8 @@ module BitChannel
 
     def view_url(name)
       if @config.html_url?
-      then "#{escape_html(URI.escape(name))}.html"
-      else "#{cgi_href()}?cmd=view;name=#{escape_html(URI.escape(name))}"
+      then "#{escape_html(name)}.html"
+      else "#{cgi_href()}?cmd=view;name=#{escape_html(name)}"
       end
     end
 
@@ -431,26 +431,26 @@ module BitChannel
         mid = "inline_ext__#{name}"
         if respond_to?(mid, true)
         then __send__(mid, arg)
-        else "[#{link}]"
+        else "[#{escape_html(link)}]"
         end
       when /\Aimg:/
         imglink = $'
         if SeemsURL =~ imglink and seems_image_url?(imglink)
-          %Q[<img src="#{imglink}">]
+          %Q[<img src="#{escape_html(imglink)}">]
         elsif /\A[\w\-]+:/n =~ imglink
           id, vary = *imglink.split(/:/, 2)
           href = resolve_interwikiname(id, vary)
           if href and seems_image_url?(href)
-          then %Q[<img src="#{href}">]
-          else "[#{link}]"
+          then %Q[<img src="#{escape_html(href)}">]
+          else "[#{escape_html(link)}]"
           end
         else
-          "[#{link}]"
+          "[#{escape_html(link)}]"
         end
       when SeemsURL      then %[<a href="#{escape_html(link)}">#{escape_html(link)}</a>]
       when /\A[\w\-]+:/n then interwiki(*link.split(/:/, 2))
       when /\A\w+\z/n    then internal_link(link)
-      else                    link
+      else                    escape_html(link)
       end
     end
 
@@ -459,11 +459,10 @@ module BitChannel
     end
 
     def interwiki(id, vary)
-      href = resolve_interwikiname(id, vary)
-      anchor = escape_html("[#{id}:#{vary}]")
-      if href
-      then %Q[<a href="#{escape_html(URI.escape(href))}">#{anchor}</a>]
-      else '?' + anchor
+      anchor = "[#{id}:#{vary}]"
+      if href = resolve_interwikiname(id, vary)
+      then %Q[<a href="#{escape_html(href)}">#{escape_html(anchor)}</a>]
+      else '?' + escape_html(anchor)
       end
     end
 
