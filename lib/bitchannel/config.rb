@@ -30,6 +30,10 @@ module AlphaWiki
       @index_page || INDEX_PAGE
     end
 
+    def tmp_page_name
+      'SandBox'
+    end
+
     def read_rhtml(name)
       File.read("#{@templatedir}/#{name}.rhtml")
     end

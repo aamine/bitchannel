@@ -33,37 +33,69 @@ def main
     print "Content-Type: text/plain\r\n"
     print "Connection: close\r\n"
     print "\r\n"
-    print "#{err.message} (#{err.class})\r\n" unless cgi.request_method.upcase == 'HEAD'
+    unless cgi.request_method.to_s.upcase == 'HEAD'
+      puts "#{err.message} (#{err.class})"
+      err.backtrace.each do |i|
+        puts i
+      end if $DEBUG
+    end
   end
 end
 
-def wiki_main(config, cgi)
-  config = AlphaWiki::Config.new(self)
+def wiki_main(cgi)
   repo = AlphaWiki::Repository.new(@cvs_path, @cvswc_read, @cvswc_write)
+  config = AlphaWiki::Config.new(self)
   case cgi.get_param('cmd').to_s.downcase
   when 'view'
-    send cgi, AlphaWiki::ViewPage.new(config, repo, cgi.get_param('name')).html
+    view repo, config, cgi, cgi.get_param('name')
   when 'edit'
-    send cgi, AlphaWiki::EditPage.new(config, repo, cgi.get_param('name')).html
+    edit repo, config, cgi, cgi.get_param('name')
   when 'save'
+    page_name = cgi.get_param('name')
+    unless page_name
+      send cgi, AlphaWiki::EditPage.new(config, repo,
+                                        config.tmp_page_name, nil,
+                                        cgi.get_param('text').to_s,
+                                        'Text saved without page name; make sure.').html
+      return
+    end
     begin
-      repo.checkin cgi.get_param('name'),
-                   cgi.get_param('origrev'),
-                   cgi.get_param('text')
-      send cgi, AlphaWiki::ViewPage.new(config, repo, cgi.get_param('name')).html
+      repo.checkin page_name,
+                   cgi.get_param('origrev').to_i,
+                   (cgi.get_param('text') || "")
+      view repo, config, cgi, cgi.get_param('name')
     rescue AlphaWiki::EditConflict => err
-      send cgi, AlphaWiki::ConflictedPage.new(config, repo, cgi.get_param('name'), err.merged).html
+      send cgi, AlphaWiki::EditPage.new(config, repo,
+                                        page_name, nil,
+                                        merged, err.message).html
     end
   else
-    send cgi, AlphaWiki::ViewPage.new(config, repo, config.index_page_name).html
+    view repo, cgi, config.index_page_name
   end
+end
+
+def view(repo, config, cgi, page_name)
+  unless repo.exist?(page_name)
+    edit repo, config, cgi, page_name
+    return
+  end
+  page_name ||= config.index_page_name
+  send cgi, AlphaWiki::ViewPage.new(config, repo, page_name).html
+end
+
+def edit(repo, config, cgi, page_name)
+  unless page_name
+    view repo, config, cgi, page_name
+    return
+  end
+  send cgi, AlphaWiki::EditPage.new(config, repo, page_name).html
 end
 
 def send(cgi, html)
   cgi.header('status' => '200 OK',
              'type' => 'text/html', 'charset' => @charset,
              'Content-Length' => html.length.to_s)
-  print html unless cgi.request_method.upcase == 'HEAD'
+  print html unless cgi.request_method.to_s.upcase == 'HEAD'
 end
 
 main

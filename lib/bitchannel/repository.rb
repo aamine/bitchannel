@@ -23,6 +23,11 @@ module AlphaWiki
       @wc_write = wc_write
     end
 
+    def exist?(page_name)
+      return false unless page_name
+      File.exist?("#{@wc_read}/#{escape_html(page_name)}")
+    end
+
     def [](page_name)
       File.read("#{@wc_read}/#{escape_html(page_name)}")
     end
@@ -31,13 +36,18 @@ module AlphaWiki
       filename = escape_html(page_name)
       Dir.chdir(@wc_write) {
         lock(filename) {
-          cvs 'up', "-r1.#{origrev}", filename
+          cvs 'up', (origrev ? "-r1.#{origrev}" : '-A'), filename
           File.open(filename, 'w') {|f|
             f.write content
           }
-          out, err = *cvs('up', '-A', filename)
-          if /conflicts during merge/ =~ err
-            raise EditConflict.new('conflict found', File.read(filename))
+          if origrev
+            out, err = *cvs('up', '-A', filename)
+            if /conflicts during merge/ =~ err
+              merged = File.read(filename)
+              File.unlink filename   # prevent next writer from conflict
+              cvs 'up', '-A', filename
+              raise EditConflict.new('conflict found', merged)
+            end
           end
           cvs 'ci', filename
         }

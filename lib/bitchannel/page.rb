@@ -19,10 +19,10 @@ module AlphaWiki
 
     include TextUtils
 
-    def initialize(config, page)
+    def initialize(config, repo, page)
       @config = config
+      @repository = repo
       @page_name = page
-      @repository = Repository.new(config.datadir)
     end
 
     def html
@@ -71,18 +71,31 @@ module AlphaWiki
 
   class EditPage
 
+    def initialize(config, repo, page_name, rev = nil, text = nil, msg = nil)
+      super config, repo, page_name
+      @rev = rev
+      @text = text
+      @message = msg
+    end
+
     private
 
     def template_id
       'edit'
     end
+    
+    def message
+      return '' unless @message
+      '<p>' + escape_html(@message) + '</p>'
+    end
 
     def body
+      return @text if @text
       escape_html(@repository[@page_name])
     end
 
     def page_revision
-      0   # FIXME
+      @rev || 0
     end
 
     def opt_headers
