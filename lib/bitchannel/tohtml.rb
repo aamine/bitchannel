@@ -308,7 +308,7 @@ module BitChannel
     }
 
     def unindent(line, n)
-      re = (INDENT_RE[n] ||= /\A {n}/)
+      re = (INDENT_RE[n] ||= /\A {#{n}}/)
       line.sub(re, '')
     end
 
