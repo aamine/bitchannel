@@ -1,0 +1,7 @@
+#
+# AlphaWiki Config File
+#
+
+$KCODE = 'EUC'
+@libdir = File.dirname(File.expand_path(__FILE__)) + '/lib'
+@datadir = File.dirname(File.expand_path(__FILE__)) + '/pages'
