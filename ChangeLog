@@ -1,3 +1,16 @@
+Wed Sep  1 23:03:20 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/userconfig.rb: new file.  This file contains
+	  UserConfig class.
+
+	* lib/bitchannel/config.rb: use userconfig.rb.
+
+	* lib/bitchannel/farm.rb: ditto.
+
+	* lib/bitchannel/notifier.rb: ditto.
+
+	* lib/bitchannel/repository.rb: ditto.
+
 Wed Sep  1 22:58:07 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/config.rb (UserConfig): new method #required!,
