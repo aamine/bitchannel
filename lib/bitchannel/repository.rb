@@ -233,7 +233,7 @@ module BitChannel
       }
       Dir.chdir(@wc_read) {
         cvs 'up', '-A', filename
-      } if @sync_wc
+      }
       @link_cache.update_cache_for page_name,
           ToHTML.extract_links(new_text, self)
     end
