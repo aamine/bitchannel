@@ -490,8 +490,13 @@ module BitChannel
       end
 
       def Diff.parse(mod, chunk)
-        meta = chunk.slice!(/\A.*?^(?=@@)/m).to_s
+        meta = chunk.slice!(/\A.*?(?=^@@|\z)/m).to_s
         file = meta.slice(/\A(?:Index:)?\s*(\S+)/, 1).strip
+        if /---/ !~ meta
+          # empty new file.
+          now = Time.now
+          return new(mod, decode_filename(file), 0, now, 1, now, chunk)
+        end
         _, stime, srev = *meta.slice(/^\-\-\- .*/).split("\t", 3)
         _, dtime, drev = *meta.slice(/^\+\+\+ .*/).split("\t", 3)
         new(mod,

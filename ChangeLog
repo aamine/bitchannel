@@ -1,3 +1,8 @@
+Thu Aug 19 20:41:40 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb (parse_diff): support
+	  empty-new-file (It includes no chunk).
+
 Mon Aug 16 20:15:34 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/wikispace.rb (save): should be able to create a
