@@ -89,7 +89,9 @@ def view(repo, config, cgi, page_name)
     edit repo, config, cgi, page_name
     return
   end
-  send cgi, AlphaWiki::ViewPage.new(config, repo, page_name).html
+  send cgi,
+       AlphaWiki::ViewPage.new(config, repo, page_name).html,
+       repo.mtime(page_name)
 end
 
 def edit(repo, config, cgi, page_name)
@@ -108,12 +110,14 @@ def history(repo, config, cgi, page_name)
   send cgi, AlphaWiki::HistoryPage.new(config, repo, page_name).html
 end
 
-def send(cgi, html)
-  print cgi.header('status' => '200 OK',
-                   'type' => 'text/html', 'charset' => @charset,
-                   'Pragma' => 'no-cache',
-                   'Cache-Control' => 'no-cache',
-                   'Content-Length' => html.length.to_s)
+def send(cgi, html, mtime = nil)
+  header = {'status' => '200 OK',
+            'type' => 'text/html', 'charset' => @charset,
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'no-cache',
+            'Content-Length' => html.length.to_s}
+  header['Last-Modified'] = CGI.rfc1123_date(mtime) if mtime
+  print cgi.header(header)
   print html unless cgi.request_method.to_s.upcase == 'HEAD'
 end
 
