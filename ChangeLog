@@ -1,3 +1,11 @@
+Sun May  9 10:57:04 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* farm.fcgi: new file.
+
+	* farm.rbx: new file.
+
+	* farm.cgi: add warning.
+
 Sun May  9 10:53:08 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* History, Viewrev, Search did not work.
