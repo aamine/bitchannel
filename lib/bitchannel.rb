@@ -1,4 +1,3 @@
 require 'bitchannel/config'
-require 'bitchannel/handler'
-require 'bitchannel/page'
+require 'bitchannel/repository'
 require 'bitchannel/rc'

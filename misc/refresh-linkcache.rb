@@ -19,6 +19,7 @@ def main
 
   load './bitchannelrc'
   config, repo = initialize_environment()
+  require 'bitchannel/tohtml'
   cache = repo.link_cache
   cache.clear
   c = BitChannel::ToHTML.new(config, repo)

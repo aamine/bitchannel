@@ -8,7 +8,6 @@
 # the GNU LGPL, Lesser General Public License version 2.1.
 #
 
-require 'bitchannel/repository'
 require 'bitchannel/tohtml'
 require 'bitchannel/textutils'
 require 'erb'
@@ -36,6 +35,10 @@ module BitChannel
       erb = ERB.new(get_template(@config.templatedir, template_id()))
       erb.filename = "#{template_id()}.rhtml"
       erb.result(binding())
+    end
+
+    def last_modified
+      nil
     end
 
     # `charset' method already exists
