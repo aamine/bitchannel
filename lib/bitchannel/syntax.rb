@@ -8,6 +8,7 @@
 # the GNU LGPL, Lesser General Public License version 2.1.
 #
 
+require 'bitchannel/lineinput'
 require 'bitchannel/textutils'
 require 'bitchannel/threadlocalcache'
 require 'stringio'
@@ -27,7 +28,7 @@ module BitChannel
     end
 
     def compile(str, page_name)
-      @f = LineInput.new(StringIO.new(str))
+      @f = ::LineInput.new(StringIO.new(str))
       @page_name = page_name
       @result = ''
       @indent_stack = [0]
@@ -545,88 +546,6 @@ module BitChannel
     def puts(str)
       @result << str
       @result << "\n" unless /\n\z/ =~ str
-    end
-
-    class LineInput
-      def initialize(f)
-        @f = f
-        @buf = []
-      end
-
-      def inspect
-        "\#<#{self.class} file=#{@f.inspect} line=#{lineno()}>"
-      end
-
-      def lineno
-        @f.lineno
-      end
-
-      def gets
-        return nil unless @buf
-        return @buf.pop unless @buf.empty?
-        line = @f.gets
-        unless line
-          @buf = nil
-          return nil
-        end
-        line.rstrip
-      end
-
-      def peek
-        line = gets()
-        ungets line if line
-        line
-      end
-
-      def ungets(line)
-        @buf.push line
-      end
-
-      def next?
-        peek() ? true : false
-      end
-
-      def skip_blank_lines
-        n = 0
-        while line = gets()
-          unless line.strip.empty?
-            ungets line
-            return n
-          end
-          n += 1
-        end
-        n
-      end
-
-      def while_match(re)
-        while line = gets()
-          unless re =~ line
-            ungets line
-            return
-          end
-          yield line
-        end
-        nil
-      end
-
-      def until_match(re)
-        while line = gets()
-          if re =~ line
-            ungets line
-            return
-          end
-          yield line
-        end
-        nil
-      end
-
-      def until_terminator(re)
-        while line = gets()
-          return if re =~ line   # discard terminal line
-          yield line
-        end
-        nil
-      end
     end
 
   end

@@ -1,3 +1,21 @@
+Thu Mar 17 15:04:49 2005  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/erdsyntax.rb: compile to HTML.
+
+	* lib/bitchannel/syntax.rb: spin off LineInput, to share it with
+	  erdsyntax.
+
+	* lib/bitchannel/lineinput.rb: imported from docutils.
+
+	* lib/bitchannel/locale.rb: new method Locale#[], #[]=.
+
+	* template/view.rhtml: show #page_title in h1 (allow override in
+	  each syntax).
+
+	* lib/bitchannel/page.rb: support #page_title.
+
+	* theme/erd/erd.css: theme for ERD.
+
 Thu Mar 17 14:48:49 2005  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/handler.rb (error_response): append final "\n".

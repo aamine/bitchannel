@@ -1,0 +1,344 @@
+/*
+    erd.css
+*/
+
+body {
+    background-color: white;
+    color: black;
+    font-family: osaka,'MS PGothic',sans-serif;
+    text-align: left;
+    margin-top: 20px;
+    margin-left: 2%;
+    margin-right: 2%;
+    line-height: 1.4;
+    width: 40em;
+}
+
+span.menuitem {
+    width: 3.9em;
+    text-align: center;
+    padding: 0px 2px;
+    margin: 0px;
+    color: white;
+    background-color: #ddd;
+    margin-right: 2px;
+}
+div.menu a:link,
+div.menu a:visited {
+    width: 3.9em;
+    padding: 0px 2px;
+    margin: 0px;
+    color: #33a;
+    background-color: #ddd;
+    text-decoration: none;
+}
+div.menu a:active,
+div.menu a:focus,
+div.menu a:hover {
+    width: 3.9em;
+    padding: 0px 2px;
+    margin: 0px;
+    color: #fff;
+    background-color: #33a;
+    text-decoration: none;
+}
+span.menuseparator {
+    width: 1em;
+    padding: 0px;
+    margin: 0px;
+}
+
+/*
+span.lastmodified {
+}
+*/
+
+/*
+div.footer {
+}
+*/
+
+address {
+    text-align: right;
+    font-size: x-small;
+}
+
+h1 {
+    font-size: 200%;
+    text-align: left;
+    color: white;
+    background-color: #33a;
+    padding: 0.4em;
+}
+
+img.sitelogo {
+    vertical-align: middle;
+}
+
+h2 {
+    font-size: 200%;
+    text-align: left;
+    border-bottom: 1px solid #33a;
+    margin-top: 2em;
+    margin-bottom: 1em;
+}
+
+h3 {
+    font-size: 150%;
+    text-align: left;
+    border-left: 1em solid #33a;
+    padding-left: 0.5em;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
+
+h4 {
+    font-size: 150%;
+    text-align: left;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+/* never use */
+h5, h6 {
+    background-color: red;
+}
+
+p {
+    line-height: 1.4;
+    //margin-top: 1em;
+    //margin-bottom: 1em;
+    //margin-left: 0px;
+    margin: 0em;
+    padding: 0.15em 0em 0.15em 0em;
+    text-indent: 1em;
+}
+
+pre {
+    line-height: 1.2;
+    background-color: #eee;
+    padding: 8px;
+    font-weight: normal;
+}
+
+pre.list {
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+}
+
+pre.emlist {
+    margin: 0em;
+}
+
+pre.cmd {
+    background-color: #ccc;
+    margin: 0em;
+}
+
+pre.dummyimage {
+    background-color: transparent;
+}
+
+pre.prototype {
+    border: 2px solid #aaa;
+}
+
+p.toplabel {
+    padding: 0px;
+    margin: 0.5em 0em -0.5em 0em;
+    font-weight: bold;
+    text-indent: 0em;
+}
+p.toplabel:before {
+    content: "вз";
+}
+
+p.botlabel {
+    padding: 0px;
+    margin: -0.5em 0em 0.5em 0em;
+    font-weight: bold;
+    text-indent: 0em;
+}
+p.botlabel:before {
+    content: "ве";
+}
+
+p.image {
+    padding: 0px;
+    text-indent: 0em;
+    font-weight: bold;
+}
+
+p.lead {
+    padding: 0px;
+    margin: 2em 3em 2em 3em;
+}
+
+blockquote {
+    background-color: transparent;
+    padding: 4px;
+    margin: 0em 0em 0em 1em;
+    font-weight: normal;
+}
+
+ul {
+    margin-left: 0px;
+    padding-left: 2em;
+}
+
+li {
+    margin-left: 0px;
+    padding-left: 0px;
+}
+
+dl {
+    margin-left: 2em;
+    width: 35em;
+}
+
+dt {
+    font-weight: bold;
+    font-family: sans-serif;
+}
+
+dd {
+    margin-top: 0.3em;
+    margin-bottom: 0.5em;
+    margin-left: 1em;
+}
+
+table {
+    padding: 0px;
+    margin: 0.5em 0em 0.5em 0em;
+}
+
+th {
+    background-color: #ccc;
+    padding: 3px;
+}
+
+td {
+    background-color: #eee;
+    padding: 3px;
+}
+
+img {
+    float: left;
+}
+
+a {
+    font-weight: bold;
+    text-decoration: none;
+}
+a:link {
+    color: #33a;
+    background-color: transparent;
+}
+a:visited {
+    color: #666666;
+    background-color: transparent;
+}
+a:hover, a:focus, a:active {
+    color: #fff;
+    background-color: #33a;
+}
+
+span.kw {
+    font-weight: bold;
+}
+
+form {
+    padding: 0px;
+    margin: 0px;
+}
+
+hr {
+    color: #33a;
+    height: 1px;
+}
+
+/*
+    diff
+*/
+span.addedline {
+    background-color: #fdd;
+}
+span.removedline {
+    background-color: #ddd;
+}
+pre.diff {
+    background-color: transparent;
+    line-height: 1.4;
+    padding: 0px;
+    font-weight: normal;
+}
+
+/*
+    gdiff
+*/
+p.minimenu {
+}
+
+/*
+    annotate
+*/
+pre.annotate {
+    background-color: transparent;
+}
+span.new4 {
+    background-color: #fdd;
+}
+span.new3 {
+    background-color: #fbb;
+}
+span.new2 {
+    background-color: #faa;
+}
+span.new1 {
+    background-color: #f88;
+}
+span.new0 {
+    background-color: #f66;
+}
+
+/*
+    edit
+*/
+textarea.edit {
+    width: 100%;
+}
+
+/*
+    preview
+*/
+span.previewmark {
+    color: red;
+    background-color: transparent;
+    font-size: 200%;
+    font-weight: bold;
+}
+
+/*
+    For Printing
+*/
+@media print {
+    div.menu {
+        display: none;
+    }
+    div.footer {
+        display: none;
+    }
+    h1 {
+        color: black;
+        background-color: white;
+        border-bottom: 10px solid #33a;
+        padding-bottom: 0em;
+    }
+    a, a:link, a:visited {
+        color: #33a;
+        font-weight: normal;
+    }
+    a.dangling {
+        display: none;
+    }
+}

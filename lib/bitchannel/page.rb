@@ -118,6 +118,10 @@ module BitChannel
       @page.syntax.compile(content, @page.name)
     end
 
+    def page_title
+      page_name()
+    end
+
     def page_name
       escape_html(@page.name)
     end

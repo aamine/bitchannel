@@ -40,8 +40,14 @@ module BitChannel
     end
     private :rc_table
 
-    def text(key)
+    def [](key)
       @rc[key]
+    end
+
+    alias text []
+
+    def []=(key, str)
+      @rc[key] = str
     end
 
     def inspect
