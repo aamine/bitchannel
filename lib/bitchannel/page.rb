@@ -77,8 +77,12 @@ module Wikitik
       @revlinks ||= @repository.reverse_links(@page_name)
     end
 
+    SYSTEM_PAGES = %w( IndexPage HelpPage InterWikiName )
+
     def ordered_reverse_links
-      reverse_links().sort_by {|page| @repository.bytes_per_link(page) }
+      (reverse_links() - SYSTEM_PAGES).sort_by {|page|
+        @repository.bytes_per_link(page)
+      }
     end
 
     def num_revlinks
