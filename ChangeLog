@@ -1,3 +1,21 @@
+Thu Mar 17 07:23:45 2005  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/handler.rb: pass `fmt' argument to gdiff.
+
+	* lib/bitchannel/wikispace.rb (gdiff): support RSS response.
+
+	* lib/bitchannel/page.rb: new page class SiteRSS.
+
+	* lib/bitchannel/locale/ja.rb: new method #xml_lang.
+
+	* lib/bitchannel/locale/en.rb: new method #xml_lang.
+
+	* lib/bitchannel/textutils.rb: new method #escape_cdata.
+
+	* lib/bitchannel/textutils.rb: new method #make_dcdate.
+
+	* template/siterss.rdf: new file.
+
 Thu Mar 17 07:23:35 2005  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/repository.rb (cvs_diff_from): follow last
