@@ -24,7 +24,7 @@
 <p><a href="<%= cgi_url() %>?cmd=gdiff;org=cookie">[Diff from my last visit]</a></p>
 <ol>
 <%  page_list().each do |page, mtime|  %>
-<li><a href="<%= cgi_url() %>?cmd=gdiff;org=<%= format_origin_time(mtime) %>"><%= format_time(mtime) %></a>: <a href="<%= view_url(page) %>"><%= escape_html(page) %></a></li>
+<li><%= format_time(mtime) %>: <a href="<%= view_url(page) %>"><%= escape_html(page) %></a></li>
 <%  end  %>
 </ol>
 </div>

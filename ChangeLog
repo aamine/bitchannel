@@ -1,3 +1,7 @@
+Sat Apr 10 00:34:51 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* template/recent.rhtml: turn off gdiff link.
+
 Sat Apr 10 00:33:11 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* template/gdiff.rhtml: add reload link.
