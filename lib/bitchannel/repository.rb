@@ -214,6 +214,60 @@ module BitChannel
       }
     end
 
+    def diff_from(org)
+      Dir.chdir(@wc_read) {
+        out, err = cvs('diff', '-u', "-D#{format_time_cvs(org)}")
+        return Diff.parse_diffs(out)
+      }
+    end
+
+    def format_time_cvs(time)
+      sprintf('%04d-%02d-%02d %02d:%02d:%02d',
+              time.year, time.month, time.mday,
+              time.hour, time.min, time.sec)
+    end
+
+    class Diff
+      def Diff.parse_diffs(out)
+        chunks = out.split(/^Index: /)
+        chunks.shift
+        chunks.map {|c| parse(c) }
+      end
+
+      DUMMY_HEADER = "dummyfilename\n" +
+                     "===================================================================\n" +
+                     "RCS file: /dummyrepo/dummyfilename,v\n" +
+                     "retrieving revision 1.1\n" +
+                     "retrieving revision 1.2\n" +
+                     "diff -u -r1.1 -r1.2\n"
+
+      def Diff.parse(chunk)
+        # cvs output may be corrupted
+        meta = chunk.slice!(/\A.*(?=^@@)/m).to_s + DUMMY_HEADER
+        file = meta.slice(/\S+/).strip
+        _, stime, srev = *meta.slice(/^\-\-\- .*/).split("\t", 3)
+        _, dtime, drev = *meta.slice(/^\+\+\+ .*/).split("\t", 3)
+        new(file, srev.slice(/\A1\.(\d+)/, 1), Time.parse(stime),
+                  drev.slice(/\A1\.(\d+)/, 1), Time.parse(dtime), chunk)
+      end
+
+      def initialize(file, srev, stime, drev, dtime, diff)
+        @file = file
+        @rev1 = srev
+        @time1 = stime
+        @rev2 = drev
+        @time2 = dtime
+        @diff = diff
+      end
+
+      attr_reader :file
+      attr_reader :rev1
+      attr_reader :time1
+      attr_reader :rev2
+      attr_reader :time2
+      attr_reader :diff
+    end
+
     def annotate(page_name, rev = nil)
       page_must_valid page_name
       page_must_exist page_name
@@ -290,6 +344,7 @@ module BitChannel
       if origrev
         out, err = *cvs('up', '-A', filename)
         if /conflicts during merge/ =~ err
+          log "conflict: #{filename}"
           merged = File.read(filename)
           File.unlink filename   # prevent next writer from conflict
           cvs 'up', '-A', filename
@@ -326,10 +381,7 @@ module BitChannel
       log %Q[exec: "#{cmd.join('", "')}"]
       popen3(ignore_status, *cmd) {|stdin, stdout, stderr|
         stdin.close
-        out = stdout.read
-        err = stderr.read
-        log "got stderr (#{cmd.join(' ')}):\n#{err}" unless err.empty?
-        return out, err
+        return stdout.read, stderr.read
       }
     end
 

@@ -282,6 +282,29 @@ module BitChannel
   end
 
 
+  class GlobalDiffPage < GenericPage
+    def initialize(config, repo, org)
+      super config
+      @repository = repo
+      @origin = org
+    end
+
+    private
+
+    def template_id
+      'gdiff'
+    end
+
+    def origin_time
+      @origin
+    end
+
+    def diffs
+      @repository.diff_from(@origin).sort_by {|diff| -diff.time2.to_i }
+    end
+  end
+
+
   class AnnotatePage < Page
     def initialize(config, repo, page_name, rev)
       super config, repo, page_name

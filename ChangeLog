@@ -1,3 +1,19 @@
+Fri Apr  9 21:28:57 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* template/recent.rhtml: add link to [gdiff].
+
+	* template/gdiff.rhtml: new file.
+
+	* lib/bitchannel/handler.rb: new CGI command handle_gdiff.
+
+	* lib/bitchannel/page.rb: new class GlobalDiffPage.
+
+	* lib/bitchannel/repository.rb: new method #diff_from.
+
+	* lib/bitchannel/repository.rb: new class Diff.
+
+	* lib/bitchannel/repository.rb: #execute should not log stderr.
+
 Sun Apr  4 22:27:09 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/repository.rb (page_names): bug fix.

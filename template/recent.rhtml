@@ -8,6 +8,14 @@
   <title>Recent Edit</title>
 </head>
 <body>
+<%
+  def format_origin_time(t)
+    time = t - 60 * 3
+    sprintf('%04d%02d%02d%02d%02d%02d',
+            time.year, time.month, time.mday,
+            time.hour, time.min - 3, time.sec)
+  end
+%>
 
 .include menu
 
@@ -15,7 +23,7 @@
 <h1><%= logo_url() %>Recent Edit</h1>
 <ol>
 <%  page_list().each do |page, mtime|  %>
-<li><%= format_time(mtime) %>: <a href="<%= view_url(page) %>"><%= escape_html(page) %></a></li>
+<li><a href="<%= cgi_url() %>?cmd=gdiff;org=<%= format_origin_time(mtime) %>"><%= format_time(mtime) %></a>: <a href="<%= view_url(page) %>"><%= escape_html(page) %></a></li>
 <%  end  %>
 </ol>
 </div>

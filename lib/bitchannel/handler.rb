@@ -12,6 +12,7 @@ require 'bitchannel/page'
 require 'bitchannel/textutils'
 require 'cgi'
 require 'uri'
+require 'date'
 
 class CGI
   def get_param(name)
@@ -26,6 +27,14 @@ class CGI
     rev = get_param(name).to_i
     return nil if rev < 1
     rev
+  end
+end
+
+unless DateTime.method_defined?(:to_i)
+  class DateTime
+    def to_i
+      ajd().to_i
+    end
   end
 end
 
@@ -200,6 +209,19 @@ module BitChannel
       rev2 = cgi.get_rev_param('rev2')
       return view_page(page_name) unless rev1 and rev2
       DiffPage.new(@config, @repository, page_name, rev1, rev2).response
+    end
+
+    def handle_gdiff(cgi)
+      org = cgi.get_param('org').sub(/[\s\-:T]+/, '').sub(/\+.*/, '')
+      GlobalDiffPage.new(@config, @repository, parse_origin(org)).response
+    end
+
+    def parse_origin(org)
+      if m = /\A(\d\d\d\d)(\d\d)(?:(\d\d)(?:(\d\d)(?:(\d\d)(\d\d)?)?)?)?\z/.match(org)
+        DateTime.new(*m.captures.map {|s| s.to_i })
+      else
+        DateTime.now - 1
+      end
     end
 
     def handle_history(cgi)
