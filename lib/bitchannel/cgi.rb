@@ -13,8 +13,8 @@ require 'bitchannel/webrick_cgi'
 
 module BitChannel
   class CGI < WEBrick::CGI
-    def CGI.main(wiki)
-      super({}, wiki)
+    def CGI.main(wiki, webrickconf = {})
+      super(webrickconf, wiki)
     end
 
     def init_application(wiki)
