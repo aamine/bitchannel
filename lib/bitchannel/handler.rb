@@ -115,7 +115,7 @@ module BitChannel
     end
 
     def __handle_preview(req)
-      @wiki.preview(req.page_name, req.normalized_text, req.origrev).response
+      @wiki.preview(req.page_name, req.origrev, req.normalized_text).response
     end
 
     def invalid_edit(text, reason)

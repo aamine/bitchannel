@@ -39,6 +39,9 @@ module BitChannel
     def DUMMY_CONFIG.html_url?
       true
     end
+    def DUMMY_CONFIG.document_suffix
+      ''
+    end
     def DUMMY_CONFIG.cgi_url
       'dummy_cgi_url'
     end

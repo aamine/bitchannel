@@ -1,3 +1,13 @@
+Tue May 11 01:04:11 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb: implement notifier. (experimental)
+
+	* lib/bitchannel/repository.rb (edit): link cache was not updated.
+
+	* lib/bitchannel/handler.rb: wrong arg order.
+
+	* lib/bitchannel/tohtml.rb: define DUMMY_CONFIG.document_suffix.
+
 Mon May 10 23:18:43 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/notifier.rb: new file.

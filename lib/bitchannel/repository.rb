@@ -69,9 +69,9 @@ module BitChannel
         @wc_read  = conf.get_required(:wc_read)
         @wc_write = conf.get_required(:wc_write)
         @logfile  = conf.get_required(:logfile)
-        @notifier = conf.get_optional(:notifier)
         cachedir  = conf.get_required(:cachedir)
         @link_cache = LinkCache.new("#{cachedir}/link", "#{cachedir}/revlink")
+        @notifier = conf.get_optional(:notifier, nil)
       }
       @module_id = id
       # per-request cache
@@ -292,25 +292,29 @@ module BitChannel
     def edit(page_name)
       page_must_valid page_name
       page_must_exist page_name
+      new_rev = nil
+      new_text = nil
       filename = encode_filename(page_name)
       Dir.chdir(@wc_write) {
         lock(filename) {
           cvs 'up', '-A', filename
-          text = yield(File.read(filename))
+          new_text = yield(File.read(filename))
           File.open(filename, 'w') {|f|
-            f.write text
+            f.write new_text
           }
           cvs 'ci', '-m', "edit checkin", filename
+          new_rev = read_revision(filename)
         }
       }
       Dir.chdir(@wc_read) {
         cvs 'up', '-A', filename
       }
-      repository_updated
+      repository_updated page_name, new_rev, new_text
     end
 
     def checkin(page_name, origrev, new_text)
       page_must_valid page_name
+      new_rev = nil
       filename = encode_filename(page_name)
       Dir.chdir(@wc_write) {
         lock(filename) {
@@ -319,17 +323,41 @@ module BitChannel
           else
             add_and_checkin filename, new_text
           end
+          new_rev = read_revision(filename)
         }
       }
       Dir.chdir(@wc_read) {
         cvs 'up', '-A', filename
       }
-      repository_updated
-      @link_cache.update_cache_for page_name,
-          ToHTML.extract_links(new_text, self)
+      repository_updated page_name, new_rev, new_text
     end
 
     private
+
+    def repository_updated(page, new_rev, new_text)
+      @Entries = nil
+      @link_cache.update_cache_for page, ToHTML.extract_links(new_text, self)
+      notify page, new_rev
+    end
+
+    def notify(page, new_rev)
+      return unless @notifier
+      # fork twice not to make zombie
+      pid = fork {
+        fork {
+          sleep 2  # dirty hack: wait unlocking
+          Dir.chdir(@wc_read) {
+            org = if new_rev == 1
+                  then '-D2000-01-01 00:00:00'
+                  else "-r1.#{new_rev-1}"
+                  end
+            out, err = cvs('diff', '-uN', org, "-r1.#{new_rev}", encode_filename(page))
+            @notifier.notify Diff.parse(@module_id, out)
+          }
+        }
+      }
+      Process.waitpid pid
+    end
 
     def update_and_checkin(filename, origrev, new_text)
       cvs 'up', (origrev ? "-r1.#{origrev}" : '-A'), filename
@@ -341,7 +369,7 @@ module BitChannel
         if /conflicts during merge/ =~ err
           log "conflict: #{filename}"
           merged = File.read(filename)
-          rev = read_Entries("CVS/Entries")[decode_filename(filename)][0]
+          rev = read_revision(filename)
           File.unlink filename   # prevent next writer from conflict
           cvs 'up', '-A', filename
           raise EditConflict.new('conflict found', merged, rev)
@@ -445,14 +473,13 @@ module BitChannel
       }
     end
 
+    def read_revision(pagefile)
+      read_Entries("CVS/Entries")[decode_filename(pagefile)][0]
+    end
+
     def cvs_Entries
       @Entries ||= read_Entries("#{@wc_read}/CVS/Entries")
     end
-
-    def repository_updated
-      @Entries = nil
-    end
-    private :repository_updated
 
     def read_Entries(filename)
       table = {}
