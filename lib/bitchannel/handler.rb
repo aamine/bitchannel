@@ -39,14 +39,14 @@ module BitChannel
     include TextUtils
 
     def Handler.cgi_main(config, repo)
-      new(config, repo).handle_request CGI.new
+      new(config, repo).service CGI.new
       repo.clear_per_request_cache
     end
 
     def Handler.fcgi_main(config, repo)
       h = new(config, repo)
       FCGI.each_cgi do |cgi|
-        h.handle_request cgi
+        h.service cgi
         repo.clear_per_request_cache
       end
     end
@@ -56,28 +56,25 @@ module BitChannel
       @repository = repo
     end
 
-    def handle_request(cgi)
+    def service(cgi)
       begin
-        wiki_main cgi
+        handle(cgi).exec cgi
       rescue Exception => err
-        res = error_response(err, true)
-        res.exec cgi
+        error_response(err, true).exec cgi
       end
     end
 
-    private
-
-    def wiki_main(cgi)
+    def handle(cgi)
       handler = "handle_#{cgi.get_param('cmd').to_s.downcase}"
-      res = if respond_to?(handler, true)
-            then __send__(handler, cgi)
-            else view_page(cgi.get_param('name') || FRONT_PAGE_NAME)
-            end
-      res.exec cgi
+      if respond_to?(handler, true)
+      then __send__(handler, cgi)
+      else view_page(cgi.get_param('name') || FRONT_PAGE_NAME)
+      end
     rescue WrongPageName => err
-      res = error_response(err, false)
-      res.exec cgi
+      error_response(err, false)
     end
+
+    private
 
     def error_response(err, debugp)
       html = "<html><head><title>Error</title></head><body>\n" +
@@ -287,12 +284,24 @@ module BitChannel
       @header['charset'] = charset if charset
     end
 
+    def content_type
+      if @header['charset']
+        "#{@header['type']}; charset=#{@header['charset']}"
+      else
+        @header['type']
+      end
+    end
+
     def last_modified=(tm)
       if tm
         @header['Last-Modified'] = CGI.rfc1123_date(tm)
       else
         @header.delete 'Last-Modified'
       end
+    end
+
+    def last_modified
+      @header['Last-Modified']
     end
 
     def no_cache=(no)
@@ -303,6 +312,10 @@ module BitChannel
         @header.delete 'Cache-Control'
         @header.delete 'no-cache'
       end
+    end
+
+    def no_cache?
+      @header['Cache-Control'] ? true : false
     end
 
     def exec(cgi)

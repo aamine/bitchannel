@@ -1,3 +1,20 @@
+Thu Apr  1 23:45:24 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* misc/webrick-sample.rb: new file. Webrick/BitChannel server example.
+
+	* lib/bitchannel/webrickservlet.rb: new file.  WEBrick servlet
+	  support.
+
+	* lib/bitchannel/config.rb: new method Config#cgi_url=.
+
+	* lib/bitchannel/handler.rb: new method Handler#handle.
+
+	* lib/bitchannel/handler.rb: new method Response#content_type.
+
+	* lib/bitchannel/handler.rb: new method Response#last_modified.
+
+	* lib/bitchannel/handler.rb: new method Response#no_cache?.
+
 Thu Apr  1 23:41:07 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* index.cgi: give filename for eval.

@@ -36,6 +36,8 @@ module BitChannel
       args.each do |key, val|
         raise ConfigError, "Config Error: unknown key: config.#{key}"
       end
+
+      @cgi_url = nil
     end
 
     attr_reader :templatedir
@@ -47,10 +49,13 @@ module BitChannel
       @html_url_p
     end
 
+    attr_writer :cgi_url
+
     def cgi_url
+      return @cgi_url if @cgi_url
       return ENV['SCRIPT_NAME'] if ENV['SCRIPT_NAME']
-      return File.basename($0) if $0
       return File.basename(::Apache.request.filename) if defined?(::Apache)
+      return File.basename($0) if $0
       raise "cannot get cgi url; given up"
     end
 
