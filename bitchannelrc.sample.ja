@@ -12,8 +12,7 @@ def setup_environment
   $BitChannelInitialized = true
 
   $KCODE = 'EUC'
-  cgidir = bitchannel_cgidir()
-  $LOAD_PATH.unshift "#{cgidir}/lib"
+  $LOAD_PATH.unshift "#{bitchannel_cgidir()}/lib"
   require 'bitchannel'
   BitChannel.lang = 'ja'
 end

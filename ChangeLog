@@ -1,3 +1,8 @@
+Wed Apr 28 18:14:39 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* bitchannelrc.sample.ja (setup_environment): remove useless local
+	  variable.
+
 Wed Apr 28 18:12:34 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* bitchannelrc.sample.ja: split method: initialize_environment ->
