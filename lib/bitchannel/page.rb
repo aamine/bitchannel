@@ -348,7 +348,7 @@ module BitChannel
     end
 
     def logs
-      @repository.getlog(@page_name)
+      @repository.logs(@page_name)
     end
   end
 

@@ -164,27 +164,42 @@ module BitChannel
       return yield
     end
 
-    # [[rev,logstr]]
-    def getlog(page_name)
+    def logs(page_name)
       page_must_valid page_name
       page_must_exist page_name
       Dir.chdir(@wc_read) {
         out, err = cvs('log', encode_filename(page_name))
-        result = []
-        curr = nil
-        out.each do |line|
-          case line
-          when /\Arevision 1\.(\d+)\s/
-            result.push(curr = [$1.to_i, line.strip])
-          when /\Adate:/
-            if curr
-              curr[1] << ": #{line.slice(/date: (.*?;)/, 1)} #{line.slice(/lines:.*/)}".gsub(/\s+/, ' ')
-              curr = nil
-            end
-          end
-        end
-        return result
+        logs = out.split(/^----------------------------/)
+p logs
+        logs.shift  # remove header
+        logs.last.slice!(/\A={8,}/)
+        return logs.map {|str| Log.parse(str.strip) }
       }
+    end
+
+    class Log
+      def Log.parse(str)
+        rline, dline, *msg = *str.to_a
+        new(rline.slice(/\Arevision 1\.(\d+)\s/, 1).to_i,
+            Time.parse(dline.slice(/date: (.*?;)/, 1)),
+            dline.slice(/lines: \+(\d+)/, 1).to_i,
+            dline.slice(/lines:(?: \+(?:\d+))? -(\d+)/, 1).to_i,
+            msg.join(''))
+      end
+
+      def initialize(rev, date, add, rem, msg)
+        @revision = rev
+        @date = date
+        @n_added = add
+        @n_removed = rem
+        @log = msg
+      end
+
+      attr_reader :revision
+      attr_reader :date
+      attr_reader :n_added
+      attr_reader :n_removed
+      attr_reader :log
     end
 
     def diff(page_name, rev1, rev2)

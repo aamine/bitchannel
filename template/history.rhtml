@@ -14,10 +14,13 @@
 <h1><%= logo_url() %><%= page_name() %> : History</h1>
 <ul>
 <%
-    logs().each do |rev, log| %>
-<li><a href="<%= cgi_url() %>?cmd=view;rev=<%= rev %>;name=<%= page_url() %>"><% %><%= log.sub(/:/, '</a>:') %>
-<% if rev > 1 %>
-(<a href="<%= cgi_url() %>?cmd=diff;rev1=<%= rev-1 %>;rev2=<%= rev %>;name=<%= page_url() %>">diff</a>)
+    logs().sort_by {|log| -log.revision }.each do |log| %>
+<li>
+<%= format_time(log.date) %>:
+<a href="<%= cgi_url() %>?cmd=view;rev=<%= log.revision %>;name=<%= page_url() %>">revision <%= log.revision %></a>
+(lines -<%= log.n_removed %> +<%= log.n_added %></a>)
+<% if log.revision > 1 %>
+<a href="<%= cgi_url() %>?cmd=diff;rev1=<%= log.revision-1 %>;rev2=<%= log.revision %>;name=<%= page_url() %>">[diff]</a>
 <% end %>
 </li>
 <%  end
