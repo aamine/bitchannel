@@ -37,6 +37,19 @@ def Time.rcslogdate(t)
   Time.utc(*m.captures)
 end
 
+# "2004-06-11 10:39:56 +0000" (UTC), CVS 1.12.9 or later
+def Time.newcvslogdate(t)
+  m = %r<(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2}) [+\-]\d{4}>.match(t)
+  raise ArgumentError, "not new CVS log date: #{t.inspect}" unless m
+  Time.utc(*m.captures)
+end
+
+def Time.cvslogdate(t)
+  newcvslogdate(t)
+rescue ArgumentError
+  rcslogdate(t)
+end
+
 module BitChannel
 
   module FilenameEncoding
@@ -581,7 +594,7 @@ module BitChannel
       def Log.parse(str)
         rline, dline, *msg = *str.to_a
         new(cvsrev_to_i(rline.slice(/\Arevision (1(?:\.\d+)+)\s/, 1), nil),
-            Time.rcslogdate(dline.slice(/date: (.*?);/, 1)).getlocal,
+            Time.cvslogdate(dline.slice(/date: (.*?);/, 1)).getlocal,
             dline.slice(/lines: \+(\d+)/, 1).to_i,
             dline.slice(/lines:(?: \+(?:\d+))? -(\d+)/, 1).to_i,
             msg.join(''))

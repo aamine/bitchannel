@@ -1,3 +1,8 @@
+Sun Nov  7 06:13:05 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb: new method Time.cvslogdate.
+	  (/w/BitChannelComment:rev77)
+
 Sun Nov  7 06:01:54 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/handler.rb (handle): support If-Modified-Since:
