@@ -12,6 +12,7 @@ require 'bitchannel/config'
 require 'bitchannel/page'
 require 'bitchannel/textutils'
 require 'webrick/cookie'
+require 'webrick/httpstatus'
 require 'uri'
 require 'date'
 require 'time'
@@ -34,7 +35,10 @@ module BitChannel
     end
 
     def handle(req)
-      _handle(req) || @wiki.view(FRONT_PAGE_NAME).response
+      res = (_handle(req) || @wiki.view(FRONT_PAGE_NAME).response)
+      check_IfModifiedSince(req, res)
+    rescue WEBrick::HTTPStatus::Status
+      raise
     rescue Exception => err
       error_response(err, true)
     end
@@ -46,6 +50,15 @@ module BitChannel
     end
 
     private
+
+    def check_IfModifiedSince(req, res)
+      return nil unless res
+      return res unless req.if_modified_since
+      if res.last_modified >= req.if_modified_since
+        raise WEBrick::HTTPStatus::NotModified, 'not modified'
+      end
+      res
+    end
 
     def error_response(err, debugp)
       html = "<html><head><title>Error</title></head><body>\n" +
@@ -168,12 +181,13 @@ module BitChannel
 
     def handle_src(req)
       return not_found() unless req.page_name
+      return not_found() unless @wiki.valid?(req.page_name)
       return not_found() unless @wiki.exist?(req.page_name)
       @wiki.src(req.page_name).response
     end
 
     def not_found
-      nil   # FIXME
+      raise WEBrick::HTTPStatus::NotFound, 'Page not found'
     end
 
     def handle_extent(req)
@@ -228,7 +242,7 @@ module BitChannel
     end
 
     def cmtbox_username
-      @locale.unify_encoding(get('uname').to_s.strip)
+      @locale.to_local(get('uname').to_s.strip)
     end
 
     def cmtbox_comment
@@ -311,7 +325,7 @@ module BitChannel
     end
 
     def search_query
-      @locale.unify_encoding(get('q').to_s.strip)
+      @locale.to_local(get('q').to_s.strip)
     end
 
     def search_regexps
@@ -338,10 +352,16 @@ module BitChannel
     end
     private :check_pattern
 
+    def if_modified_since
+      return nil unless @request['if-modified-since']
+      ims = @request['if-modified-since']
+      Time.httpdate(ims) rescue Time.parse(ims)
+    end
+
     private
 
     def normalize_text(text)
-      @locale.unify_encoding(text).map {|line|
+      @locale.to_local(text).map {|line|
         detab(line).rstrip + "\r\n"
       }.join('')
     end
@@ -367,11 +387,13 @@ module BitChannel
       @status = nil
       @header = {}
       @cookies = []
+      @last_modified = nil
       @body = nil
       self.no_cache = true
     end
 
     attr_accessor :status
+    attr_accessor :last_modified
     attr_reader :body
 
     def set_content_body(body, type, charset)
@@ -381,18 +403,6 @@ module BitChannel
 
     def content_type
       @header['Content-Type']
-    end
-
-    def last_modified=(tm)
-      if tm
-        @header['Last-Modified'] = tm.httpdate
-      else
-        @header.delete 'Last-Modified'
-      end
-    end
-
-    def last_modified
-      @header['Last-Modified']
     end
 
     def no_cache=(no)
@@ -419,6 +429,7 @@ module BitChannel
         webrickres[k] = v
       end
       webrickres.cookies.replace @cookies
+      webrickres['Last-Modified'] = @last_modified.httpdate if @last_modified
       webrickres.body = @body
     end
   end

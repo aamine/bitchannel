@@ -1,3 +1,24 @@
+Sun Nov  7 06:01:54 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/handler.rb (handle): support If-Modified-Since:
+	  header.
+
+	* lib/bitchannel/handler.rb (handle_src): return 404 status for
+	  wrong page name.
+
+	* lib/bitchannel/handler.rb (Response#last_modified): holds a
+	  Time, not a String.
+
+	* lib/bitchannel/locale/en.rb: new method #utf8_enabled?
+
+	* lib/bitchannel/locale/ja.rb: ditto.
+
+	* lib/bitchannel/locale/en.rb: #unify_encoding -> #to_local.
+
+	* lib/bitchannel/locale/ja.rb: ditto.
+
+	* lib/bitchannel/handler.rb: ditto.
+
 Sat Oct  9 21:21:42 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* misc/init.rb: append '/' for cgi_url.

@@ -30,16 +30,30 @@ module BitChannel
       begin
         require 'uconv'
 
-        MIME_CHARSET_TO_UCONV = {
+        U8toLOCAL = {
           'euc-jp'    => :u8toeuc,
           'shift_jis' => :u8tosjis
         }
 
-        def unify_encoding(text)
-          method = MIME_CHARSET_TO_UCONV[@encoding] or return unify_encoding_NKF(text)
+        def to_local(text)
+          method = U8toLOCAL[@encoding]  or return to_local_NKF(text)
           Uconv.__send__(method, text)
         rescue Uconv::Error
-          unify_encoding_NKF(text)
+          to_local_NKF(text)
+        end
+
+        LOCALtoU8 = {
+          'euc-jp'    => :euctou8,
+          'shift_jis' => :sjistou8
+        }
+
+        def utf8_enabled?
+          LOCALtoU8[@encoding] ? true : false
+        end
+
+        def to_utf8(text)
+          method = LOCALtoU8[@encoding]  or return text
+          Uconv.__send__(method, text)
         end
       rescue LoadError
         require 'iconv'
@@ -53,21 +67,34 @@ module BitChannel
           end
         }
 
-        MIME_CHARSET_TO_ICONV = {
-          'euc-jp'    => %w(eucJP euc-jp EUC-JP).find {|c| check[c] },
-          'shift_jis' => %w(SJIS shift_jis Shift_JIS).find {|c| check[c] }
+        ICONV_NAME = {
+          'euc-jp'    => %w(eucJP euc-jp EUC-JP).detect {|c| check[c] },
+          'shift_jis' => %w(SJIS shift_jis Shift_JIS).detect {|c| check[c] }
         }
 
-        def unify_encoding(text)
-          dest = MIME_CHARSET_TO_ICONV[@encoding] or return unify_encoding_NKF(text)
+        def to_local(text)
+          dest = ICONV_NAME[@encoding]  or return to_local_NKF(text)
           Iconv.conv(dest, 'UTF-8', text)
         rescue Iconv::Failure
-          unify_encoding_NKF(text)
+          to_local_NKF(text)
+        end
+
+        def utf8_enabled?
+          ICONV_NAME[@encoding] ? true : false
+        end
+
+        def to_utf8(text)
+          src = ICONV_NAME[@encoding]  or return text
+          Iconv.conv('UTF-8', src, text)
         end
       end
     rescue LoadError
-      def unify_encoding(text)
-        unify_encoding_NKF(text)
+      def to_local(text)
+        to_local_NKF(text)
+      end
+
+      def utf8_enabled?
+        false
       end
     end
 
@@ -79,12 +106,12 @@ module BitChannel
       'iso-2022-jp' => '-j -m0 -x'
     }
 
-    def unify_encoding_NKF(text)
+    def to_local_NKF(text)
       flags = MIME_CHARSET_TO_NKF[@encoding] or return text
       NKF.nkf(flags, text)
     end
 
-    alias _ unify_encoding
+    alias _ to_local
 
     Z_SPACE = "\241\241"   # zen-kaku space
 

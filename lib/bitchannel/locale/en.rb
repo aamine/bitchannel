@@ -25,12 +25,20 @@ module BitChannel
       'us-ascii'
     end
 
-    def unify_encoding(str)
+    def to_local(str)
+      str
+    end
+
+    def to_utf8(str)
       str
     end
 
     def split_words(str)
       str.strip.split
+    end
+
+    def utf8_enabled?
+      true
     end
   end
 
