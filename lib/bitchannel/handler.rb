@@ -153,7 +153,7 @@ module BitChannel
     def handle_history(req)
       return nil unless req.page_name
       return nil unless @wiki.exist?(req.page_name)
-      @wiki.history(name).response
+      @wiki.history(req.page_name).response
     end
 
     def handle_annotate(req)
@@ -187,7 +187,7 @@ module BitChannel
     def handle_search(req)
       @wiki.search(req.search_query, req.search_regexps).response
     rescue WrongQuery => err
-      @wiki.search_error(req.search_query, err)
+      @wiki.search_error(req.search_query, err).response
     end
   end
 
@@ -195,9 +195,9 @@ module BitChannel
   class Request
     include TextUtils
 
-    def initialize(req, config, pathinfo_sensitive)
+    def initialize(req, locale, pathinfo_sensitive)
       @request = req
-      @config = config
+      @locale = locale
       @pathinfo_sensitive = pathinfo_sensitive
     end
 

@@ -1,3 +1,13 @@
+Sun May  9 10:53:08 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* History, Viewrev, Search did not work.
+
+	* lib/bitchannel/handler.rb: ditto.
+
+	* lib/bitchannel/page.rb: ditto.
+
+	* lib/bitchannel/wikispace.rb: ditto.
+
 Sun May  9 10:39:16 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* WikiFarm implemented.

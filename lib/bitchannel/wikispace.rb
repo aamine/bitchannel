@@ -43,7 +43,7 @@ module BitChannel
     end
 
     def viewrev(name, rev)
-      ViewRevPage.new(@config, @repository, page_name, rev)
+      ViewRevPage.new(@config, @repository, name, rev)
     end
 
     def edit(name)

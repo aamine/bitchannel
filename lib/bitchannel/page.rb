@@ -544,7 +544,7 @@ module BitChannel
     end
 
     def query_string
-      escape_html(jsplit(@query_string).join(' '))
+      escape_html(@config.locale.split_words(@query_string).join(' '))
     end
 
     def matched_pages(&block)
