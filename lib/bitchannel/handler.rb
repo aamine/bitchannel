@@ -8,7 +8,7 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
-require 'wikitik/textutils'
+require 'bitchannel/textutils'
 require 'cgi'
 require 'uri'
 
@@ -28,9 +28,9 @@ class CGI
   end
 end
 
-module Wikitik
+module BitChannel
 
-  def Wikitik.cgi_main(config, repo)
+  def BitChannel.cgi_main(config, repo)
     Handler.new(config, repo).handle_request(CGI.new)
   end
 
@@ -271,4 +271,4 @@ raise ArgumentError, "view page=nil" unless page_name
 
   end
 
-end   # module Wikitik
+end   # module BitChannel

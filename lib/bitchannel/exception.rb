@@ -8,15 +8,15 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
-module Wikitik
-  class WikitikError < StandardError; end
-  class ConfigError < WikitikError; end
-  class ResourceError < WikitikError; end
-  class UnknownRCSLogFormat < WikitikError; end
-  class WrongQuery < WikitikError; end
-  class WrongPageName < WikitikError; end
+module BitChannel
+  class BitChannelError < StandardError; end
+  class ConfigError < BitChannelError; end
+  class ResourceError < BitChannelError; end
+  class UnknownRCSLogFormat < BitChannelError; end
+  class WrongQuery < BitChannelError; end
+  class WrongPageName < BitChannelError; end
 
-  class CommandFailed < WikitikError
+  class CommandFailed < BitChannelError
     def initialize(msg, status)
       @status = status
     end
@@ -26,7 +26,7 @@ module Wikitik
     end
   end
 
-  class EditConflict < WikitikError
+  class EditConflict < BitChannelError
     def initialize(msg, merged)
       super msg
       @merged = merged

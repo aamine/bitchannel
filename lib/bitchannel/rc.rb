@@ -8,21 +8,21 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
-module Wikitik
+module BitChannel
   @lang = 'ja'
   @resources = {}
 
-  def Wikitik.lang
+  def BitChannel.lang
     @lang
   end
 
-  def Wikitik.lang=(lang)
+  def BitChannel.lang=(lang)
     raise ArgumentError, "not supported language: #{lang}" \
         unless @resources.key?(lang)
     @lang = lang
   end
 
-  def Wikitik.gettext(key)
+  def BitChannel.gettext(key)
     table = @resources[@lang] or
         raise ResourceError, "resource not exist: #{@lang}"
     table[key]
@@ -30,8 +30,8 @@ module Wikitik
 end
 
 def gettext(key)
-  ::Wikitik.gettext(key)
+  ::BitChannel.gettext(key)
 end
 
-require 'wikitik/rc/ja'
-require 'wikitik/rc/en'
+require 'bitchannel/rc/ja'
+require 'bitchannel/rc/en'

@@ -8,7 +8,7 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
-module Wikitik
+module BitChannel
 
   module TextUtils
 
@@ -71,4 +71,4 @@ module Wikitik
 
   end
 
-end   # module Wikitik
+end   # module BitChannel

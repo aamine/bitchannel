@@ -8,9 +8,9 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
-require 'wikitik/exception'
+require 'bitchannel/exception'
 
-module Wikitik
+module BitChannel
   rc = Hash.new {|h,k| raise ResourceError, "unknown resource key: #{k}" }
   rc[:save_without_name] = 'Text saved without page name; make sure.'
   rc[:edit_conflicted] = 'Edit conflicted; make sure.'

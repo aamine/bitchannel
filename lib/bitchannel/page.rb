@@ -8,9 +8,9 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
-require 'wikitik/repository'
-require 'wikitik/tohtml'
-require 'wikitik/textutils'
+require 'bitchannel/repository'
+require 'bitchannel/tohtml'
+require 'bitchannel/textutils'
 require 'erb'
 
 class ERB   # tmp
@@ -22,7 +22,7 @@ class ERB   # tmp
   end
 end
 
-module Wikitik
+module BitChannel
 
   class GenericPage
     include TextUtils

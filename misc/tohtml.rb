@@ -17,9 +17,9 @@ def main
   usage(0) if $OPT_help
   usage(1) unless ok
 
-  load './wikitikrc'
+  load './bitchannelrc'
   config, repo = initialize_environment()
-  c = Wikitik::ToHTML.new(config, repo)
+  c = BitChannel::ToHTML.new(config, repo)
   ARGV.each do |page_name|
     puts c.compile(repo[page_name], page_name)
   end

@@ -8,9 +8,9 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
-require 'wikitik/constants'
+require 'bitchannel/constants'
 
-module Wikitik
+module BitChannel
 
   class Config
 

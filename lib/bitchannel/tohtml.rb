@@ -8,12 +8,12 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
-require 'wikitik/textutils'
-require 'wikitik/constants'
+require 'bitchannel/textutils'
+require 'bitchannel/constants'
 require 'stringio'
 require 'uri'
 
-module Wikitik
+module BitChannel
 
   class ToHTML
 
@@ -36,7 +36,7 @@ module Wikitik
     end
 
     def extract_links(str)
-      compile(str, ' (dummy) ')   # page name never includes ' ' in Wikitik
+      compile(str, ' (dummy) ')   # page name never includes ' ' in BitChannel
       @internal_links
     end
 
@@ -410,4 +410,4 @@ module Wikitik
 
   end
 
-end   # module Wikitik
+end   # module BitChannel

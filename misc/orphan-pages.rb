@@ -17,7 +17,7 @@ def main
   usage(0) if $OPT_help
   usage(1) unless ok
 
-  load './wikitikrc'
+  load './bitchannelrc'
   config, repo = initialize_environment()
   repo.orphan_pages.each do |page_name|
     puts page_name

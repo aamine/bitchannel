@@ -8,11 +8,11 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
-require 'wikitik/textutils'
-require 'wikitik/exception'
+require 'bitchannel/textutils'
+require 'bitchannel/exception'
 require 'time'
 
-module Wikitik
+module BitChannel
 
   module FilenameEncoding
 
@@ -34,7 +34,7 @@ module Wikitik
     # Read only access is always allowed.
     def lock(path)
       n_retry = 5
-      lock = path + ',wikitik,lock'
+      lock = path + ',bitchannel,lock'
       begin
         Dir.mkdir(lock)
         begin

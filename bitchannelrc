@@ -1,5 +1,5 @@
 #
-# Wikitik Config File
+# BitChannel Config File
 #
 
 def initialize_environment
@@ -8,18 +8,18 @@ def initialize_environment
   cgidir = File.dirname(File.expand_path(__FILE__))
 
   $:.unshift "#{cgidir}/lib"
-  require 'wikitik'
+  require 'bitchannel'
 
-  Wikitik.lang = 'ja'
+  BitChannel.lang = 'ja'
 
-  config = Wikitik::Config.new(
+  config = BitChannel::Config.new(
     :templatedir => "#{cgidir}/template",
     :cachedir => "#{cgidir}/cache",
     :charset => 'euc-jp',
     :css_url => 'default.css',
     :cgi_url => 'index.rb'
   )
-  repo = Wikitik::Repository.new(config,
+  repo = BitChannel::Repository.new(config,
     :cmd_path  => '/usr/bin/cvs',
     # :cvsroot => '/var/cvs/jail/wiki',
     :wc_read   => "#{cgidir}/wc.read",
