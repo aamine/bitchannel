@@ -31,16 +31,23 @@ end
 
 module BitChannel
 
-  def BitChannel.cgi_main(config, repo)
-    Handler.new(config, repo).handle_request(CGI.new)
-  end
-
   #
   # CGI request handler class.
   # This object interprets a CGI request to the specific task.
   #
   class Handler
     include TextUtils
+
+    def Handler.cgi_main(config, repo)
+      new(config, repo).handle_request CGI.new
+    end
+
+    def Handler.fcgi_main(config, repo)
+      h = new(config, repo)
+      FCGI.each_cgi do |cgi|
+        h.handle_request cgi
+      end
+    end
 
     def initialize(config, repo)
       @config = config

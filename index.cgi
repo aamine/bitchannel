@@ -1,7 +1,8 @@
 #!/usr/bin/ruby
 # $Id$
 
-load "#{File.dirname(__FILE__)}/bitchannelrc"
-config, repo = initialize_environment()
+env = Object.new
+env.instance_eval(File.read("#{File.dirname(__FILE__)}/bitchannelrc".untaint).untaint)
+config, repo = env.initialize_environment
 require 'bitchannel/handler'
-BitChannel.cgi_main config, repo
+BitChannel::Handler.cgi_main config, repo

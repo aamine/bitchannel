@@ -1,3 +1,16 @@
+Mon Mar 29 00:03:59 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* index.cgi: define initialize_environment on anonymous object,
+	  not to define same method twice.
+
+	* index.fcgi: new file.  FastCGI support.
+
+	* lib/bitchannel/handler.rb: new method
+	  BitChannel::Handler.cgi_main.
+
+	* lib/bitchannel/handler.rb: new method
+	  BitChannel::Handler.fcgi_main.
+
 Sun Mar 28 22:55:27 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/repository.rb (popen3): should ensure to wait
