@@ -208,6 +208,13 @@ span.new0 {
 }
 
 /*
+    edit
+*/
+textarea.edit {
+    width: 100%;
+}
+
+/*
     preview
 */
 span.previewmark {

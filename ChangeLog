@@ -1,3 +1,9 @@
+Fri Apr 16 02:25:08 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* default.css: widen textarea width.
+
+	* template/edit.rhtml: classify textarea.
+
 Sun Apr 11 01:42:01 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* template/annotate.rhtml: include systeminfo.rhtml.
