@@ -311,18 +311,25 @@ module BitChannel
     end
 
     def cvs(*args)
-      execute(@cvs_cmd, '-f', '-q', *args)
+      execute(ignore_status_p(args[0]), @cvs_cmd, '-f', '-q', *args)
     end
 
-    def execute(*cmd)
+    def ignore_status_p(cmd)
+      cmd == 'diff'
+    end
+
+    def execute(ignore_status, *cmd)
       log %Q[exec: "#{cmd.join('", "')}"]
-      popen3(*cmd) {|stdin, stdout, stderr|
+      popen3(ignore_status, *cmd) {|stdin, stdout, stderr|
         stdin.close
-        return stdout.read, stderr.read
+        out = stdout.read
+        err = stderr.read
+        log "got stderr (#{cmd.join(' ')}):\n#{err}" unless err.empty?
+        return out, err
       }
     end
 
-    def popen3(*cmd)
+    def popen3(ignore_status, *cmd)
       pw = IO.pipe
       pr = IO.pipe
       pe = IO.pipe
@@ -347,14 +354,14 @@ module BitChannel
       pipes = [pw[1], pr[0], pe[0]]
       pw[1].sync = true
       begin
-        result = yield(*pipes)
-        dummy, status = Process.waitpid2(pid)
-        raise CommandFailed.new("Command failed: #{cmd.join ' '}", status) \
-            unless status.exitstatus == 0
-        return result
+        return yield(*pipes)
       ensure
         pipes.each do |f|
           f.close unless f.closed?
+        end
+        dummy, status = Process.waitpid2(pid)
+        if status.exitstatus != 0 and not ignore_status
+          raise CommandFailed.new("Command failed: #{cmd.join ' '}", status)
         end
       end
     end

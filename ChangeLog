@@ -1,3 +1,11 @@
+Sun Mar 28 22:55:27 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb (popen3): should ensure to wait
+	  children.
+
+	* lib/bitchannel/repository.rb (cvs): "cvs diff" may exit by 1
+	  even on success.
+
 Sun Mar 28 22:53:52 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/exception.rb (CommandFailed#initialize): should
