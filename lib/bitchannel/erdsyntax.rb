@@ -9,6 +9,7 @@
 #
 
 require 'bitchannel/textutils'
+require 'bitchannel/repository'
 
 module BitChannel
 
@@ -53,6 +54,7 @@ module BitChannel
 
   end
 
+  # reopen
   class ViewPage
     alias org_last_modified last_modified
     remove_method :last_modified
@@ -62,6 +64,19 @@ module BitChannel
       then File.mtime('/var/linuxprog/hide')
       else org_last_modified
       end
+    end
+  end
+
+  # reopen
+  module FilenameEncoding
+    remove_method :encode_filename
+    def encode_filename(name)
+      name
+    end
+
+    remove_method :decode_filename
+    def decode_filename(name)
+      name
     end
   end
 
