@@ -106,6 +106,8 @@ end
 def send(cgi, html)
   print cgi.header('status' => '200 OK',
                    'type' => 'text/html', 'charset' => @charset,
+                   'Pragma' => 'no-cache',
+                   'Cache-Control' => 'no-cache',
                    'Content-Length' => html.length.to_s)
   print html unless cgi.request_method.to_s.upcase == 'HEAD'
 end
