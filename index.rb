@@ -19,6 +19,7 @@ repo = Wikitik::Repository.new(
 )
 config = Wikitik::Config.new(
   :templatedir => "#{cgidir}/template",
+  :cachedir => "#{cgidir}/cache",
   :charset => 'euc-jp',
   :css_url => 'default.css',
   :cgi_url => 'index.rb'

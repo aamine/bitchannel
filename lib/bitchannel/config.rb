@@ -18,6 +18,7 @@ module Wikitik
       }
       t.update args
       @templatedir = t[:templatedir]; t.delete(:templatedir)
+      @cachedir    = t[:cachedir];    t.delete(:cachedir)
       @charset     = t[:charset];     t.delete(:charset)
       @cgi_url     = t[:cgi_url];     t.delete(:cgi_url)
       @css_url     = t[:css_url];     t.delete(:css_url)
@@ -44,6 +45,25 @@ module Wikitik
 
     def read_rhtml(name)
       File.read("#{@templatedir}/#{name}.rhtml")
+    end
+
+    def lock_revlink_cachedir
+      dir = "#{@cachedir}/revlink"
+      try = 5
+      begin
+        Dir.mkdir "#{dir}.lock"
+        begin
+          Dir.mkdir dir unless File.directory?(dir)
+          yield dir
+        ensure
+          Dir.rmdir "#{dir}.lock"
+        end
+      rescue Errno::EEXIST
+        try -= 1
+        raise if try < 0
+        sleep 1
+        retry
+      end
     end
 
   end

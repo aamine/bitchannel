@@ -21,14 +21,21 @@ module Wikitik
     def initialize(config, repo)
       @config = config
       @repository = repo
+      @internal_links = nil
     end
 
     def compile(str)
       @f = LineInput.new(StringIO.new(str))
       @result = ''
       @indent_stack = [0]
+      @internal_links = []
       do_compile
       @result
+    end
+
+    def extract_links(str)
+      compile(str)
+      @internal_links
     end
 
     private
@@ -216,26 +223,42 @@ module Wikitik
         if ch = $1
           esctable[ch]
         elsif wikiname = $2
+          @internal_links.push wikiname
           href = escape_html(URI.escape(wikiname))
           link = escape_html(wikiname)
           q = (@repository.exist?(wikiname) ? '' : '?')
           %Q[<a href="#{cgi_href}?cmd=view;name=#{href}">#{q}#{link}</a>]
-        elsif exlink = $3
-          href = escape_html(URI.escape(exlink[2..-3]))
-          link = escape_html(exlink[2..-3])
-          q = (@repository.exist?(exlink[2..-3]) ? '' : '?')
+        elsif linkname = $3
+          linkname = linkname[2..-3]   # remove '[[' and ']]'
+          @internal_links.push linkname
+          href = escape_html(URI.escape(linkname))
+          link = escape_html(linkname)
+          q = (@repository.exist?(linkname) ? '' : '?')
           %Q[<a href="#{cgi_href}?cmd=view;name=#{href}">#{q}#{link}</a>]
         elsif url = $4
-          if url[-1,1] == ')'   # special case
+          if url[-1,1] == ')' and not balanced?(url)   # special case
             url[-1,1] = ''
-            %Q[<a href="#{escape_html(url)}">#{escape_html(url)}</a>)]
+            add = ')'
           else
-            %Q[<a href="#{escape_html(url)}">#{escape_html(url)}</a>]
+            add = ''
+          end
+          if seems_image_url?(url)
+            %Q[<img src="#{escape_html(url)}">#{add}]
+          else
+            %Q[<a href="#{escape_html(url)}">#{escape_html(url)}</a>#{add}]
           end
         else
           raise 'must not happen'
         end
       }
+    end
+
+    def seems_image_url?(url)
+      /\.(?:png|jpg|jpeg|gif|bmp|tiff|tif)\z/i =~ url
+    end
+
+    def balanced?(str)
+      str.count('(') == str.count(')')
     end
 
     #
@@ -331,7 +354,6 @@ module Wikitik
         end
         nil
       end
-
     end
 
   end

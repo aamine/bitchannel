@@ -8,6 +8,7 @@
 # the GNU LGPL, Lesser General Public License version 2.
 #
 
+require 'wikitik/textutils'
 require 'cgi'
 require 'uri'
 
@@ -38,6 +39,8 @@ module Wikitik
   # This object interprets a CGI request to the specific task.
   #
   class Handler
+
+    include TextUtils
 
     def initialize(repo, config)
       @repository = repo
@@ -93,9 +96,11 @@ module Wikitik
           return
         end
         begin
+          text = cgi.get_param('text').to_s
           @repository.checkin page_name,
                               cgi.get_rev_param('origrev'),
-                              cgi.get_param('text').to_s
+                              text
+          update_revlink_cache page_name, text
           thanks cgi, page_name
         rescue EditConflict => err
           send cgi, EditPage.new(@config, @repository,
@@ -170,6 +175,29 @@ raise ArgumentError, "view page=nil" unless page_name
       header['Last-Modified'] = CGI.rfc1123_date(mtime) if mtime
       print cgi.header(header)
       print html unless cgi.request_method.to_s.upcase == 'HEAD'
+    end
+
+    def update_revlink_cache(page_name, text)
+      links = ToHTML.new(@config, @repository).extract_links(text)
+      @config.lock_revlink_cachedir {|dir|
+        links.each do |link|
+          cachefile = "#{dir}/#{encode_filename(link)}"
+          if File.exist?(cachefile)
+            revlinks = File.readlines(cachefile).map {|line| line.strip }
+            revlinks.shift   # discard first line (number of lines)
+          else
+            revlinks = []
+          end
+          revlinks = (revlinks + [page_name]).uniq.sort
+          File.open("#{cachefile},tmp", 'w') {|f|
+            f.puts revlinks.size
+            revlinks.each do |rev|
+              f.puts rev
+            end
+          }
+          File.rename "#{cachefile},tmp", cachefile
+        end
+      }
     end
 
   end
