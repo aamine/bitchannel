@@ -40,12 +40,14 @@ module BitChannel
 
     def Handler.cgi_main(config, repo)
       new(config, repo).handle_request CGI.new
+      repo.clear_per_request_cache
     end
 
     def Handler.fcgi_main(config, repo)
       h = new(config, repo)
       FCGI.each_cgi do |cgi|
         h.handle_request cgi
+        repo.clear_per_request_cache
       end
     end
 

@@ -74,10 +74,17 @@ module BitChannel
         raise ConfigError, "Config Error: unknown key: repository.#{k}"
       end
       @link_cache = LinkCache.new("#{cachedir}/link", "#{cachedir}/revlink")
+      # per-request cache
+      @Entries = nil
     end
 
     # internal use only
     attr_reader :link_cache
+
+    # internal use only
+    def clear_per_request_cache
+      @Entries = nil
+    end
 
     def page_names
       Dir.entries(@wc_read)\
@@ -386,7 +393,7 @@ module BitChannel
     end
 
     def cvs_Entries
-      read_Entries("#{@wc_read}/CVS/Entries")
+      @Entries ||= read_Entries("#{@wc_read}/CVS/Entries")
     end
 
     def read_Entries(filename)

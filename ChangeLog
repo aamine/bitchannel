@@ -1,3 +1,11 @@
+Thu Apr  1 16:24:03 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/handler.rb (fcgi_main, cgi_main): clear
+	  per-request cache.
+
+	* lib/bitchannel/repository.rb: new method
+	  #clear_per_request_cache.
+
 Thu Apr  1 15:42:04 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/repository.rb: don't cache CVS/Entries, it causes
