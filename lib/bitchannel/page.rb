@@ -343,6 +343,11 @@ module BitChannel
 
 
   class ListPage < GenericPage
+    def initialize(config, repo)
+      super config
+      @repository = repo
+    end
+
     private
 
     def template_id
@@ -356,6 +361,11 @@ module BitChannel
 
 
   class RecentPage < GenericPage
+    def initialize(config, repo)
+      super config
+      @repository = repo
+    end
+
     private
 
     def template_id
