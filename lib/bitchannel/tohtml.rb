@@ -122,8 +122,8 @@ module BitChannel
     def xlist(type, mark_re)
       puts "<#{type}>"
       push_indent(indentof(@f.peek)) {
-        @f.while_match(mark_re) do |line|
-          line = emulate_rdstyle(line) if /\A\s*[\*\#]{2,}/ =~ line
+        @f.while_match(mark_re) do |line0|
+          line = unify_listitem_style(line0)
           if indent_shallower?(line)
             @f.ungets line
             break
@@ -131,16 +131,33 @@ module BitChannel
           if indent_deeper?(line)
             @f.ungets line
             xlist type, mark_re
+            puts '</li>'
             next
           end
           buf = line.sub(mark_re, '').strip
           @f.while_match(LI_CONTINUE[type]) do |line|
             buf << "\n" + line.strip
           end
-          puts "<li>#{text(buf)}</li>"
+          if next_line_is_nested_list?(mark_re)
+            puts "<li>#{text(buf)}"
+          else
+            puts "<li>#{text(buf)}</li>"
+          end
         end
       }
       puts "</#{type}>"
+    end
+
+    def next_line_is_nested_list?(mark_re)
+      line = unify_listitem_style(@f.peek)
+      mark_re =~ line and indent_deeper?(line)
+    end
+
+    def unify_listitem_style(line)
+      if /\A[\*\#]{2,}/ =~ line
+      then emulate_rdstyle(line)
+      else line
+      end
     end
 
     MARK = {
