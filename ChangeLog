@@ -1,3 +1,10 @@
+Mon Apr 26 01:51:15 2004  Minero Aoki  <aamine@loveruby.net>
+
+	* template/menu.rhtml: insert span.menuseparator between page menu
+	  items and site menu items.
+
+	* default.css: add span.menuseparator.
+
 Mon Apr 26 01:49:21 2004  Minero Aoki  <aamine@loveruby.net>
 
 	* default.css: use "1.4" instead of "140%" for line-height.

@@ -41,6 +41,11 @@ div.menu a:hover {
     background-color: #33a;
     text-decoration: none;
 }
+span.menuseparator {
+    width: 1em;
+    padding: 0px;
+    margin: 0px;
+}
 
 /*
 span.lastmodified {
