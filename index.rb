@@ -10,7 +10,6 @@
 #
 
 load "#{File.dirname(__FILE__)}/config"
-$LOAD_PATH.unshift @libdir if @libdir
 
 require 'wikitik'
 require 'cgi'

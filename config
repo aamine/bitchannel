@@ -2,10 +2,10 @@
 # Wikitik Config File
 #
 
-# @libdir:
-#	RUBYLIB for Wikitik.
-#	If you have installed Wikitik in right place, set @libdir to nil.
-@libdir = File.dirname(File.expand_path(__FILE__)) + '/lib'
+# Additional RUBYLIB:
+#	If you have installed Wikitik in the official libdir,
+#	comment out the following line.
+$:.unshift File.dirname(File.expand_path(__FILE__)) + '/lib'
 
 # @templatedir:
 #	The path to template files.
