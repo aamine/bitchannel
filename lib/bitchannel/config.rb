@@ -38,6 +38,10 @@ module BitChannel
       @index_page || 'FrontPage'
     end
 
+    def help_page_name
+      'HelpPage'
+    end
+
     def tmp_page_name
       'SandBox'
     end

@@ -58,6 +58,21 @@ module BitChannel
       url(@config.cgi_url)
     end
 
+    def index_page_url
+      view_url(@config.index_page_name)
+    end
+
+    def help_page_url
+      view_url(@config.help_page_name)
+    end
+
+    def view_url(page_name)
+      if true
+      then "#{cgi_url()}?cmd=view;name=#{url(page_name)}"
+      else "#{url(page_name)}.html"
+      end
+    end
+
     def url(str)
       escape_html(URI.escape(str))
     end
@@ -94,6 +109,13 @@ module BitChannel
 
     def page_url
       url(@page_name)
+    end
+
+    def page_full_url
+      if true
+      then "#{cgi_url()}?cmd=view;name=#{page_url()}"
+      else "#{page_url()}.html"
+      end
     end
 
     def size

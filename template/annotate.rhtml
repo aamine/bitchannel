@@ -9,13 +9,21 @@
 <body>
 
 <div class="menu">
-<a href="<%= cgi_url() %>?cmd=view;name=<%= page_url() %>">View</a>
+<a href="<%= page_view_url() %>">View</a>
 <a href="<%= cgi_url() %>?cmd=edit;name=<%= page_url() %>">Edit</a>
 <a href="<%= cgi_url() %>?cmd=recent">Recent</a>
 <a href="<%= cgi_url() %>?cmd=list">List</a>
 <a href="<%= cgi_url() %>?cmd=history;name=<%= page_url() %>">History</a>
-<a href="<%= cgi_url() %>?cmd=view;name=IndexPage">Top</a>
-<a href="<%= cgi_url() %>?cmd=view;name=HelpPage">Help</a>
+Annotate
+<%
+    if revision() and revision() > 1
+%><a href="<%= cgi_url() %>?cmd=diff;rev1=<%= revision() - 1 %>;rev2=<%= revision() %>;name=<%= page_url() %>">Diff</a><%
+    else
+%>Diff<%
+    end
+%>
+<a href="<%= index_page_url() %>">Top</a>
+<a href="<%= help_page_url() %>">Help</a>
 .include search_form
 </div>
 
