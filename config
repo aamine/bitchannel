@@ -2,17 +2,28 @@
 # AlphaWiki Config File
 #
 
+# @libdir:
+#	RUBYLIB for AlphaWiki.
+#	If you have installed AlphaWiki in right place, set @libdir to nil.
 @libdir = File.dirname(File.expand_path(__FILE__)) + '/lib'
-@datadir = File.dirname(File.expand_path(__FILE__)) + '/pages'
-@templatedir = File.dirname(File.expand_path(__FILE__)) + '/template'
-@cgi_url = 'index.rb'
-@css_url = 'default.css'
 
-# CVS
+# @templatedir:
+#	The path to AlphaWiki template files.
+@templatedir = File.dirname(File.expand_path(__FILE__)) + '/template'
+
+# CVS related parameters.
+# You MUST set up @cvswc_read/@cvswc_write by yourself.
 @cvs_path = '/usr/bin/cvs'
 @cvswc_read = File.dirname(File.expand_path(__FILE__)) + '/wc.read'
 @cvswc_write = File.dirname(File.expand_path(__FILE__)) + '/wc.write'
 
+# Locale related parameters.
+# Only tested environment is ja_JP.eucJP.
 $KCODE = 'EUC'
 @charset = 'euc-jp'
-@lang = 'ja'
+@lang = 'ja'		# Affects only text resource.
+			# You can safely combine $KCODE=EUC with @lang=en.
+
+# If you want to change:
+@cgi_url = 'index.rb'
+@css_url = 'default.css'

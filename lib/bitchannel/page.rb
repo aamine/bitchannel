@@ -67,7 +67,7 @@ module AlphaWiki
 
     def initialize(config, repo, page_name, rev = nil, text = nil, msg = nil)
       super config, repo, page_name
-      @rev = rev
+      @rev = rev || @repository.revision(@page_name)
       @text = text
       @opt_message = msg
     end

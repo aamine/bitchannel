@@ -33,24 +33,22 @@ module AlphaWiki
       File.read("#{@wc_read}/#{escape_html(page_name)}")
     end
 
-    def checkin(page_name, origrev, content)
+    def revision(page_name)
+      re = %r<\A/#{Regexp.quote(escape_html(page_name))}/1>
+      line = File.readlines("#{@wc_read}/CVS/Entries").detect(re)
+      return nil unless line   # file not checked in
+      line.split(%r</>)[2]
+    end
+
+    def checkin(page_name, origrev, new_text)
       filename = escape_html(page_name)
       Dir.chdir(@wc_write) {
         lock(filename) {
-          cvs 'up', (origrev ? "-r1.#{origrev}" : '-A'), filename
-          File.open(filename, 'w') {|f|
-            f.write content
-          }
-          if origrev
-            out, err = *cvs('up', '-A', filename)
-            if /conflicts during merge/ =~ err
-              merged = File.read(filename)
-              File.unlink filename   # prevent next writer from conflict
-              cvs 'up', '-A', filename
-              raise EditConflict.new('conflict found', merged)
-            end
+          if File.exist?(filename)
+            update_and_checkin filename, origrev, new_text
+          else
+            add_and_checkin filename, new_text
           end
-          cvs 'ci', filename
         }
       }
       Dir.chdir(@wc_read) {
@@ -59,6 +57,31 @@ module AlphaWiki
     end
 
     private
+
+    def update_and_checkin(filename, origrev, new_text)
+      cvs 'up', (origrev ? "-r1.#{origrev}" : '-A'), filename
+      File.open(filename, 'w') {|f|
+        f.write new_text
+      }
+      if origrev
+        out, err = *cvs('up', '-A', filename)
+        if /conflicts during merge/ =~ err
+          merged = File.read(filename)
+          File.unlink filename   # prevent next writer from conflict
+          cvs 'up', '-A', filename
+          raise EditConflict.new('conflict found', merged)
+        end
+      end
+      cvs 'ci', filename
+    end
+
+    def add_and_checkin(filename, new_text)
+      File.open(filename, 'w') {|f|
+        f.write new_text
+      }
+      cvs 'add', filename
+      cvs 'ci', filename
+    end
 
     def cvs(*args)
       execute(@cvs_cmd, *args)
