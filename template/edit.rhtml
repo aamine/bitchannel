@@ -30,7 +30,7 @@ Edit started at: <%= format_time(Time.now) %>
 <input type="hidden" name="origrev" value="<%= original_revision() %>">
 <%  end
 %>
-<textarea name="text" cols="70" rows="30"><%= body() %></textarea><br>
+<textarea name="text" cols="70" rows="30"><%= escape_html(body()) %></textarea><br>
 <input type="submit" name="preview" value="Preview">
 <input type="submit" id="okbutton" value="Save">
 </form>
