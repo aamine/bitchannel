@@ -24,17 +24,12 @@ end
 
 module Wikitik
 
-  class Page
-
+  class GenericPage
     include TextUtils
 
-    def initialize(config, repo, page)
+    def initialize(config, repo)
       @config = config
       @repository = repo
-      @page_name = page
-
-      # cache
-      @revlinks = nil
     end
 
     def html
@@ -57,8 +52,29 @@ module Wikitik
       url(@config.cgi_url)
     end
 
-    def title
-      page_name()
+    def url(str)
+      escape_html(URI.escape(str))
+    end
+  end
+
+
+  # a page object which is associated with a real file
+  class Page < GenericPage
+    def initialize(config, repo, page_name)
+      super config, repo
+      @page_name = page_name
+
+      # cache
+      @size = nil
+      @mtime = nil
+      @links = nil
+      @revlinks = nil
+    end
+
+    private
+
+    def compile_page(content)
+      ToHTML.new(@config, @repository).compile(content, @page_name)
     end
 
     def page_name
@@ -69,8 +85,16 @@ module Wikitik
       url(@page_name)
     end
 
-    def compile_page(content)
-      ToHTML.new(@config, @repository).compile(content, @page_name)
+    def size
+      @size ||= @repository.size(@page_name)
+    end
+
+    def mtime
+      @mtime ||= @repository.mtime(@page_name)
+    end
+
+    def links
+      @links ||= @repository.links(@page_name)
     end
 
     def reverse_links
@@ -78,31 +102,26 @@ module Wikitik
     end
 
     def ordered_reverse_links
-      reverse_links().sort_by {|page|
-        @repository.bytes_per_link(page)
-      }
+      reverse_links().map {|page| [page, @repository.links(page)] }\
+          .reject {|page, links| links.size < 2 }\
+          .sort_by {|page, links| @repository.size(page) / links.size }\
+          .map {|page, links| page }
     end
 
     def num_revlinks
-      @revlinks.size
+      reverse_links().size
     end
-
-    def url(str)
-      escape_html(URI.escape(str))
-    end
-
   end
 
 
   class ViewPage < Page
-
-    def initialize(*args)
+    def initialize(config, repo, page_name)
       super
-      @rev = nil
+      @revision = nil
     end
 
     def last_modified
-      @repository.mtime(@page_name)
+      mtime()
     end
 
     private
@@ -113,26 +132,23 @@ module Wikitik
 
     def revision
       # FIXME: `|| 0' needed?
-      @rev ||= (@repository.revision(@page_name) || 0)
+      @revision ||= (@repository.revision(@page_name) || 0)
     end
 
     def body
       compile_page(@repository[@page_name])
     end
-  
   end
 
 
   class ViewRevPage < Page
-
     def initialize(config, repo, page_name, rev)
       super config, repo, page_name
       @revision = rev
-      @mtime = nil
     end
 
     def last_modified
-      @mtime ||= @repository.mtime(@page_name, @revision)
+      mtime()
     end
 
     private
@@ -148,12 +164,10 @@ module Wikitik
     def body
       compile_page(@repository[@page_name, @revision])
     end
-  
   end
 
 
   class DiffPage < Page
-
     def initialize(config, repo, page_name, rev1, rev2)
       super config, repo, page_name
       @rev1 = rev1
@@ -177,15 +191,13 @@ module Wikitik
     def body
       escape_html(@repository.diff(@page_name, @rev1, @rev2))
     end
-  
   end
 
 
   class EditPage < Page
-
     def initialize(config, repo, page_name, rev = nil, text = nil, msg = nil)
       super config, repo, page_name
-      @rev = rev || @repository.revision(@page_name)
+      @revision = rev || @repository.revision(@page_name)
       @text = text
       @opt_message = msg
     end
@@ -210,19 +222,26 @@ module Wikitik
       end
     end
 
-    def page_revision
-      @rev || 0
+    def revision
+      @revision || 0
     end
-
   end
 
 
-  class ListPage < Page
+  class HistoryPage < Page
+    private
 
-    def initialize(config, repo)
-      super config, repo, 'List'
+    def template_id
+      'history'
     end
 
+    def logs
+      @repository.getlog(@page_name)
+    end
+  end
+
+
+  class ListPage < GenericPage
     private
 
     def template_id
@@ -232,16 +251,10 @@ module Wikitik
     def page_list
       @repository.entries.sort_by {|n| n.downcase }.map {|n| escape_html(n) }
     end
-
   end
 
 
-  class RecentPage < Page
-
-    def initialize(config, repo)
-      super config, repo, 'Recent'
-    end
-
+  class RecentPage < GenericPage
     private
 
     def template_id
@@ -253,22 +266,6 @@ module Wikitik
           .map {|name| [escape_html(name), @repository.mtime(name)] }\
           .sort_by {|name, mtime| -(mtime.to_i) }
     end
-
-  end
-
-
-  class HistoryPage < Page
-
-    private
-
-    def template_id
-      'history'
-    end
-
-    def logs
-      @repository.getlog(@page_name)
-    end
-  
   end
 
 end

@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=<%= charset() %>">
   <meta http-equiv="Content-Language" content="ja-JP">
   <link rel="stylesheet" type="text/css" href="<%= css_url() %>">
-  <title>Edit: <%= title() %></title>
+  <title>Edit: <%= page_name() %></title>
 </head>
 <body>
 
@@ -17,7 +17,7 @@
 <form method="POST" action="<%= cgi_url() %>">
 <input type="hidden" name="cmd" value="save">
 <input type="hidden" name="name" value="<%= page_name() %>">
-<input type="hidden" name="origrev" value="<%= page_revision() %>">
+<input type="hidden" name="origrev" value="<%= revision() %>">
 <textarea name="text" cols="70" rows="30">
 <%= body() %></textarea>
 <input type="submit" id="okbutton" value="Save">

@@ -32,16 +32,20 @@ module Wikitik
       end
     end
 
+    def entries
+      Dir.entries(@wc_read)\
+          .select {|ent| File.file?("#{@wc_read}/#{ent}") }\
+          .map {|ent| decode_filename(ent) }
+    end
+
     def exist?(page_name)
       raise 'page_name == nil' unless page_name
       raise 'page_name == ""' if page_name.empty?
       File.exist?("#{@wc_read}/#{encode_filename(page_name)}")
     end
 
-    def entries
-      Dir.entries(@wc_read)\
-          .select {|ent| File.file?("#{@wc_read}/#{ent}") }\
-          .map {|ent| decode_filename(ent) }
+    def size(page_name)
+      File.size("#{@wc_read}/#{encode_filename(page_name)}")
     end
 
     def mtime(page_name, rev = nil)
@@ -106,18 +110,12 @@ module Wikitik
       }
     end
 
-    def size(page_name)
-      File.size("#{@wc_read}/#{encode_filename(page_name)}")
-    end
-
-    def bytes_per_link(page_name)
-      (size(page_name) / (links(page_name).size + 0.1)).to_i
-    rescue Errno::ENOENT
-      return 0
+    def links(page_name)
+      read_linkcache(link_cache(page_name))
     end
 
     def reverse_links(page_name)
-      read_revlink_cache(revlink_cache(page_name))
+      read_linkcache(revlink_cache(page_name))
     end
 
     def checkin(page_name, origrev, new_text)
@@ -194,12 +192,6 @@ LOG %Q[exec: "#{cmd.join('", "')}"]
       }
     end
 
-    def links(page_name)
-      File.readlines(link_cache(page_name)).map {|s| s.strip }
-    rescue Errno::ENOENT
-      return []
-    end
-
     def link_cache(page_name)
       "#{@config.link_cachedir}/#{encode_filename(page_name)}"
     end
@@ -213,44 +205,44 @@ LOG %Q[exec: "#{cmd.join('", "')}"]
         Dir.mkdir cachedir unless File.directory?(cachedir)
         foreach_file(cachedir) do |cachefile|
           if linktbl.delete(decode_filename(File.basename(cachefile)))
-            add_revlink_cache_entry cachefile, page_name
+            add_linkcache_entry cachefile, page_name
           else
-            remove_revlink_cache_entry cachefile, page_name
+            remove_linkcache_entry cachefile, page_name
           end
         end
         linktbl.each_key do |link|
-          add_revlink_cache_entry revlink_cache(link), page_name
+          add_linkcache_entry revlink_cache(link), page_name
         end
       }
     end
 
-    def add_revlink_cache_entry(path, page_name)
-      revlinks = read_revlink_cache(path)
-      write_revlink_cache path, (revlinks + [page_name]).uniq.sort
+    def revlink_cache(page_name)
+      "#{@config.revlink_cachedir}/#{encode_filename(page_name)}"
     end
 
-    def remove_revlink_cache_entry(path, page_name)
-      revlinks = read_revlink_cache(path)
-      write_revlink_cache path, (revlinks - [page_name]).uniq.sort
+    def add_linkcache_entry(path, page_name)
+      revlinks = read_linkcache(path)
+      write_linkcache path, (links + [page_name]).uniq.sort
     end
 
-    def read_revlink_cache(path)
+    def remove_linkcache_entry(path, page_name)
+      links = read_linkcache(path)
+      write_linkcache path, (links - [page_name]).uniq.sort
+    end
+
+    def read_linkcache(path)
       File.readlines(path).map {|line| line.strip }
     rescue Errno::ENOENT
       return []
     end
 
-    def write_revlink_cache(path, revlinks)
+    def write_linkcache(path, links)
       File.open("#{path},tmp", 'w') {|f|
-        revlinks.each do |rev|
-          f.puts rev
+        links.each do |lnk|
+          f.puts lnk
         end
       }
       File.rename "#{path},tmp", path
-    end
-
-    def revlink_cache(page_name)
-      "#{@config.revlink_cachedir}/#{encode_filename(page_name)}"
     end
 
     def foreach_file(dir, &block)
