@@ -111,7 +111,7 @@ class FCGI
       # We use Errno::EPIPE exception, ignore signal.
       Signal.trap(:PIPE, 'IGNORE')
 
-      # mod_fcgi requires that FastCGI server must exit
+      # mod_fcgi requires that FastCGI server exits
       # with status 0 on SIGTERM.
       Signal.trap(:TERM, 'EXIT')
 
@@ -139,6 +139,8 @@ class FCGI
           req = next_request(fsock)
           yield req
           respond_to req, fsock, FCGI_REQUEST_COMPLETE
+        rescue Errno::EAGAIN
+          retry
         rescue Errno::EPIPE, EOFError
           # HTTP request is canceled by the remote user
         ensure
