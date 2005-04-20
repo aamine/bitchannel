@@ -1,3 +1,17 @@
+Wed Apr 20 21:06:50 2005  Minero Aoki  <aamine@loveruby.net>
+
+	* misc/init.rb: defined FileUtils.chmod_R only when
+	  FileUtils.chmod_R does not exist.
+
+	* misc/init.rb: better error message.
+
+	* misc/template/bitchannelrc.ja: comment out config.site_name and
+	  config.logo_url when they do not exist.
+
+	* misc/template/htaccess.ja: "AddHandler cgi-script fcgi" causes
+	  unexpected error, "AddHandler cgi-script" must be applied to
+	  "cgi" always.
+
 Mon Mar 28 03:12:17 2005  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/fcgi.rb: use nonblocking mode.  Signal problem finally
