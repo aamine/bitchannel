@@ -14,9 +14,9 @@ def bitchannel_context
     :cgi_url      => '%%CGI_URL%%',
     :use_html_url => %%HTML_URL_P%%,
     :templatedir  => '%%SRCDIR%%/template',
-    :theme        => '%%THEME%%',
-    :site_name    => '%%SITE_NAME%%',
-    :logo_url     => '%%LOGO_URL%%'
+    #%SITE_NAME%%:site_name    => '%%SITE_NAME%%',
+    #%LOGO_URL%%:logo_url     => '%%LOGO_URL%%',
+    :theme        => '%%THEME%%'
   )
   vardir = '%%VARDIR%%'
   repository = BitChannel::Repository.new(

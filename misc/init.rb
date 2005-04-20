@@ -4,9 +4,40 @@
 #
 
 require 'fileutils'
-require 'find'
-require 'etc'
 require 'optparse'
+
+unless FileUtils.respond_to?(:chown_R)
+  require 'etc'
+  require 'find'
+
+  module FileUtils
+    def chown_R(user, group, path, options)
+      $stderr.puts "chown -R #{[user,group].compact.join('.')} #{path}" if options[:verbose]
+      uid = user ? get_uid(user) : nil
+      gid = group ? get_gid(group) : nil
+      Find.find(path) do |path|
+        File.chown uid, gid, path
+      end
+    end
+    module_function :chown_R
+
+    def get_uid(spec)
+      if /\A\d+\z/ =~ spec
+      then spec.to_i
+      else Etc.getpwnam(spec).uid
+      end
+    end
+    module_function :get_uid
+
+    def get_gid(spec)
+      if /\A\d+\z/ =~ spec
+      then spec.to_i
+      else Etc.getgrnam(spec).gid
+      end
+    end
+    module_function :get_gid
+  end
+end
 
 IFTYPES = {
   'cgi'      => 'cgi',
@@ -134,6 +165,7 @@ def main
   if File.expand_path(srcdir) != File.expand_path(cgidir)
     FileUtils.cp "#{srcdir}/index.#{params[:iftype]}", cgidir
     FileUtils.chmod 0755, "#{cgidir}/index.#{params[:iftype]}"
+    linkdir "#{srcdir}/theme", cgidir
   end
 
   # requires cgidir initialized
@@ -150,12 +182,12 @@ def main
 
   if user or group
     if cvsroot_created
-      chown_R user, group, cvsroot
+      FileUtils.chown_R user, group, cvsroot, :verbose => $app_verbose
     else
-      chown_R user, group, "#{cvsroot}/#{wcname}"
+      FileUtils.chown_R user, group, "#{cvsroot}/#{wcname}", :verbose => $app_verbose
     end
-    chown_R user, group, vardir
-    chown_R user, group, cgidir
+    FileUtils.chown_R user, group, vardir, :verbose => $app_verbose
+    FileUtils.chown_R user, group, cgidir, :verbose => $app_verbose
   end
 
   check_tmp
@@ -178,7 +210,7 @@ end
 def fill_template(id, params)
   File.read("#{params[:srcdir]}/misc/template/#{id}.#{params[:lang]}")\
       .gsub(/%%(\w+)%%/) { params[$1.downcase.intern].to_s }\
-      .gsub(/^\#%(\w+)%%/) { params[$1.downcase.intern] ? '' : $& }
+      .gsub(/^\#%(\w+)%%/) { params[$1.downcase.intern] ? '' : '# ' }
 end
 
 def check_tmp
@@ -201,27 +233,10 @@ def find_command(cmd)
       .detect {|path| File.executable?(path) }
 end
 
-def chown_R(user, group, prefix)
-  msg "chown -R #{[user,group].compact.join('.')} #{prefix}"
-  uid = user ? get_uid(user) : nil
-  gid = group ? get_gid(group) : nil
-  Find.find(prefix) do |path|
-    File.chown uid, gid, path
-  end
-end
-
-def get_uid(spec)
-  if /\A\d+\z/ =~ spec
-  then spec.to_i
-  else Etc.getpwnam(spec).uid
-  end
-end
-
-def get_gid(spec)
-  if /\A\d+\z/ =~ spec
-  then spec.to_i
-  else Etc.getgrnam(spec).gid
-  end
+def linkdir(src, dest)
+  FileUtils.ln_sf src, dest, :verbose => $app_verbose
+rescue NotImplementedError
+  FileUtils.cp_r src, dest, :verbose => $app_verbose
 end
 
 def cmd(str)
@@ -230,7 +245,7 @@ def cmd(str)
 end
 
 def fail(msg)
-  $stderr.puts msg
+  $stderr.puts "#{$0}: error: #{msg}"
   exit 1
 end
 
