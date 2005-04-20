@@ -3,7 +3,7 @@
 #
 
 Options +ExecCGI
-AddHandler cgi-script %%IFTYPE%%
+AddHandler cgi-script cgi
 DirectoryIndex index.%%IFTYPE%%
 
 #%HTML_URL_P%%RewriteEngine on
