@@ -233,6 +233,10 @@ span.previewmark {
     For Printing
 */
 @media print {
+    body {
+        font-family: osaka,'MS Mincho',serif;
+        line-height: 1.5;
+    }
     div.menu {
         display: none;
     }
@@ -242,7 +246,7 @@ span.previewmark {
     h1 {
         color: black;
         background-color: white;
-        border-bottom: 10px solid #33a;
+        border-bottom: 2px solid #33a;
         padding-bottom: 0em;
     }
     a, a:link, a:visited {
