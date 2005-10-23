@@ -350,12 +350,12 @@ module BitChannel
     def_delegators "@fs", :exist?, :size, :stat, :read, :write, :lock
 
     def revision(name)
-      rev, mtime = *cvs_Entries()[name]
+      rev, mtime = cvs_Entries()[name]
       rev
     end
 
     def mtime(name)
-      rev, mtime = *cvs_Entries()[name]
+      rev, mtime = cvs_Entries()[name]
       mtime
     end
 
