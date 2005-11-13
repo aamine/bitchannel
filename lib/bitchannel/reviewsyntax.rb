@@ -63,7 +63,7 @@ module BitChannel
     def compile(str, page_name)
       if /\A\#@@@meta/ =~ str
       then meta(str, page_name)
-      else compile(str)
+      else review_compile(str)
       end
     end
 
@@ -75,7 +75,7 @@ module BitChannel
       }
     end
 
-    def compile(str)
+    def review_compile(str)
       src = str.to_a   # optimize
       s = ReVIEW::HTMLBuilder.new(
         ReVIEW::LocalizeMark.new(@config.locale,

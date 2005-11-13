@@ -1,3 +1,7 @@
+Mon Nov 14 03:47:29 2005  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/reviewsyntax.rb: method duplicated.
+
 Mon Nov 14 03:16:33 2005  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/reviewsyntax.rb: new file.
