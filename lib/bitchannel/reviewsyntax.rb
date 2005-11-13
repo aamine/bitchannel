@@ -54,6 +54,7 @@ module BitChannel
     def initialize(config, repo)
       @config = config
       @repository = repo
+      @env = ReVIEW::Environment.load(repo.instance_variable_get(:@wc_read).dir + '/PARAMS')
     end
 
     def extract_links(str)
@@ -61,9 +62,13 @@ module BitChannel
     end
 
     def compile(str, page_name)
-      if /\A\#@@@meta/ =~ str
-      then meta(str, page_name)
-      else review_compile(str)
+      case
+      when File.extname(page_name) == '.re'
+        review_compile(str, page_name)
+      when /\A\#@@@meta/ =~ str
+        meta(str, page_name)
+      else
+        "<pre>#{escape_html(str)}</pre>"
       end
     end
 
@@ -75,17 +80,21 @@ module BitChannel
       }
     end
 
-    def review_compile(str)
+    def review_compile(str, page_name)
       src = str.to_a   # optimize
-      s = ReVIEW::HTMLBuilder.new(
-        ReVIEW::LocalizeMark.new(@config.locale,
-            ReVIEW::ChapterIndex.load(@repository[::ReVIEW.CHAPS].source)\
-                {|fname| @repository[fname].source }),
-        ReVIEW::LocalizeMark.new(@config.locale, ReVIEW::ListIndex.parse(src)),
-        ReVIEW::LocalizeMark.new(@config.locale, ReVIEW::ImageIndex.parse(src)),
-        ReVIEW::LocalizeMark.new(@config.locale, ReVIEW::TableIndex.parse(src))
-      )
-      ::ReVIEW::Compiler.new(s).compile(str)
+      strategy = ReVIEW::HTMLBuilder.new([
+        new_index(src) {|s| @env.chapter_index },
+        new_index(src) {|s| ReVIEW::ListIndex.parse(s) },
+        new_index(src) {|s| ReVIEW::ImageIndex.parse(s) },
+        new_index(src) {|s| ReVIEW::TableIndex.parse(s) }
+      ])
+      ReVIEW::Compiler.new(strategy).compile(str, page_name)
+    end
+
+    def new_index(src)
+      ReVIEW::FormatRef.new(@config.locale, yield(src))
+    rescue
+      ReVIEW::FormatRef.new(@config.locale, yield(''))
     end
   
   end

@@ -1,3 +1,9 @@
+Mon Nov 14 06:57:52 2005  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/reviewsyntax.rb: support ReVIEW format.
+
+	* lib/bitchannel/reviewsyntax.rb: support plain text.
+
 Mon Nov 14 06:55:55 2005  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/repository.rb (valid?): should not require file
