@@ -31,7 +31,7 @@ module BitChannel
 
     def escape_html(str)
       table = ESC   # optimize
-      str.gsub(/[&"<>]/) {|s| table[s] }
+      str.gsub(/[&"<>]/n) {|s| table[s] }
     end
 
     alias escape_xml escape_html

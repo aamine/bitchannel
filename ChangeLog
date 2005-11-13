@@ -1,6 +1,10 @@
+Mon Nov 14 03:15:14 2005  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/textutils.rb (escape_html): use 'n' option.
+
 Wed Apr 20 21:06:50 2005  Minero Aoki  <aamine@loveruby.net>
 
-	* misc/init.rb: defined FileUtils.chmod_R only when
+	* misc/init.rb: define FileUtils.chmod_R only when
 	  FileUtils.chmod_R does not exist.
 
 	* misc/init.rb: better error message.
