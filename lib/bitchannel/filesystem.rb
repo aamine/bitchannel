@@ -20,6 +20,8 @@ module BitChannel
       @prefix = prefix
     end
 
+    attr_reader :prefix
+
     def real_path(rel)
       "#{@prefix}/#{encode(rel)}".chomp('/')
     end
@@ -136,7 +138,7 @@ module BitChannel
   class CaseSensitiveFileSystem < FileSystem
     def encode(path)
       path.split('/').map {|s|
-        s.gsub(/[^a-z\d]/in) {|c| sprintf('%%%02x', c[0]) }
+        s.gsub(/[^a-zA-Z\d]/n) {|c| sprintf('%%%02x', c[0]) }
       }.join('/').untaint
     end
 

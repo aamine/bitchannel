@@ -115,7 +115,7 @@ module BitChannel
 
     def exist?(name)
       st = @wc_read.stat(name)
-      st.file? and st.readable? and st.writable?
+      st.file? and st.readable? and (read_only? or st.writable?)
     rescue Errno::ENOENT
       return false
     end
