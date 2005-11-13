@@ -1,3 +1,4 @@
+module BitChannel
 #
 # $docutilsId: lineinput.rb,v 1.4 2005/03/16 23:40:16 aamine Exp $
 #
@@ -124,4 +125,5 @@ class LineInput
     nil
   end
 
+end
 end

@@ -1,3 +1,9 @@
+Mon Nov 14 06:53:59 2005  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/lineinput.rb: nested in module BitChannel.
+
+	* lib/bitchannel/syntax.rb: ditto.
+
 Mon Nov 14 03:47:29 2005  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/reviewsyntax.rb: method duplicated.

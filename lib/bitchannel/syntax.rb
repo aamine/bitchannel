@@ -28,7 +28,7 @@ module BitChannel
     end
 
     def compile(str, page_name)
-      @f = ::LineInput.new(StringIO.new(str))
+      @f = LineInput.new(StringIO.new(str))
       @page_name = page_name
       @result = ''
       @indent_stack = [0]
