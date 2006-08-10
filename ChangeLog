@@ -1,3 +1,7 @@
+Thu Aug 10 23:03:43 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/reviewsyntax.rb: follow latest ReVIEW.
+
 Mon Nov 14 06:57:52 2005  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/reviewsyntax.rb: support ReVIEW format.

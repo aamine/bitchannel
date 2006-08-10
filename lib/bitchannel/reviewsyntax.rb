@@ -10,7 +10,9 @@
 
 require 'bitchannel/page'
 require 'bitchannel/locale'
-require 'review'
+require 'review/compiler'
+require 'review/htmlbuilder'
+require 'review/env'
 
 module BitChannel
 
@@ -54,7 +56,7 @@ module BitChannel
     def initialize(config, repo)
       @config = config
       @repository = repo
-      @env = ReVIEW::Environment.load(repo.instance_variable_get(:@wc_read).dir + '/PARAMS')
+      @env = ReVIEW::Environment.load(repo.instance_variable_get(:@wc_read).dir)
     end
 
     def extract_links(str)
@@ -81,22 +83,22 @@ module BitChannel
     end
 
     def review_compile(str, page_name)
-      src = str.to_a   # optimize
-      strategy = ReVIEW::HTMLBuilder.new([
-        new_index(src) {|s| @env.chapter_index },
-        new_index(src) {|s| ReVIEW::ListIndex.parse(s) },
-        new_index(src) {|s| ReVIEW::ImageIndex.parse(s) },
-        new_index(src) {|s| ReVIEW::TableIndex.parse(s) }
-      ])
-      ReVIEW::Compiler.new(strategy).compile(str, page_name)
+      strategy = ReVIEW::HTMLBuilder.new(@env.chapter_index)
+      ReVIEW::Compiler.new(strategy).compile(get_chap(page_name))
     end
 
+    def get_chap(page_name)
+      @env.chaps.detect {|page| page.basename == page_name }
+    end
+
+=begin
     def new_index(src)
       ReVIEW::FormatRef.new(@config.locale, yield(src))
     rescue
       ReVIEW::FormatRef.new(@config.locale, yield(''))
     end
-  
+=end
+
   end
 
 end   # module BitChannel
