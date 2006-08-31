@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# Copyright (c) 2003-2005 Minero Aoki
+# Copyright (c) 2003-2006 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the terms of
@@ -133,5 +133,8 @@ module BitChannel
 
   loc = Locale_ja.new('ja_JP.iso2022jp', 'iso-2022-jp')
   Locale.declare_locale 'ja_JP.iso2022jp', loc
+
+  loc = Locale_ja.new('ja_JP.UTF-8', 'utf-8')
+  Locale.declare_locale 'ja_JP.UTF-8', loc
 
 end
