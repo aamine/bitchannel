@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# Copyright (C) 2003,2004 Minero Aoki
+# Copyright (C) 2003-2006 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the terms of
@@ -9,7 +9,25 @@
 #
 
 require 'bitchannel/handler'
-require 'bitchannel/webrick_cgi'
+require 'webrick/cgi'
+
+module WEBrick
+  class CGI   # reopen
+    def CGI.main(conf, *context)
+      new(conf, *context).run
+    end
+
+    def CGI.each_request(&block)
+      yield ENV, $stdin, $stdout
+    end
+
+    def run
+      CGI.each_request do |env, stdin, stdout|
+        start env, stdin, stdout
+      end
+    end
+  end
+end
 
 module BitChannel
   class CGI < WEBrick::CGI
@@ -30,7 +48,7 @@ module BitChannel
     private
 
     def guess_cgi_url(req)
-      return File.basename(req.path) if req.path
+      return req.path if req.path
       return req.script_name if req.script_name
       return File.basename(::Apache.request.filename) if defined?(::Apache)
       return File.basename($0) if $0

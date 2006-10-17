@@ -1,3 +1,37 @@
+Tue Oct 17 20:59:02 2006  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/compat.rb: new file.  Ruby 1.9 does not have
+	  String#each, provide it.
+
+	* lib/bitchannel/handler.rb: use String#each_line or #lines.
+
+	* lib/bitchannel/syntax.rb: ditto.
+
+	* lib/bitchannel/repository.rb: ditto.
+
+	* template/diff.rhtml: ditto.
+
+	* template/gdiff.rhtml: ditto.
+
+	* lib/bitchannel/syntax.rb: use more strict regexp for comment
+	  box.
+
+	* lib/bitchannel/wikispace.rb (insert_comment): comment may
+	  include line terminator.
+
+	* lib/bitchannel/killlist.rb (KillList.parse): should accept a
+	  String, not an Array of String.
+
+	* lib/bitchannel/cgi.rb: merge webrick_cgi.rb.
+
+	* lib/bitchannel/fcgi.rb: merge webrick_fcgi.rb.
+
+	* lib/bitchannel/farm.rb: bitchannel/webrick_cgi.rb is removed.
+
+	* lib/bitchannel/webrick_cgi.rb: removed.
+
+	* lib/bitchannel/webrick_fcgi.rb: removed.
+
 Thu Aug 31 15:30:40 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/locale/ja.rb: add ja_JP.UTF-8 locale.

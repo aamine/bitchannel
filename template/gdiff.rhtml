@@ -33,7 +33,7 @@
 <span class="addedline">+++ rev<%= log.rev2 %>  <%= format_time(log.time2) %></span>
 </p>
 <pre class="diff"><%=
-  log.diff.map {|line|
+  log.diff.lines.map {|line|
     case line
     when /\A\-/
       %Q[<span class="removedline">#{escape_html(line.rstrip)}</span>\n]

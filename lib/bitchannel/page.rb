@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# Copyright (c) 2003-2005 Minero Aoki
+# Copyright (c) 2003-2006 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the terms of
@@ -327,11 +327,11 @@ module BitChannel
     def annotate
       latest = annotate_revision()
       @page.annotate(@revision).map {|a|
-        sprintf(%Q[<a href="%s?cmd=view;rev=%d;name=%s">%4d</a>: <span class="new%d">%s</span>\n],
+        sprintf(%Q[<a href="%s?cmd=view;rev=%d;name=%s">%4d</a>: <span class="new%d">%s</span>],
                 @config.cgi_url, a.revision, page_url(), a.revision,
                 latest - a.revision,
                 escape_html(a.line))
-      }
+      }.join("\n")
     end
   end
 

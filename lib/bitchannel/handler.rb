@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# Copyright (c) 2003-2005 Minero Aoki
+# Copyright (c) 2003-2006 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the terms of
@@ -11,6 +11,7 @@
 require 'bitchannel/config'
 require 'bitchannel/page'
 require 'bitchannel/textutils'
+require 'bitchannel/compat'
 require 'webrick/cookie'
 require 'webrick/httpstatus'
 require 'date'
@@ -365,7 +366,7 @@ module BitChannel
     private
 
     def normalize_text(text)
-      @locale.to_local(text).map {|line|
+      @locale.to_local(text).lines.map {|line|
         detab(line).rstrip + "\r\n"
       }.join('')
     end

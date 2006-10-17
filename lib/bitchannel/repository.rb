@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# Copyright (c) 2003-2005 Minero Aoki
+# Copyright (c) 2003-2006 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the terms of
@@ -14,6 +14,7 @@ require 'bitchannel/logger'
 require 'bitchannel/killlist'
 require 'bitchannel/textutils'
 require 'bitchannel/exception'
+require 'bitchannel/compat'
 require 'forwardable'
 
 # "Wed Jun 23 15:39:58 2004" (UTC)
@@ -509,7 +510,7 @@ module BitChannel
       end
 
       def Log.parse(str)
-        rline, dline, *msg = *str.to_a
+        rline, dline, *msg = *str.lines
         new(cvsrev_to_i(rline.slice(/\Arevision (1(?:\.\d+)+)\s/, 1), nil),
             Time.cvslogdate(dline.slice(/date: (.*?);/, 1)).getlocal,
             dline.slice(/lines: \+(\d+)/, 1).to_i,
@@ -559,7 +560,7 @@ module BitChannel
 
     def parse_annotation(name, out)
       kill = @killlist[name]
-      out.map {|line|
+      out.lines.map {|line|
         revstr, content = line.split(': ', 2)
         rev = revstr.slice(/1\.(\d+)/, 1).to_i
         AnnotateLine.new(name, rev, content.rstrip, kill.include?(rev))

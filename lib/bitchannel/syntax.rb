@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# Copyright (C) 2003,2004 Minero Aoki
+# Copyright (C) 2003-2006 Minero Aoki
 #
 # This program is free software.
 # You can distribute or modify this program under the terms of
@@ -11,6 +11,7 @@
 require 'bitchannel/lineinput'
 require 'bitchannel/textutils'
 require 'bitchannel/threadlocalcache'
+require 'bitchannel/compat'
 require 'stringio'
 require 'uri'
 require 'csv'
@@ -101,7 +102,7 @@ module BitChannel
     TABLE = /\A,|\A\|\|/
     PRE = /\A\{\{\{/
     INDENTED = /\A\s+\S/
-    BLOCKEXT = /\A\[\[\#(\w+)(:.*?)?\]\]$/
+    BLOCKEXT = /\A\[\[\#(\w+)(:.*?)?\]\]\s*\z/
 
     PARAGRAPH_END = Regexp.union(CAPTION, UL, OL, DL,
         CITE, TABLE, PRE, INDENTED, BLOCKEXT)
@@ -366,7 +367,7 @@ module BitChannel
         <input type="text" name="cmt" size="32" value="">
         <input type="submit" name="submit" value="Write">
         </form>
-      ).strip.map {|line| line.strip }.join("\n")
+      ).strip.lines.map {|line| line.strip }.join("\n")
     end
 
     #
@@ -512,7 +513,7 @@ module BitChannel
     def read_interwikiname_table(page_name)
       page = @repository[page_name] or return {}
       table = {}
-      page.source.each do |line|
+      page.source.each_line do |line|
         if /\A\s*\*\s*(\S+?):/ =~ line
           interwikiname = $1
           url = $'.strip

@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# Copyright (C) 2003,2004 Minero Aoki
+# Copyright (C) 2003-2006 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the terms of
@@ -12,7 +12,7 @@ require 'bitchannel/userconfig'
 require 'bitchannel/config'
 require 'bitchannel/repository'
 require 'bitchannel/handler'
-require 'bitchannel/webrick_cgi'
+require 'bitchannel/cgi'
 require 'fileutils'
 require 'forwardable'
 
@@ -373,7 +373,7 @@ module BitChannel
   end   # class Farm
 
 
-  class WikiSpace   # redefine
+  class WikiSpace   # reopen
     extend Forwardable
     def_delegator "@repository", :last_modified
     def_delegator "@repository", :name
@@ -382,7 +382,7 @@ module BitChannel
   end
 
 
-  class Repository   # redefine
+  class Repository   # reopen
 
     def name
       getprop(:name)
