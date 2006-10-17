@@ -1,4 +1,5 @@
 #!/usr/bin/ruby
+#
 # $Id$
 #
 # BitChannel entry point for (pure) CGI environment.

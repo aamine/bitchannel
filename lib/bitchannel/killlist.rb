@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# Copyright (C) 2003,2004 Minero Aoki
+# Copyright (C) 2003-2006 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the terms of
@@ -15,15 +15,15 @@ module BitChannel
   class KillList
 
     def KillList.load(path)
-      parse(File.readlines(path))
+      parse(File.read(path))
     rescue Errno::ENOENT
       return new()
     end
 
-    def KillList.parse(lines)
+    def KillList.parse(src)
       list = new()
       lineno = 0
-      lines.each do |line|
+      src.each_line do |line|
         lineno += 1
         line = line.split('#', 2).first.to_s.strip
         next if line.empty?

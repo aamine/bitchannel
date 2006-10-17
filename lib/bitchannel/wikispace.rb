@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# Copyright (c) 2003-2005 Minero Aoki
+# Copyright (c) 2003-2006 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the terms of
@@ -105,12 +105,12 @@ module BitChannel
     end
 
     def insert_comment(text, uname, comment)
-      cmtline = "* #{format_time(Time.now)}: #{uname}: #{comment}"
-      unless /\[\[\#comment(:.*?)?\]\]/n =~ text
-        text << "\n" << cmtline
+      cmtline = "* #{format_time(Time.now)}: #{uname}: #{comment.strip}"
+      unless /^\[\[\#comment(:.*?)?\]\]\s*$/n =~ text
+        text << "\r\n" << cmtline
         return text
       end
-      text.sub(/\[\[\#comment(:.*?)?\]\]/n) { $& + "\n" + cmtline }
+      text.sub(/^\[\[\#comment(:.*?)?\]\]\s*$/n) { $& + "\r\n" + cmtline }
     end
     private :insert_comment
 

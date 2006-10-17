@@ -3,7 +3,7 @@
 #
 # fastcgi.rb Copyright (C) 2001 Eli Green
 # fcgi.rb    Copyright (C) 2002-2003 MoonWolf <moonwolf@moonwolf.com>
-# fcgi.rb    Copyright (C) 2004,2005 Minero Aoki
+# fcgi.rb    Copyright (C) 2004-2006 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the Ruby License.
