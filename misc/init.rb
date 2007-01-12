@@ -69,7 +69,15 @@ def main
   $app_verbose = true
 
   parser = OptionParser.new(nil, 20, ' ')
-  parser.banner = "Usage: ruby #{$0} --lang=LANG --cgiurl=URLPATH --vardir=PATH [options]"
+  parser.banner = <<-EndUsage
+#{File.basename($0)}
+    * Generates bitchannelrc and .htaccess.
+    * Creates CVS repository.
+    * Initializes CVS working copy and link cache.
+
+Usage: ruby #{$0} --lang=LANG --cgiurl=URLPATH --vardir=PATH [options]
+Options:
+  EndUsage
   parser.on('--lang=LANG', 'Content language (ja|en) [REQUIRED]') {|lang|
     params[:lang] = lang
   }
@@ -194,15 +202,23 @@ def main
 end
 
 def generate_htaccess(cgidir, params)
-  msg "creating #{cgidir}/.htaccess ..."
-  File.open("#{cgidir}/.htaccess", 'w') {|f|
+  target = "#{cgidir}/.htaccess"
+  if File.exist?(target)
+    target += '.generated'
+  end
+  msg "creating #{target}..."
+  File.open(target, 'w') {|f|
     f.write fill_template('htaccess', params)
   }
 end
 
 def generate_bitchannelrc(cgidir, params)
-  msg "creating #{cgidir}/bitchannelrc ..."
-  File.open("#{cgidir}/bitchannelrc", 'w') {|f|
+  target = "#{cgidir}/bitchannelrc"
+  if File.exist?(target)
+    target += '.generated'
+  end
+  msg "creating #{target} ..."
+  File.open(target, 'w') {|f|
     f.write fill_template('bitchannelrc', params)
   }
 end

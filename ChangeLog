@@ -1,3 +1,9 @@
+Fri Jan 12 19:49:27 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* misc/init.rb: do not overwrite existing .htaccess.
+
+	* misc/init.rb: show more detailed help message.
+
 Tue Oct 17 21:00:15 2006  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/*.rb: update copyright year.
