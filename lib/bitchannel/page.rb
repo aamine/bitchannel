@@ -460,6 +460,33 @@ module BitChannel
   end
 
 
+  class WriteErrorPage < WikiPage
+    def initialize(config, page_name, reason)
+      super config
+      @page_name = page_name
+      @reason = reason
+    end
+
+    private
+
+    def template_id
+      'write_error'
+    end
+
+    def page_name
+      escape_html(@page_name)
+    end
+
+    def page_view_url
+      view_url(@page_name)
+    end
+
+    def reason
+      @reason
+    end
+  end
+
+
   class ListPage < WikiPage
     def initialize(config, repo)
       super config

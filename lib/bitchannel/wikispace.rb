@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# Copyright (c) 2003-2006 Minero Aoki
+# Copyright (c) 2003-2007 Minero Aoki
 #
 # This program is free software.
 # You can distribute/modify this program under the terms of
@@ -11,6 +11,7 @@
 require 'bitchannel/page'
 require 'bitchannel/textutils'
 require 'bitchannel/syntax'
+require 'bitchannel/filter'
 require 'bitchannel/threadlocalcache'
 
 module BitChannel
@@ -23,6 +24,7 @@ module BitChannel
       @config = config
       @repository = repo
       @repository.syntax ||= Syntax.new(config, repo)
+      @filter = Filter.load_default
     end
 
     # misc command use only
@@ -88,16 +90,65 @@ module BitChannel
       EditPage.new(@config, page, src, (cirev || page.revision), reason)
     end
 
-    def preview(name, orgrev, text)
-      PreviewPage.new(@config, @repository.fetch(name), text, orgrev)
+    class EditData
+      def initialize(page_name, text, origrev)
+        @page_name = page_name
+        @text = text
+        @revision = origrev
+      end
+
+      attr_reader :page_name
+      attr_reader :text
+      attr_reader :revision
+
+      def edit?
+        true
+      end
+
+      def comment?
+        false
+      end
+    end
+
+    def preview(name, origrev, text)
+      if reason = @filter.invalid?(EditData.new(name, text, origrev))
+        return WriteErrorPage.new(@config, name, reason)
+      end
+      PreviewPage.new(@config, @repository.fetch(name), text, origrev)
     end
 
     def save(name, origrev, text)
+      if reason = @filter.invalid?(EditData.new(name, text, origrev))
+        return WriteErrorPage.new(@config, name, reason)
+      end
       @repository.fetch(name).checkin origrev, text
       ThanksPage.new(@config, name)
     end
 
+    class CommentData
+      def initialize(page_name, user, text)
+        @page_name = page_name
+        @user = user
+        @text = text
+      end
+
+      attr_reader :page_name
+      attr_reader :user
+      attr_reader :text
+
+      def edit?
+        false
+      end
+
+      def comment?
+        true
+      end
+    end
+
     def comment(name, user, cmt)
+      if reason = @filter.invalid?(CommentData.new(name, user, cmt))
+        return WriteErrorPage.new(@config, name, reason)
+      end
       @repository[name].edit {|text|
         insert_comment(text, user, cmt)
       }

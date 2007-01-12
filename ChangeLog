@@ -1,3 +1,13 @@
+Fri Jan 12 21:19:21 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/wikispace.rb: filter invalid edits/comments.
+
+	* lib/bitchannel/filter.rb: new file.
+
+	* lib/bitchannel/page.rb: new class WriteErrorPage.
+
+	* template/write_error.rhtml: new file.
+
 Fri Jan 12 20:02:42 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* template/view.rhtml: show site name in <title> element.
