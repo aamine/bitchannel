@@ -136,7 +136,6 @@ pre.cmd {
 }
 
 pre.dummyimage {
-    background-color: transparent;
 }
 
 pre.prototype {
@@ -179,6 +178,11 @@ blockquote {
     padding: 4px;
     margin: 0em 0em 0em 1em;
     font-weight: normal;
+}
+
+p.comment {
+    margin-left: 4em;
+    color: gray;
 }
 
 ul {
