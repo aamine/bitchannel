@@ -1,3 +1,7 @@
+Fri Jan 12 21:27:32 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/filter.rb: fix typo.
+
 Fri Jan 12 21:19:21 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/wikispace.rb: filter invalid edits/comments.

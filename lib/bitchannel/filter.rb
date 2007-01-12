@@ -58,15 +58,15 @@ module BitChannel
       deny.reason
     end
 
-    def install_bulitin_rules
+    def install_builtin_rules
       Filter.install_builtin_rules self
     end
 
-    def install_bulitin_edit_rules
+    def install_builtin_edit_rules
       Filter.install_builtin_edit_rules self
     end
 
-    def install_bulitin_comment_rules
+    def install_builtin_comment_rules
       Filter.install_builtin_comment_rules self
     end
 
@@ -82,7 +82,7 @@ module BitChannel
     end
 
     def deny_edit(reason, &block)
-      rule = lambda {|data| not data.comment? and block.call(data) }
+      rule = lambda {|data| data.edit? and block.call(data) }
       @denys.push Deny.new(reason, rule)
     end
 
