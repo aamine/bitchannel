@@ -80,6 +80,10 @@ module BitChannel
       u ? %[<img class="sitelogo" src="#{escape_html(u)}" alt=""> ] : ''
     end
 
+    def site_prefix
+      @config.site_name ? escape_html(@config.site_name) + ': ' : ''
+    end
+
     def index_page_url
       view_url(FRONT_PAGE_NAME)
     end

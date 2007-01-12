@@ -1,3 +1,13 @@
+Fri Jan 12 20:02:42 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* template/view.rhtml: show site name in <title> element.
+
+	* template/list.rhtml: show site name in <title> and <h1> element.
+
+	* template/recent.rhtml: ditto.
+
+	* lib/bitchannel/page.rb: new method WikiPage#site_prefix.
+
 Fri Jan 12 19:49:27 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* misc/init.rb: do not overwrite existing .htaccess.

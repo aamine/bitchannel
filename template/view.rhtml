@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=<%= page_charset() %>">
   <meta http-equiv="Content-Language" content="ja-JP">
   <link rel="stylesheet" type="text/css" href="<%= css_url() %>">
-  <title><%= front_page?() ? site_name() : page_name() %></title>
+  <title><%= front_page? ? site_name() : site_prefix() + page_title() %></title>
 </head>
 <body>
 
