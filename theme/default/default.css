@@ -5,7 +5,7 @@
 body {
     background-color: white;
     color: black;
-    font-family: osaka,'MS PGothic',sans-serif;
+    font-family: "Hiragino Mincho Pro", "¥Ò¥é¥®¥ÎÌÀÄ« Pro W3", "Osaka", "MS Gothic", sans-serif;
     text-align: left;
     margin-top: 20px;
     margin-left: 2%;
@@ -107,6 +107,7 @@ pre {
     background-color: #eee;
     padding: 10px;
     font-weight: normal;
+    font-family: monospace;
 }
 
 blockquote {
@@ -131,8 +132,8 @@ dl {
 }
 
 dt {
+    font-family: "Hiragino Gothic Pro", "¥Ò¥é¥®¥Î³Ñ¥´ Pro W3", "Osaka", "MS Gothic", sans-serif;
     font-weight: bold;
-    font-family: sans-serif;
 }
 
 dd {
@@ -182,6 +183,7 @@ pre.diff {
     line-height: 1.4;
     padding: 0px;
     font-weight: normal;
+    font-family: monospace;
 }
 
 /*
@@ -234,7 +236,7 @@ span.previewmark {
 */
 @media print {
     body {
-        font-family: osaka,'MS Mincho',serif;
+        font-family: "Hiragino Mincho Pro", "¥Ò¥é¥®¥ÎÌÀÄ« Pro W3", "Osaka", "MS Mincho", serif;
         line-height: 1.5;
     }
     div.menu {
