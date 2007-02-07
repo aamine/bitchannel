@@ -217,8 +217,12 @@ span.new0 {
 /*
     edit
 */
-textarea.edit {
+textarea {
     width: 100%;
+    height: 50%;
+    line-height: 1.3;
+    font-size: 100%;
+    font-family: "Hiragino Mincho Pro", "е╥ещеое╬╠└─л Pro W3", "Osaka", "MS Gothic", sans-serif;
 }
 
 /*
