@@ -1,3 +1,8 @@
+Wed Feb  7 22:56:34 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/wikispace.rb: recreate new Filter object for each
+	  session to respond to filter.rb file change.
+
 Wed Feb  7 22:47:34 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/filter.rb: install_*_rules are not class methods
