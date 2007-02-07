@@ -24,13 +24,14 @@ module BitChannel
       @config = config
       @repository = repo
       @repository.syntax ||= Syntax.new(config, repo)
-      @filter = Filter.load_default
     end
 
-    # misc command use only
+    # misc/* commands use only
     def _config
       @config
     end
+
+    # misc/* commands use only
     def _repository
       @repository
     end
@@ -110,15 +111,20 @@ module BitChannel
       end
     end
 
+    def filter
+      Filter.load_default
+    end
+    private :filter
+
     def preview(name, origrev, text)
-      if reason = @filter.invalid?(EditData.new(name, text, origrev))
+      if reason = filter().invalid?(EditData.new(name, text, origrev))
         return WriteErrorPage.new(@config, name, reason)
       end
       PreviewPage.new(@config, @repository.fetch(name), text, origrev)
     end
 
     def save(name, origrev, text)
-      if reason = @filter.invalid?(EditData.new(name, text, origrev))
+      if reason = filter().invalid?(EditData.new(name, text, origrev))
         return WriteErrorPage.new(@config, name, reason)
       end
       @repository.fetch(name).checkin origrev, text
@@ -146,7 +152,7 @@ module BitChannel
     end
 
     def comment(name, user, cmt)
-      if reason = @filter.invalid?(CommentData.new(name, user, cmt))
+      if reason = filter().invalid?(CommentData.new(name, user, cmt))
         return WriteErrorPage.new(@config, name, reason)
       end
       @repository[name].edit {|text|
