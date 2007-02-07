@@ -18,28 +18,8 @@ module BitChannel
 
     def Filter.builtin
       filter = new()
-      install_builtin_rules filter
+      filter.install_builtin_rules
       filter
-    end
-
-    TOO_LONG = 1024 * 1024   # 1MB
-
-    def Filter.install_builtin_rules(filter)
-      install_builtin_edit_rules filter
-      install_builtin_comment_rules filter
-    end
-
-    def Filter.install_builtin_edit_rules(filter)
-      filter.deny('Too long page') {|data| data.text.size > TOO_LONG }
-    end
-
-    def Filter.install_builtin_comment_rules(filter)
-      filter.deny_comment('Too long comment') {|data| data.text.size > 4098 }
-      filter.deny_comment('Empty comment') {|data| data.text.strip.empty? }
-      filter.deny_comment('Too many URLs') {|data|
-        data.text.scan(/https?:/i).size > 3
-      }
-      filter.deny_comment('wrong link format') {|data| /\[url=/ =~ data.text }
     end
 
     def initialize
@@ -58,16 +38,24 @@ module BitChannel
       deny.reason
     end
 
+    TOO_LONG = 1024 * 1024   # 1MB
+
     def install_builtin_rules
-      Filter.install_builtin_rules self
+      install_builtin_edit_rules
+      install_builtin_comment_rules
     end
 
     def install_builtin_edit_rules
-      Filter.install_builtin_edit_rules self
+      deny('Too long page') {|data| data.text.size > TOO_LONG }
     end
 
     def install_builtin_comment_rules
-      Filter.install_builtin_comment_rules self
+      deny_comment('Too long comment') {|data| data.text.size > 4098 }
+      deny_comment('Empty comment') {|data| data.text.strip.empty? }
+      deny_comment('Too many URLs') {|data|
+        data.text.scan(/https?:/i).size > 3
+      }
+      deny_comment('wrong link format') {|data| /\[url=/ =~ data.text }
     end
 
     Deny = Struct.new(:reason, :block)

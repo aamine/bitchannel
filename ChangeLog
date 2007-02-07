@@ -1,3 +1,8 @@
+Wed Feb  7 22:47:34 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/filter.rb: install_*_rules are not class methods
+	  but instance methods.
+
 Fri Jan 12 21:27:32 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/filter.rb: fix typo.
