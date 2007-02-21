@@ -12,12 +12,15 @@
 .include menu
 
 <h1><%= logo_url() %><%= site_prefix() %>List of All Pages</h1>
+
+<div class="body">
 <ol>
 <%  page_list().each do |page|  %>
 <li><a href="<%= view_url(page) %>"><%= escape_html(page) %></a>
     <%  if orphan_page?(page)  %>[orphan]<%  end  %></li>
 <%  end  %>
 </ol>
+</div>
 
 .include systeminfo
 

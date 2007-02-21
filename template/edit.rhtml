@@ -14,14 +14,14 @@
 <h1><%= logo_url() %><%= page_name() %> : Edit</h1>
 <%
     if opt_message()  %>
-<p><%= escape_html(opt_message()) %></p>
+<p class="optmessage"><%= escape_html(opt_message()) %></p>
 <%  end
 %>
-<p>
+<p class="pageinfo">
 Current revision: <%= original_revision() || '(new page)' %><br>
 Edit started at: <%= format_time(Time.now) %>
 </p>
-<form method="POST" action="<%= cgi_url() %>">
+<form method="POST" action="<%= cgi_url() %>" class="editform">
 <input type="hidden" name="cmd" value="save">
 <input type="hidden" name="name" value="<%= page_name() %>">
 <%
@@ -30,10 +30,13 @@ Edit started at: <%= format_time(Time.now) %>
 <%  end
 %>
 <textarea class="edit" name="text" cols="70" rows="30"><%= escape_html(body()) %></textarea><br>
-<input type="submit" name="preview" value="Preview">
-<input type="submit" id="okbutton" value="Save">
+<div class="buttons">
+<input type="submit" class="preview button" name="preview" value="Preview">
+<input type="submit" class="save button" id="okbutton" value="Save">
+</div>
 </form>
 
+<hr>
 .include systeminfo
 
 </body>

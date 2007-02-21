@@ -12,6 +12,8 @@
 .include menu
 
 <h1><%= logo_url() %><%= page_name() %> : History</h1>
+
+<div class="body">
 <ul>
 <%
     logs().sort_by {|log| -log.revision }.each do |log| %>
@@ -32,7 +34,9 @@ revision <%= log.revision %>
 <%  end
 %>
 </ul>
+</div>
 
+<hr>
 .include systeminfo
 
 </body>

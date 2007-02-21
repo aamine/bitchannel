@@ -13,6 +13,7 @@
 
 <h1><%= logo_url() %><%= page_name() %> : Diff rev <%= rev1() %> &lt;=&gt; rev <%= rev2() %></h1>
 
+<div class="body">
 <p class="revnavi">
 [<%  if rev1() > 1  %>
 <a href="<%= cgi_url() %>?cmd=view;rev=<%= rev1() - 1 %>;name=<%= page_url() %>">rev<%= rev1() - 1 %></a>
@@ -28,7 +29,7 @@
 </p>
 
 <% log = diff() %>
-<p>
+<p class="diffinfo">
 <span class="removedline">--- rev<%= log.rev1 %>  <%= format_time(log.time1) %></span><br>
 <span class="addedline">+++ rev<%= log.rev2 %>  <%= format_time(log.time2) %></span>
 </p>
@@ -44,7 +45,9 @@
     end
   }.join('')
 %></pre>
+</div>
 
+<hr>
 .include systeminfo
 
 </body>

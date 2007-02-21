@@ -1,72 +1,77 @@
 <div class="menu">
+<div class="sitemenu">
+  <span class="menuitem">
+  <%  if menuitem_edit_enabled?  %>
+  <a href="<%= cgi_url() %>?cmd=edit;name=<%= page_url() %>">Edit</a>
+  <%  else  %>
+  Edit
+  <%  end  %>
+  </span>
+
+  <span class="menuitem">
+  <%  if menuitem_diff_enabled?  %>
+  <a href="<%= cgi_url() %>?cmd=diff;rev1=<%= diff_base_revision() - 1 %>;rev2=<%= diff_base_revision() %>;name=<%= page_url() %>">Diff</a>
+  <%  else  %>
+  Diff
+  <%  end  %>
+  </span>
+
+  <span class="menuitem">
+  <%  if menuitem_annotate_enabled?  %>
+  <a href="<%= cgi_url() %>?cmd=annotate;name=<%= page_url() %>">Annotate</a>
+  <%  else  %>
+  Annotate
+  <%  end  %>
+  </span>
+
+  <span class="menuitem">
+  <%  if menuitem_history_enabled?  %>
+  <a href="<%= cgi_url() %>?cmd=history;name=<%= page_url() %>">History</a>
+  <%  else  %>
+  History
+  <%  end  %>
+  </span>
+</div>
+
+<div class="pagemenu">
+  <span class="menuitem">
+  <%  if menuitem_recent_enabled?  %>
+  <a href="<%= cgi_url() %>?cmd=recent">Recent</a>
+  <%  else  %>
+  Recent
+  <%  end  %>
+  </span>
+
+  <span class="menuitem">
+  <%  if menuitem_list_enabled?  %>
+  <a href="<%= cgi_url() %>?cmd=list">List</a>
+  <%  else  %>
+  List
+  <%  end  %>
+  </span>
+
+  <span class="menuitem">
+  <%  if menuitem_top_enabled?  %>
+  <a href="<%= index_page_url() %>">Top</a>
+  <%  else  %>
+  Top
+  <%  end  %>
+  </span>
+
+  <span class="menuitem">
+  <%  if menuitem_help_enabled?  %>
+  <a href="<%= help_page_url() %>">Help</a>
+  <%  else  %>
+  Help
+  <%  end  %>
+  </span>
+</div>
+
 <%  if menuitem_search_enabled?  %>
 <form method="post" action="<%= cgi_url() %>">
-<%  else  %>
-<p>
-<%  end  %>
-<span class="menuitem">
-<%  if menuitem_edit_enabled?  %>
-<a href="<%= cgi_url() %>?cmd=edit;name=<%= page_url() %>">Edit</a>
-<%  else  %>
-Edit
-<%  end  %>
-</span>
-<span class="menuitem">
-<%  if menuitem_diff_enabled?  %>
-<a href="<%= cgi_url() %>?cmd=diff;rev1=<%= diff_base_revision() - 1 %>;rev2=<%= diff_base_revision() %>;name=<%= page_url() %>">Diff</a>
-<%  else  %>
-Diff
-<%  end  %>
-</span>
-<span class="menuitem">
-<%  if menuitem_annotate_enabled?  %>
-<a href="<%= cgi_url() %>?cmd=annotate;name=<%= page_url() %>">Annotate</a>
-<%  else  %>
-Annotate
-<%  end  %>
-</span>
-<span class="menuitem">
-<%  if menuitem_history_enabled?  %>
-<a href="<%= cgi_url() %>?cmd=history;name=<%= page_url() %>">History</a>
-<%  else  %>
-History
-<%  end  %>
-</span>
-<span class="menuseparator"> </span>
-<span class="menuitem">
-<%  if menuitem_recent_enabled?  %>
-<a href="<%= cgi_url() %>?cmd=recent">Recent</a>
-<%  else  %>
-Recent
-<%  end  %>
-</span>
-<span class="menuitem">
-<%  if menuitem_list_enabled?  %>
-<a href="<%= cgi_url() %>?cmd=list">List</a>
-<%  else  %>
-List
-<%  end  %>
-</span>
-<span class="menuitem">
-<%  if menuitem_top_enabled?  %>
-<a href="<%= index_page_url() %>">Top</a>
-<%  else  %>
-Top
-<%  end  %>
-</span>
-<span class="menuitem">
-<%  if menuitem_help_enabled?  %>
-<a href="<%= help_page_url() %>">Help</a>
-<%  else  %>
-Help
-<%  end  %>
-</span>
-<%  if menuitem_search_enabled?  %>
 <input type="hidden" name="cmd" value="search">
 <input type="text" name="q" size="9" value="">
 <input type="submit" value="Search">
 </form>
-<%  else  %>
-</p>
 <%  end  %>
 </div>

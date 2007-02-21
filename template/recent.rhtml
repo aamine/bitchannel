@@ -12,12 +12,15 @@
 .include menu
 
 <h1><%= logo_url() %><%= site_prefix() %>Recent Edit</h1>
+
+<div class="body">
 <p><a href="<%= cgi_url() %>?cmd=gdiff;org=cookie">[Diff from my last visit]</a></p>
 <ol>
 <%  page_list().each do |page|  %>
 <li><%= format_time(page.mtime) %>: <a href="<%= view_url(page.name) %>"><%= escape_html(page.name) %></a></li>
 <%  end  %>
 </ol>
+</div>
 
 .include systeminfo
 

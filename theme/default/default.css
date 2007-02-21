@@ -1,3 +1,4 @@
+@charset 'euc-jp';
 /*
     default.css
 */
@@ -5,7 +6,6 @@
 body {
     background-color: white;
     color: black;
-    font-family: "Hiragino Mincho Pro", "¥Ò¥é¥®¥ÎÌÀÄ« Pro W3", "Osaka", "MS Gothic", sans-serif;
     text-align: left;
     margin-top: 20px;
     margin-left: 2%;
@@ -13,20 +13,28 @@ body {
     line-height: 1.3;
 }
 
+div.memu {
+}
+div.sitemenu {
+    display: inline;
+}
+div.pagemenu {
+    display: inline;
+    margin-left: 1em;
+}
 span.menuitem {
-    width: 3.9em;
     text-align: center;
-    padding: 0px 2px;
-    margin: 0px;
+    padding: 0.2em 0.5em;
+    margin: 0px 3px 0px 0px;
     color: white;
     background-color: #ddd;
-    margin-right: 2px;
+    font-family: sans-serif;
+}
+div.menu a {
+    margin: 0px;
 }
 div.menu a:link,
 div.menu a:visited {
-    width: 3.9em;
-    padding: 0px 2px;
-    margin: 0px;
     color: #33a;
     background-color: #ddd;
     text-decoration: none;
@@ -34,17 +42,13 @@ div.menu a:visited {
 div.menu a:active,
 div.menu a:focus,
 div.menu a:hover {
-    width: 3.9em;
-    padding: 0px 2px;
-    margin: 0px;
     color: #fff;
     background-color: #33a;
     text-decoration: none;
 }
-span.menuseparator {
-    width: 1em;
-    padding: 0px;
-    margin: 0px;
+div.menu form {
+    display: inline;
+    margin-left: 1em;
 }
 
 /*
@@ -132,7 +136,7 @@ dl {
 }
 
 dt {
-    font-family: "Hiragino Gothic Pro", "¥Ò¥é¥®¥Î³Ñ¥´ Pro W3", "Osaka", "MS Gothic", sans-serif;
+    font-family: sans-serif;
     font-weight: bold;
 }
 
@@ -142,21 +146,24 @@ dd {
     margin-left: 2em;
 }
 
-a {
+table {
+    border-collapse: collapse;
+    border: 2px solid black;
+}
+
+th {
+    color: white;
+    background-color: gray;
+    text-align: left;
     font-weight: bold;
-    text-decoration: none;
+    border: 1px solid black;
+    padding: 3px;
 }
-a:link {
-    color: #33a;
-    background-color: transparent;
-}
-a:visited {
-    color: #666666;
-    background-color: transparent;
-}
-a:hover, a:focus, a:active {
-    color: #fff;
-    background-color: #33a;
+
+td {
+    text-align: left;
+    border: 1px solid gray;
+    padding: 3px 0.4em;
 }
 
 form {
@@ -169,6 +176,26 @@ hr {
     height: 1px;
 }
 
+div.body a {
+    font-weight: bold;
+    text-decoration: none;
+}
+div.body a:link {
+    color: #33a;
+    background-color: transparent;
+}
+div.body a:visited {
+    color: #555;
+    background-color: transparent;
+    text-decoration: underline;
+}
+div.body a:hover,
+div.body a:focus,
+div.body a:active {
+    color: #fff;
+    background-color: #33a;
+}
+
 /*
     diff
 */
@@ -177,6 +204,9 @@ span.addedline {
 }
 span.removedline {
     background-color: #ddd;
+}
+p.diffinfo {
+    font-family: monospace;
 }
 pre.diff {
     background-color: transparent;
@@ -222,7 +252,15 @@ textarea {
     height: 50%;
     line-height: 1.3;
     font-size: 100%;
-    font-family: "Hiragino Mincho Pro", "¥Ò¥é¥®¥ÎÌÀÄ« Pro W3", "Osaka", "MS Gothic", sans-serif;
+    font-family: monospace;
+}
+
+form.editform div.buttons input {
+    display: inline;
+    width: 10em;
+}
+form.editform div.buttons {
+    text-align: right;
 }
 
 /*
@@ -240,7 +278,7 @@ span.previewmark {
 */
 @media print {
     body {
-        font-family: "Hiragino Mincho Pro", "¥Ò¥é¥®¥ÎÌÀÄ« Pro W3", "Osaka", "MS Mincho", serif;
+        font-family: serif;
         line-height: 1.5;
     }
     div.menu {

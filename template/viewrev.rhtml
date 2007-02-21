@@ -13,6 +13,7 @@
 
 <h1><%= logo_url() %><%= page_name() %> rev <%= revision() %></h1>
 
+<div class="body">
 <p><span class="lastmodified">Saved at: <%= format_time(last_modified()) %></span></p>
 
 <p><a href="<%= cgi_url() %>?cmd=edit;rev=<%= revision() %>;name=<%= page_url() %>">Revert to this revision</a></p>
@@ -29,6 +30,7 @@ rev<%= revision() %>
 </p>
 
 <%= body() %>
+</div>
 
 .include systeminfo
 

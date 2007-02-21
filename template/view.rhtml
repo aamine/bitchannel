@@ -11,6 +11,8 @@
 .include menu
 
 <h1><%= logo_url() %><%= front_page?() ? site_name() : page_title() %></h1>
+
+<div class="body">
 <p>
 <span class="lastmodified"><%= format_time(last_modified()) %></span>
 (<%= times_before(last_modified()) %>);
@@ -21,6 +23,7 @@ rev <%= revision() %>
 <hr>
 .include revlinks
 .include systeminfo
+</div>
 
 </body>
 </html>
