@@ -19,6 +19,7 @@ require 'forwardable'
 
 # "Wed Jun 23 15:39:58 2004" (UTC)
 def Time.rcsdate(t)
+  return Time.now if /Result of merge/ =~ t
   m = /\w{3} (\w{3})  ?(\d{1,2}) (\d{1,2}):(\d{1,2}):(\d{1,2}) (\d{4})/.match(t)
   raise ArgumentError, "not RCS date: #{t.inspect}" unless m
   Time.utc(m[6], m[1], m[2], m[3], m[4], m[5])

@@ -1,3 +1,8 @@
+Mon Aug 27 05:06:19 2007  Minero Aoki  <aamine@loveruby.net>
+
+	* lib/bitchannel/repository.rb (Time.rcsdate): return dummy Time
+	  object for 'Result of merge' expression.
+
 Mon Aug 27 05:05:09 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/filter.rb: new method freeze_page.
