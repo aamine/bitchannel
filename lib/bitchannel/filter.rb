@@ -55,7 +55,7 @@ module BitChannel
       deny_comment('Too many URLs') {|data|
         data.text.scan(/https?:/i).size > 3
       }
-      deny_comment('wrong link format') {|data| /\[url=/ =~ data.text }
+      deny_comment('wrong link format') {|data| %r<\[/url\]>i =~ data.text }
     end
 
     Deny = Struct.new(:reason, :block)
@@ -72,6 +72,10 @@ module BitChannel
     def deny_edit(reason, &block)
       rule = lambda {|data| data.edit? and block.call(data) }
       @denys.push Deny.new(reason, rule)
+    end
+
+    def freeze_page(name)
+      deny_edit('This page is frozen') {|data| data.page_name == name }
     end
 
     def allow(&block)
