@@ -414,7 +414,7 @@ module BitChannel
     # Inline
     #
 
-    WikiName = /\b(?:[A-Z][a-z0-9]+){2,}\b/n
+    WikiName = /\b(?:[A-Z][a-z0-9_]+){2,}\b/n
     BracketLink = /\[\[[!-~]+?\]\]/n
     SeemsURL = URI.regexp(%w(http https ftp))
     NeedESC = /[&"<>]/
