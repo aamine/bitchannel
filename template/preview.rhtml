@@ -21,7 +21,7 @@
 <%= compiled_body() %>
 
 <hr>
-<form method="POST" action="<%= cgi_url() %>">
+<form method="POST" action="<%= cgi_url() %>" class="editform">
 <input type="hidden" name="cmd" value="save">
 <input type="hidden" name="name" value="<%= page_name() %>">
 <%
@@ -30,8 +30,10 @@
 <%  end
 %>
 <textarea class="edit" name="text" cols="70" rows="30"><%= escape_html(body()) %></textarea><br>
+<div class="buttons">
 <input type="submit" name="preview" value="Preview">
 <input type="submit" id="okbutton" value="Save">
+</div>
 </form>
 </div>
 

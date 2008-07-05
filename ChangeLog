@@ -1,3 +1,8 @@
+Sat Jul  5 22:07:13 2008  Minero Aoki  <aamine@loveruby.net>
+
+	* template/preview.rhtml: should show buttons in the same manner
+	  with edit page.
+
 Fri Oct 12 02:30:20 2007  Minero Aoki  <aamine@loveruby.net>
 
 	* lib/bitchannel/syntax.rb: treat '_' as lower case char.
