@@ -2,12 +2,19 @@
 # BitChannel Config File
 #
 
+# http://www.machu.jp/diary/20100504.html#c01
+class String
+  alias :each :each_line
+  include Enumerable
+end
+
 def bitchannel_cgidir
   File.dirname(File.expand_path(__FILE__)).untaint
 end
 
 def setup_environment
-  $KCODE = 'EUC'
+  Encoding.default_internal = Encoding::EUC_JP
+  Encoding.default_external = Encoding::EUC_JP
   srcdir = bitchannel_cgidir()
   $LOAD_PATH.unshift "#{srcdir}/lib"
   require 'bitchannel'

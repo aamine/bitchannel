@@ -414,14 +414,14 @@ module BitChannel
     # Inline
     #
 
-    WikiName = /\b(?:[A-Z][a-z0-9_]+){2,}\b/n
-    BracketLink = /\[\[[!-~]+?\]\]/n
+    WikiName = /\b(?:[A-Z][a-z0-9_]+){2,}\b/
+    BracketLink = /\[\[[!-~]+?\]\]/
     SeemsURL = URI.regexp(%w(http https ftp))
     NeedESC = /[&"<>]/
 
     def text(str)
       esctable = TextUtils::ESC
-      str.gsub(/(#{NeedESC})|(#{WikiName})|(#{BracketLink})|(#{SeemsURL})/on) {
+      str.gsub(/(#{NeedESC})|(#{WikiName})|(#{BracketLink})|(#{SeemsURL})/o) {
         if    ch  = $1 then esctable[ch]
         elsif tok = $2 then internal_link(tok)
         elsif tok = $3 then bracket_link(tok[2..-3])

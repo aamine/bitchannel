@@ -117,7 +117,7 @@ module BitChannel
 
     alias _ to_local
 
-    Z_SPACE = "\241\241"   # zen-kaku space
+    Z_SPACE = "\241\241".force_encoding(Encoding::EUC_JP)   # zen-kaku space
 
     def split_words(str)
       str.sub(/\A[\s#{Z_SPACE}]+/oe, '').sub(/[\s#{Z_SPACE}]+\z/oe, '')\
