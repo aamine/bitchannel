@@ -10,6 +10,7 @@
 
 require 'bitchannel/handler'
 require 'webrick/cgi'
+require 'webrick/accesslog'
 
 module WEBrick
   class CGI   # reopen
